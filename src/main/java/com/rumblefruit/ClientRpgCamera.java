@@ -132,9 +132,8 @@ public class ClientRpgCamera {
         // frame the caster
         double dx = eye.x - cinePos.x, dy = eye.y - 0.5 - cinePos.y, dz = eye.z - cinePos.z;
         double flat = Math.sqrt(dx * dx + dz * dz);
-        acc.rumblefruit$setYRot((float) Math.toDegrees(Math.atan2(-dx, dz)));
-        acc.rumblefruit$setXRot((float) Math.toDegrees(-Math.atan2(dy, flat)));
-        acc.rumblefruit$setRoll(roll * 0.3F);
+        acc.rumblefruit$setRotation((float) Math.toDegrees(Math.atan2(-dx, dz)),
+                (float) Math.toDegrees(-Math.atan2(dy, flat)), roll * 0.3F);
     }
 
     @SubscribeEvent

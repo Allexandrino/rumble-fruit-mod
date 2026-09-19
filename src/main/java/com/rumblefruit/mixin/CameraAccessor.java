@@ -5,6 +5,7 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Camera.class)
 public interface CameraAccessor {
@@ -16,15 +17,6 @@ public interface CameraAccessor {
     @Mutable
     void rumblefruit$setDetached(boolean detached);
 
-    @Accessor("xRot")
-    @Mutable
-    void rumblefruit$setXRot(float pitch);
-
-    @Accessor("yRot")
-    @Mutable
-    void rumblefruit$setYRot(float yaw);
-
-    @Accessor("roll")
-    @Mutable
-    void rumblefruit$setRoll(float roll);
+    @Invoker("setRotation(FFF)V")
+    void rumblefruit$setRotation(float yaw, float pitch, float roll);
 }
