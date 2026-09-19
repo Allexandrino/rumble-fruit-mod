@@ -2,6 +2,7 @@ package com.rumblefruit;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.rumblefruit.core.AnimCurves;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -219,11 +220,11 @@ public class FirstPersonEffectsRenderer {
     }
 
     private static float phase(float t, float start, float end) {
-        return Math.max(0.0F, Math.min(1.0F, (t - start) / (end - start)));
+        return AnimCurves.phase(t, start, end);
     }
 
     private static float lerp(float a, float b, float k) {
-        return a + (b - a) * k;
+        return AnimCurves.lerp(a, b, k);
     }
 
     private static void applyBow(PoseStack poseStack, LocalPlayer player, float partial, float time) {

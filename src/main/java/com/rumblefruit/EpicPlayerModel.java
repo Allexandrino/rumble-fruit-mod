@@ -1,5 +1,7 @@
 package com.rumblefruit;
 
+import com.rumblefruit.core.AnimCurves;
+
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -565,14 +567,14 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
     }
 
     private static float phase(float t, float start, float end) {
-        return Mth.clamp((t - start) / (end - start), 0.0F, 1.0F);
+        return AnimCurves.phase(t, start, end);
     }
 
     private static float easeInOut(float k) {
-        return k * k * (3.0F - 2.0F * k);
+        return AnimCurves.easeInOut(k);
     }
 
     private static float lerp(float a, float b, float k) {
-        return a + (b - a) * k;
+        return AnimCurves.lerp(a, b, k);
     }
 }

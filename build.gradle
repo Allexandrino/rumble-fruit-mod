@@ -3,6 +3,8 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'net.neoforged.moddev' version '2.0.147'
+    id 'info.solidsoft.pitest' version '1.15.0'
+    id 'jacoco'
 }
 
 version = '1.0.0'
@@ -33,6 +35,36 @@ neoForge {
 }
 
 dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation 'org.mockito:mockito-core:5.12.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.12.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+    testLogging { events 'PASSED', 'FAILED', 'SKIPPED' }
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+// mutation testing: ./gradlew pitest (mutates the pure core package)
+pitest {
+    targetClasses = ['com.rumblefruit.core.*', 'com.rumblefruit.OrbManager', 'com.rumblefruit.ReleaseSkill']
+    targetTests = ['com.rumblefruit.core.*Test', 'com.rumblefruit.*Test']
+    junit5PluginVersion = '1.2.1'
+    threads = 4
+    outputFormats = ['HTML', 'XML']
+    mutators = ['DEFAULTS']
+    verbose = true
+    avoidCallsTo = ['java.util.logging']
 }
 
 jar {

@@ -22,8 +22,15 @@ import java.util.concurrent.ConcurrentHashMap;
 // single nuke-class blast. afterwards the fruit is spent: all powers are gone
 // until another lightning fruit is eaten.
 public class ReleaseSkill {
+
+    private ReleaseSkill() {
+    }
     private static final int CHARGE_TICKS = 60; // 3s ascension
-    private static final Map<UUID, Integer> ACTIVE = new ConcurrentHashMap<>();
+    private static final Map<UUID, Integer> ACTIVE;
+
+    static {
+        ACTIVE = new ConcurrentHashMap<>();
+    }
     private static final Random RANDOM = new Random();
 
     public static boolean isActive(UUID playerId) {
@@ -69,7 +76,12 @@ public class ReleaseSkill {
         double up = t < 8 ? 0.12 : t < 52 ? 0.48 : 0.0;
         player.setDeltaMovement(vel.x * 0.4, up, vel.z * 0.4);
         player.hurtMarked = true;
+        emitAscensionFx(player, level, t);
+    }
 
+    // pure presentation: limb rays, coating shell, sky tears, clouds, helix, pillar
+    @com.rumblefruit.core.VisualEffect
+    private static void emitAscensionFx(ServerPlayer player, ServerLevel level, int t) {
         // THE POWER COMES FROM WITHIN: jagged lightning rays burst out of the
         // caster's HANDS and FEET — more limbs join in as the charge builds
         Vec3 core = player.position().add(0.0, 1.2, 0.0);
@@ -176,7 +188,38 @@ public class ReleaseSkill {
             entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 100, 0));
         }
 
-        // the blast: triple flash + expanding particle shells + double ring of bolts
+        emitBlastFx(player, level, center);
+        // the crater: find the ground below and blow it open
+        Vec3 ground = center;
+        var hit = level.clip(new net.minecraft.world.level.ClipContext(
+                center, center.add(0.0, -40.0, 0.0),
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+        if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+            ground = hit.getLocation();
+        }
+        level.explode(null, ground.x, ground.y + 1.0, ground.z, 16.0F, Level.ExplosionInteraction.BLOCK);
+        level.explode(null, ground.x, ground.y + 3.0, ground.z, 11.0F, Level.ExplosionInteraction.BLOCK);
+        level.explode(null, center.x, center.y, center.z, 8.0F, Level.ExplosionInteraction.NONE);
+        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 120, 4, false, false));
+        player.setDeltaMovement(0.0, -1.9, 0.0);
+        player.hurtMarked = true;
+        net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(
+                new CombatAnimPacket(player.getUUID(), 20));
+
+        // the fruit is spent: wings fold, stance drops, powers are gone
+        if (WingsData.isActive(player.getUUID())) {
+            WingsData.setActive(player, false);
+        }
+        StanceData.reset(player);
+        RumblePowerData.revoke(player);
+        player.displayClientMessage(Component.translatable("rumblefruit.release_spent")
+                .withStyle(net.minecraft.ChatFormatting.GOLD), true);
+    }
+
+    // pure presentation: flash, particle shells, bolt crowns, ray fan, thunder
+    @com.rumblefruit.core.VisualEffect
+    private static void emitBlastFx(ServerPlayer player, ServerLevel level, Vec3 center) {
         for (int i = 0; i < 3; i++) {
             level.sendParticles(ParticleTypes.FLASH, center.x, center.y + 1.0, center.z, 1, 0, 0, 0, 0);
         }
@@ -227,18 +270,6 @@ public class ReleaseSkill {
                     center.x + Math.cos(angle) * 10.0, center.y + 2.0, center.z + Math.sin(angle) * 10.0,
                     0, (float) angle, 0.0F, 0.0F, 0.0);
         }
-        // the crater: find the ground below and blow it open
-        Vec3 ground = center;
-        var hit = level.clip(new net.minecraft.world.level.ClipContext(
-                center, center.add(0.0, -40.0, 0.0),
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                net.minecraft.world.level.ClipContext.Fluid.NONE, player));
-        if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
-            ground = hit.getLocation();
-        }
-        level.explode(null, ground.x, ground.y + 1.0, ground.z, 16.0F, Level.ExplosionInteraction.BLOCK);
-        level.explode(null, ground.x, ground.y + 3.0, ground.z, 11.0F, Level.ExplosionInteraction.BLOCK);
-        level.explode(null, center.x, center.y, center.z, 8.0F, Level.ExplosionInteraction.NONE);
         level.playSound(null, center.x, center.y, center.z,
                 SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 16.0F, 0.3F);
         level.playSound(null, center.x, center.y, center.z,
@@ -247,49 +278,19 @@ public class ReleaseSkill {
                 SoundEvents.ENDER_DRAGON_DEATH, SoundSource.PLAYERS, 6.0F, 1.4F);
         level.playSound(null, center.x, center.y, center.z,
                 SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 8.0F, 0.4F);
-
-        // the caster is blasted DOWN into the crater — sprawled, then lies there
-        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 120, 4, false, false));
-        player.setDeltaMovement(0.0, -1.9, 0.0);
-        player.hurtMarked = true;
-        net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(
-                new CombatAnimPacket(player.getUUID(), 20));
-
-        // the fruit is spent: wings fold, stance drops, powers are gone
-        if (WingsData.isActive(player.getUUID())) {
-            WingsData.setActive(player, false);
-        }
-        StanceData.reset(player);
-        RumblePowerData.revoke(player);
-        player.displayClientMessage(Component.translatable("rumblefruit.release_spent")
-                .withStyle(net.minecraft.ChatFormatting.GOLD), true);
     }
 
-    // jagged 3d lightning ray from a point: a crooked polyline of spark particles,
-    // forking once near the middle — reads as real lightning, not a laser
+    // jagged 3d lightning ray from a point: geometry comes from the pure
+    // RayPolyline generator (unit-tested), here we only emit particles
+    @com.rumblefruit.core.VisualEffect
     private static void ray(ServerLevel level, Vec3 from, double yaw, double pitch, double length) {
-        double dx = Math.cos(yaw) * Math.cos(pitch);
-        double dy = Math.sin(pitch);
-        double dz = Math.sin(yaw) * Math.cos(pitch);
-        Vec3 pos = from;
-        int segments = 14;
-        double segLen = length / segments;
-        for (int i = 0; i < segments; i++) {
-            // wander the direction a little each segment — that is the zigzag
-            dx += (RANDOM.nextDouble() - 0.5) * 0.55;
-            dy += (RANDOM.nextDouble() - 0.5) * 0.55;
-            dz += (RANDOM.nextDouble() - 0.5) * 0.55;
-            double norm = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            pos = pos.add(dx / norm * segLen, dy / norm * segLen, dz / norm * segLen);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.x, pos.y, pos.z,
+        java.util.List<com.rumblefruit.core.Vec> points = com.rumblefruit.core.RayPolyline.generate(
+                new com.rumblefruit.core.Vec(from.x, from.y, from.z), yaw, pitch, length, RANDOM);
+        for (com.rumblefruit.core.Vec p : points) {
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x(), p.y(), p.z(),
                     2, 0.03, 0.03, 0.03, 0.0);
-            level.sendParticles(ParticleTypes.END_ROD, pos.x, pos.y, pos.z,
+            level.sendParticles(ParticleTypes.END_ROD, p.x(), p.y(), p.z(),
                     1, 0.0, 0.0, 0.0, 0.0);
-            // one fork branching off mid-ray
-            if (i == segments / 2 && RANDOM.nextBoolean()) {
-                ray(level, pos, yaw + (RANDOM.nextDouble() - 0.5) * 1.5,
-                        pitch + (RANDOM.nextDouble() - 0.5) * 0.8, length * 0.4);
-            }
         }
     }
 }

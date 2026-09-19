@@ -30,9 +30,8 @@ public class ClientRpgCamera {
         }
         // banking: sideways speed rolls the horizon like a chase cam
         Vec3 vel = mc.player.getDeltaMovement();
-        float yawRad = mc.player.getYRot() * Mth.DEG_TO_RAD;
-        double lateral = -vel.x * Math.cos(yawRad) - vel.z * Math.sin(yawRad);
-        float rollTarget = Mth.clamp((float) lateral * 14.0F, -7.0F, 7.0F);
+        float rollTarget = com.rumblefruit.core.CameraMath.bankRoll(
+                new com.rumblefruit.core.Vec(vel.x, vel.y, vel.z), mc.player.getYRot());
         roll += (rollTarget - roll) * 0.1F;
 
         // fov punch on every sword slash
@@ -130,10 +129,10 @@ public class ClientRpgCamera {
         acc.rumblefruit$setPosition(cinePos);
         acc.rumblefruit$setDetached(true);
         // frame the caster
-        double dx = eye.x - cinePos.x, dy = eye.y - 0.5 - cinePos.y, dz = eye.z - cinePos.z;
-        double flat = Math.sqrt(dx * dx + dz * dz);
-        acc.rumblefruit$setRotation((float) Math.toDegrees(Math.atan2(-dx, dz)),
-                (float) Math.toDegrees(-Math.atan2(dy, flat)), roll * 0.3F);
+        com.rumblefruit.core.Vec lookDir = new com.rumblefruit.core.Vec(
+                eye.x - cinePos.x, eye.y - 0.5 - cinePos.y, eye.z - cinePos.z);
+        acc.rumblefruit$setRotation(com.rumblefruit.core.CameraMath.lookYaw(lookDir),
+                com.rumblefruit.core.CameraMath.lookPitch(lookDir), roll * 0.3F);
     }
 
     @SubscribeEvent

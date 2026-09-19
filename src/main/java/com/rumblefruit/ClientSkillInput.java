@@ -41,11 +41,7 @@ public class ClientSkillInput {
 
     // HUD helper: remaining cooldown fraction 0..1 for skill index (0=Z,1=X,2=C,3=F,4=V)
     public static float cooldownFraction(int idx) {
-        long elapsed = tick - lastSkillUseTick[idx];
-        if (elapsed >= SKILL_COOLDOWN_TICKS[idx]) {
-            return 0.0F;
-        }
-        return 1.0F - (float) elapsed / (float) SKILL_COOLDOWN_TICKS[idx];
+        return com.rumblefruit.core.Cooldowns.fraction(lastSkillUseTick[idx], tick, SKILL_COOLDOWN_TICKS[idx]);
     }
 
     @SubscribeEvent

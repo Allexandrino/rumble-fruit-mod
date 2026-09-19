@@ -362,10 +362,7 @@ public class SkillExecutor {
     }
 
     public static int chargeLevel(int heldTicks) {
-        if (heldTicks >= 30) return 4;
-        if (heldTicks >= 15) return 3;
-        if (heldTicks >= 5) return 2;
-        return 1;
+        return com.rumblefruit.core.ChargeLevels.level(heldTicks);
     }
 
     public static void castThunderball(ServerPlayer player, int charge) {
