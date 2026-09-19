@@ -45,6 +45,7 @@ public class SkillExecutor {
         }
         if (skillId == 9) {
             // R: Release — rise, shed lightning, detonate everything (fruit is spent)
+            System.out.println("[lightningfruit] Release started for " + player.getName().getString());
             player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
             ReleaseSkill.begin(player);
             return;

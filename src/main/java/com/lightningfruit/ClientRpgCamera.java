@@ -85,6 +85,9 @@ public class ClientRpgCamera {
             return;
         }
         int combo = ClientCombatAnim.comboOf(mc.player.getUUID());
+        if (combo == 9 || combo == 20) {
+            System.out.println("[lightningfruit] cinematic active, combo=" + combo);
+        }
         if (combo != 9 && combo != 20) {
             cinePos = null;
             return;

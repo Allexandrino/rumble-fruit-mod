@@ -122,6 +122,7 @@ public class ClientSkillInput {
         // R: Release — the nuke ultimate (spends the fruit)
         boolean r = ModKeyBindings.SKILL_R.isDown();
         if (r && !prevR && hasItem) {
+            System.out.println("[lightningfruit] R pressed, sending release");
             net.neoforged.neoforge.network.PacketDistributor.sendToServer(new SkillPacket(9, 0));
             notifyCast(9);
         }
