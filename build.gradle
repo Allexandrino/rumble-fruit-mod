@@ -1,0 +1,46 @@
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'net.neoforged.moddev' version '2.0.147'
+}
+
+version = '1.0.0'
+group = 'com.lightningfruit'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = '21.1.250'
+
+    mods {
+        lightningfruit {
+            sourceSet(sourceSets.main)
+        }
+    }
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'lightningfruit'
+            systemProperty 'fml.earlyprogresswindow', 'false'
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+    }
+}
+
+dependencies {
+}
+
+jar {
+    manifest.attributes([
+            "MixinConfigs": "lightningfruit.mixins.json"
+    ])
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

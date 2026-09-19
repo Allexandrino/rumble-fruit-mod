@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="lightningfruit"
+version="1.0.0"
+displayName="Lightning Fruit V"
+authors="kimi"
+description='''Blox Fruits Lightning (Goro Goro no Mi) moveset: Z/X/C/V skills, force lightning,
+combat stances (fists/electro sword/electro bow), the angel transformation with golden powers,
+and the Fallen Exorcist boss with its sky temple.'''
+
+[[mixins]]
+config="lightningfruit.mixins.json"
+
+[[dependencies.lightningfruit]]
+modId="neoforge"
+mandatory=true
+versionRange="[21.1,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.lightningfruit]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"
