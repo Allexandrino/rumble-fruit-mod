@@ -3,25 +3,25 @@ loaderVersion="[4,)"
 license="All Rights Reserved"
 
 [[mods]]
-modId="lightningfruit"
+modId="rumblefruit"
 version="1.0.0"
-displayName="Lightning Fruit V"
-authors="kimi"
-description='''Blox Fruits Lightning (Goro Goro no Mi) moveset: Z/X/C/V skills, force lightning,
-combat stances (fists/electro sword/electro bow), the angel transformation with golden powers,
-and the Fallen Exorcist boss with its sky temple.'''
+displayName="Rumble Fruit"
+authors="Allexandrino"
+description='''Blox Fruits Rumble (Goro Goro no Mi) moveset: Z/X/C/V skills, the nuke-tier R release,
+combat stances (fists/electro sword/electro bow) with fighting-game combos,
+the angel transformation with golden powers, and the Fallen Exorcist boss with its sky temple.'''
 
 [[mixins]]
-config="lightningfruit.mixins.json"
+config="rumblefruit.mixins.json"
 
-[[dependencies.lightningfruit]]
+[[dependencies.rumblefruit]]
 modId="neoforge"
 mandatory=true
 versionRange="[21.1,)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.lightningfruit]]
+[[dependencies.rumblefruit]]
 modId="minecraft"
 mandatory=true
 versionRange="[1.21.1,1.22)"
