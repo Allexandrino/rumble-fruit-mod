@@ -24,13 +24,22 @@ public class ServerLevel extends Level {
         public final double y;
         public final double z;
         public final int count;
+        public final double dx;
+        public final double dy;
+        public final double dz;
+        public final double speed;
 
-        public ParticleCall(Object type, double x, double y, double z, int count) {
+        public ParticleCall(Object type, double x, double y, double z, int count,
+                            double dx, double dy, double dz, double speed) {
             this.type = type;
             this.x = x;
             this.y = y;
             this.z = z;
             this.count = count;
+            this.dx = dx;
+            this.dy = dy;
+            this.dz = dz;
+            this.speed = speed;
         }
     }
 
@@ -65,7 +74,7 @@ public class ServerLevel extends Level {
     public <T extends net.minecraft.core.particles.ParticleOptions> int sendParticles(
             T type, double x, double y, double z, int count,
             double dx, double dy, double dz, double speed) {
-        particles.add(new ParticleCall(type, x, y, z, count));
+        particles.add(new ParticleCall(type, x, y, z, count, dx, dy, dz, speed));
         return count;
     }
 

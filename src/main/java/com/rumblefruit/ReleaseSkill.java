@@ -31,7 +31,8 @@ public class ReleaseSkill {
     static {
         ACTIVE = new ConcurrentHashMap<>();
     }
-    private static final Random RANDOM = new Random();
+    // package-visible and swappable in tests so the fx emission is deterministic
+    static Random RANDOM = new Random();
 
     public static boolean isActive(UUID playerId) {
         return ACTIVE.containsKey(playerId);

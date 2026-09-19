@@ -33,20 +33,20 @@ public class Level {
                           net.minecraft.core.BlockPos pos,
                           net.minecraft.sounds.SoundEvent sound,
                           net.minecraft.sounds.SoundSource source, float volume, float pitch) {
-        sounds.add(sound.toString());
+        sounds.add(sound.toString() + "@" + volume + "@" + pitch);
     }
 
     public void playSound(net.minecraft.world.entity.player.Player except,
                           double x, double y, double z,
                           net.minecraft.sounds.SoundEvent sound,
                           net.minecraft.sounds.SoundSource source, float volume, float pitch) {
-        sounds.add(sound.toString());
+        sounds.add(sound.toString() + "@" + volume + "@" + pitch);
     }
 
     public void playSound(net.minecraft.world.entity.player.Player except,
                           double x, double y, double z,
                           net.minecraft.core.Holder<net.minecraft.sounds.SoundEvent> sound,
                           net.minecraft.sounds.SoundSource source, float volume, float pitch) {
-        sounds.add(sound.value().toString());
+        sounds.add(sound.value().toString() + "@" + volume + "@" + pitch);
     }
 }
