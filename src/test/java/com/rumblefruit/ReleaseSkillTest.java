@@ -338,6 +338,23 @@ class ReleaseSkillTest {
     }
 
     @Test
+    void blastThenCarvesTheMountainAway() {
+        // when the blast goes off
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 60; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        // then the sphere dissolves outward for 6 more ticks
+        for (int t = 0; t < 6; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        var center = net.minecraft.core.BlockPos.containing(caster.position());
+        // the core and the deep shell edge are plain air now
+        assertTrue(level.getBlockState(center).isAir());
+        assertTrue(level.getBlockState(center.offset(20, 10, 20)).isAir());
+    }
+
+    @Test
     void blastEmitsVisualEffects() {
         // given a release mid-charge
         ReleaseSkill.begin(caster);
@@ -351,5 +368,54 @@ class ReleaseSkillTest {
         // then particles and thunder actually went out
         assertFalse(level.particles.isEmpty());
         assertFalse(level.sounds.isEmpty());
+    }
+
+    @Test
+    void bedrockSurvivesTheCarve() {
+        // given indestructible ground
+        level.setDefaultBlock(net.minecraft.world.level.block.Blocks.BEDROCK);
+        // when the blast and the carve complete
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 66; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        // then bedrock is untouched
+        var center = net.minecraft.core.BlockPos.containing(caster.position());
+        assertFalse(level.getBlockState(center).isAir());
+    }
+
+    @Test
+    void noCarveWithoutBlast() {
+        // when ticks pass without the ultimate
+        ReleaseSkill.tick(caster);
+        // then nothing is carved
+        var center = net.minecraft.core.BlockPos.containing(caster.position());
+        assertFalse(level.getBlockState(center).isAir());
+    }
+
+    @Test
+    void carveStopsAfterAllShells() {
+        // when the blast and the carve complete
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 66; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        int afterCarve = level.particles.size();
+        // then further ticks emit nothing (the sphere is gone)
+        ReleaseSkill.tick(caster);
+        assertEquals(afterCarve, level.particles.size());
+    }
+
+    @Test
+    void carveShellBoundary() {
+        // when the blast went off and ONE carve tick ran (shell 0: radius 0..8)
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 61; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        var center = net.minecraft.core.BlockPos.containing(caster.position());
+        // then the shell edge block is carved but one beyond it is not yet
+        assertTrue(level.getBlockState(center.offset(2, 0, 0)).isAir());
+        assertFalse(level.getBlockState(center.offset(9, 0, 0)).isAir());
     }
 }

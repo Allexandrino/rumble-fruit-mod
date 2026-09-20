@@ -6,7 +6,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 
 // vacuum fake of minecraft's Level
-public class Level {
+public class Level implements BlockGetter {
     public final boolean isClientSide = false;
     private long gameTime = 0;
 

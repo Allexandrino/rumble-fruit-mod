@@ -26,11 +26,19 @@ public class ReleaseSkill {
     private ReleaseSkill() {
     }
     private static final int CHARGE_TICKS = 60; // 3s ascension
+    private static final int CARVE_RADIUS = 48; // the sphere that eats the mountain
+    private static final int CARVE_SHELL = 8;   // blocks carved per tick per shell
+    private static final int CARVE_SHELLS = CARVE_RADIUS / CARVE_SHELL;
     private static final Map<UUID, Integer> ACTIVE;
 
     static {
         ACTIVE = new ConcurrentHashMap<>();
     }
+    // carving state: blast center + current shell
+    private record Carve(Vec3 center, int shell) {
+    }
+
+    private static final Map<UUID, Carve> CARVING = new ConcurrentHashMap<>();
     // package-visible and swappable in tests so the fx emission is deterministic
     static Random RANDOM = new Random();
 
@@ -56,6 +64,7 @@ public class ReleaseSkill {
     public static void tick(ServerPlayer player) {
         Integer t0 = ACTIVE.get(player.getUUID());
         if (t0 == null) {
+            carveTick(player); // after the blast the sphere keeps eating the world
             return;
         }
         int t = t0 + 1;
@@ -66,6 +75,52 @@ public class ReleaseSkill {
         } else {
             ACTIVE.remove(player.getUUID());
             detonate(player, level);
+        }
+    }
+
+    // the mountain-eater: after the blast a sphere of the world is erased shell
+    // by shell (8 blocks per tick) — the terrain visibly dissolves outward
+    private static void carveTick(ServerPlayer player) {
+        Carve c = CARVING.get(player.getUUID());
+        if (c == null) {
+            return;
+        }
+        ServerLevel level = (ServerLevel) player.level();
+        int r0 = c.shell() * CARVE_SHELL;
+        int r1 = r0 + CARVE_SHELL;
+        Vec3 center = c.center();
+        net.minecraft.core.BlockPos origin = net.minecraft.core.BlockPos.containing(center);
+        for (int dx = -r1; dx <= r1; dx++) {
+            for (int dy = -r1; dy <= r1; dy++) {
+                for (int dz = -r1; dz <= r1; dz++) {
+                    double d2 = dx * dx + dy * dy + dz * dz;
+                    if (d2 > r1 * r1 || (r0 > 0 && d2 <= r0 * r0)) {
+                        continue;
+                    }
+                    net.minecraft.core.BlockPos pos = origin.offset(dx, dy, dz);
+                    var state = level.getBlockState(pos);
+                    if (state.isAir() || state.getDestroySpeed(level, pos) < 0.0F) {
+                        continue; // bedrock & friends survive
+                    }
+                    level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),
+                            net.minecraft.world.level.block.Block.UPDATE_ALL);
+                }
+            }
+        }
+        // shell edge glows as it dissolves
+        for (int i = 0; i < 40; i++) {
+            double theta = RANDOM.nextDouble() * Math.PI * 2.0;
+            double phi = RANDOM.nextDouble() * Math.PI;
+            level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
+                    center.x + Math.sin(phi) * Math.cos(theta) * r1,
+                    center.y + Math.cos(phi) * r1,
+                    center.z + Math.sin(phi) * Math.sin(theta) * r1,
+                    2, 0.2, 0.2, 0.2, 0.0);
+        }
+        if (c.shell() + 1 >= CARVE_SHELLS) {
+            CARVING.remove(player.getUUID());
+        } else {
+            CARVING.put(player.getUUID(), new Carve(center, c.shell() + 1));
         }
     }
 
@@ -227,6 +282,8 @@ public class ReleaseSkill {
         RumblePowerData.revoke(player);
         player.displayClientMessage(Component.translatable("rumblefruit.release_spent")
                 .withStyle(net.minecraft.ChatFormatting.GOLD), true);
+        // start eating the world: the sphere carves outward from the blast point
+        CARVING.put(player.getUUID(), new Carve(ground, 0));
     }
 
     // pure presentation: flash, particle shells, bolt crowns, ray fan, thunder

@@ -1,7 +1,7 @@
 package net.minecraft.world.phys;
 
 // vacuum fake of minecraft's Vec3 — same members our code uses, same signatures
-public class Vec3 {
+public class Vec3 implements net.minecraft.core.Position {
     public static final Vec3 ZERO = new Vec3(0.0, 0.0, 0.0);
     public final double x;
     public final double y;
@@ -11,6 +11,21 @@ public class Vec3 {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    @Override
+    public double x() {
+        return x;
+    }
+
+    @Override
+    public double y() {
+        return y;
+    }
+
+    @Override
+    public double z() {
+        return z;
     }
 
     public Vec3 add(Vec3 o) {
