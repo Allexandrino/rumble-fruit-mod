@@ -1,12 +1,31 @@
 package net.minecraft.world.level;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 
 // vacuum fake of minecraft's Level
 public class Level {
     public final boolean isClientSide = false;
     private long gameTime = 0;
-    public final java.util.List<String> sounds = new java.util.ArrayList<>();
+
+    // structured record of a played sound — tests assert real parameters
+    public static class SoundCall {
+        public final SoundEvent sound;
+        public final SoundSource source;
+        public final float volume;
+        public final float pitch;
+
+        public SoundCall(SoundEvent sound, SoundSource source, float volume, float pitch) {
+            this.sound = sound;
+            this.source = source;
+            this.volume = volume;
+            this.pitch = pitch;
+        }
+    }
+
+    public final java.util.List<SoundCall> sounds = new java.util.ArrayList<>();
 
     public enum ExplosionInteraction {
         NONE, BLOCK, MOB, TNT
@@ -30,23 +49,21 @@ public class Level {
     }
 
     public void playSound(net.minecraft.world.entity.player.Player except,
-                          net.minecraft.core.BlockPos pos,
-                          net.minecraft.sounds.SoundEvent sound,
-                          net.minecraft.sounds.SoundSource source, float volume, float pitch) {
-        sounds.add(sound.toString() + "@" + volume + "@" + pitch);
+                          BlockPos pos, SoundEvent sound, SoundSource source,
+                          float volume, float pitch) {
+        sounds.add(new SoundCall(sound, source, volume, pitch));
     }
 
     public void playSound(net.minecraft.world.entity.player.Player except,
                           double x, double y, double z,
-                          net.minecraft.sounds.SoundEvent sound,
-                          net.minecraft.sounds.SoundSource source, float volume, float pitch) {
-        sounds.add(sound.toString() + "@" + volume + "@" + pitch);
+                          SoundEvent sound, SoundSource source, float volume, float pitch) {
+        sounds.add(new SoundCall(sound, source, volume, pitch));
     }
 
     public void playSound(net.minecraft.world.entity.player.Player except,
                           double x, double y, double z,
-                          net.minecraft.core.Holder<net.minecraft.sounds.SoundEvent> sound,
-                          net.minecraft.sounds.SoundSource source, float volume, float pitch) {
-        sounds.add(sound.value().toString() + "@" + volume + "@" + pitch);
+                          net.minecraft.core.Holder<SoundEvent> sound,
+                          SoundSource source, float volume, float pitch) {
+        sounds.add(new SoundCall(sound.value(), source, volume, pitch));
     }
 }

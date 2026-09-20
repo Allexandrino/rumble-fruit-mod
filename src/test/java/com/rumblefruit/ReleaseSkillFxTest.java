@@ -69,9 +69,15 @@ class ReleaseSkillFxTest {
         var helixPoint = level.particles.get(70);
         assertEquals(0.05, helixPoint.dx, 1.0E-9);
         assertEquals(0.02, helixPoint.speed, 1.0E-9);
-        // and the charge-up sounds carry the golden volume and pitch
-        assertEquals("warden_sonic_charge@3.0@0.6", level.sounds.get(0));
-        assertEquals("beacon_power_select@2.0@0.5", level.sounds.get(1));
+        // and the charge-up sounds carry real parameters
+        var chargeSound = level.sounds.get(0);
+        assertEquals("warden_sonic_charge", chargeSound.sound.toString());
+        assertEquals(3.0F, chargeSound.volume, 1.0E-9);
+        assertEquals(0.6F, chargeSound.pitch, 1.0E-9);
+        var beaconSound = level.sounds.get(1);
+        assertEquals("beacon_power_select", beaconSound.sound.toString());
+        assertEquals(2.0F, beaconSound.volume, 1.0E-9);
+        assertEquals(0.5F, beaconSound.pitch, 1.0E-9);
     }
 
     @Test
@@ -153,13 +159,19 @@ class ReleaseSkillFxTest {
                 h = hash(h, p.dy);
                 h = hash(h, p.dz);
                 h = hash(h, p.speed);
+                h = h * 31 + (p.type == null ? 0 : p.type.getClass().getSimpleName().hashCode());
             }
-            for (String s : probeLevel.sounds) {
-                h = h * 31 + s.hashCode();
+            for (var sc : probeLevel.sounds) {
+                h = h * 31 + sc.sound.toString().hashCode();
+                h = hash(h, sc.volume);
+                h = hash(h, sc.pitch);
             }
         }
-        for (String b : ElectroBolts.STRIKES) {
-            h = h * 31 + b.hashCode();
+        for (var bc : ElectroBolts.STRIKES) {
+            h = h * 31 + bc.kind.hashCode();
+            h = hash(h, bc.x);
+            h = hash(h, bc.y);
+            h = hash(h, bc.z);
         }
         return h;
     }
@@ -168,14 +180,14 @@ class ReleaseSkillFxTest {
     void chargeStreamMatchesGoldenHashes() {
         // every phase boundary of the ascension, hashed against the golden capture
         long[][] golden = {
-                {1, 1830378927751236466L},
-                {4, 3295771452895037328L},
-                {8, -5473444450046889394L},
-                {10, 4155257181818601588L},
-                {15, -987783029939817272L},
-                {30, -1231204668925986699L},
-                {45, -6502395068137776905L},
-                {60, 5203240350432331406L},
+                {1, 4005581143591340526L},
+                {4, -8476097461590516181L},
+                {8, 6452623816588030867L},
+                {10, -7116542954896958399L},
+                {15, 7655983970571546696L},
+                {30, 1255257902964024123L},
+                {45, -8787094621545129340L},
+                {60, -6782354355691495381L},
         };
         for (long[] g : golden) {
             assertEquals(g[1], probeHash((int) g[0]), "stream hash diverged at tick " + g[0]);
@@ -207,13 +219,19 @@ class ReleaseSkillFxTest {
             h = hash(h, p.dy);
             h = hash(h, p.dz);
             h = hash(h, p.speed);
+            h = h * 31 + (p.type == null ? 0 : p.type.getClass().getSimpleName().hashCode());
         }
-        for (String s : level.sounds) {
-            h = h * 31 + s.hashCode();
+        for (var sc : level.sounds) {
+            h = h * 31 + sc.sound.toString().hashCode();
+            h = hash(h, sc.volume);
+            h = hash(h, sc.pitch);
         }
-        for (String b : ElectroBolts.STRIKES) {
-            h = h * 31 + b.hashCode();
+        for (var bc : ElectroBolts.STRIKES) {
+            h = h * 31 + bc.kind.hashCode();
+            h = hash(h, bc.x);
+            h = hash(h, bc.y);
+            h = hash(h, bc.z);
         }
-        assertEquals(8670506311394982401L, h);
+        assertEquals(-7284949133414171280L, h);
     }
 }

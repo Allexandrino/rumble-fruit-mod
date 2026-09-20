@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 public class DeferredHolder<R, T> {
     private final T value;
 
-    private DeferredHolder(T value) {
+    public DeferredHolder(T value) {
         this.value = value;
     }
 
