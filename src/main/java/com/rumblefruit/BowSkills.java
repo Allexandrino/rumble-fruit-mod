@@ -24,7 +24,7 @@ public class BowSkills {
         arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 4.5F, 0.3F);
         level.addFreshEntity(arrow);
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 1.2F, 0.7F);
+                ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 1.2F, 0.7F);
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.5F, 0.6F);
     }
@@ -44,8 +44,8 @@ public class BowSkills {
             level.addFreshEntity(arrow);
         }
         level.playSound(null, target.x, target.y, target.z,
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 3.0F, 1.3F);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.x, target.y + 6, target.z, 40, 5.0, 2.0, 5.0, 0.08);
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 3.0F, 1.3F);
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), target.x, target.y + 6, target.z, 40, 5.0, 2.0, 5.0, 0.08);
     }
 
     // C: thunder arrow — a golden lightning strike where the arrow lands
@@ -56,7 +56,7 @@ public class BowSkills {
         arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 3.5F, 0.4F);
         level.addFreshEntity(arrow);
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 1.5F, 0.7F);
+                ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 1.5F, 0.7F);
     }
 
     // V: wind wings — a gust that blasts every nearby enemy away
@@ -74,13 +74,13 @@ public class BowSkills {
             entity.hurt(level.damageSources().indirectMagic(player, player), holy ? 14.0F : 8.0F);
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 3));
         }
-        level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1.2, player.getZ(),
+        level.sendParticles(ModParticles.ELECTRO_CLOUD.get(), player.getX(), player.getY() + 1.2, player.getZ(),
                 60, 3.0, 1.0, 3.0, 0.15);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(),
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), player.getX(), player.getY() + 1.0, player.getZ(),
                 40, 3.0, 1.0, 3.0, 0.1);
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 2.0F, 1.2F);
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 2.0F, 1.5F);
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 2.0F, 1.5F);
     }
 }

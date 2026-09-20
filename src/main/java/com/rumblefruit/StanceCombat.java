@@ -54,7 +54,7 @@ public class StanceCombat {
                 entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 12, 1));
                 entity.knockback(0.5, -view.x, -view.z);
                 hitAny = true;
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                level.sendParticles(ModParticles.ELECTRO_SPARK.get(),
                         entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(),
                         8, 0.3, 0.3, 0.3, 0.04);
             }
@@ -70,7 +70,7 @@ public class StanceCombat {
                 SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 1.2F);
         if (hitAny) {
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.8F, 1.5F);
+                    ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 0.8F, 1.5F);
         }
         // stickman-fight feel: each combo hurls the fighter across the ground
         Vec3 perp = new Vec3(-view.z, 0.0, view.x); // strafe direction
@@ -130,7 +130,7 @@ public class StanceCombat {
                 }
                 entity.hurtMarked = true;
                 hitAny = true;
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                level.sendParticles(ModParticles.ELECTRO_SPARK.get(),
                         entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(),
                         10, 0.3, 0.3, 0.3, 0.05);
             }
@@ -141,7 +141,7 @@ public class StanceCombat {
                 SoundSource.PLAYERS, 1.0F, 1.1F);
         if (hitAny) {
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.7F, 1.7F);
+                    ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 0.7F, 1.7F);
         }
         // step into the strike; the kick hops forward
         player.push(view.x * (kick ? 0.5 : 0.3), kick ? 0.12 : 0.0, view.z * (kick ? 0.5 : 0.3));
@@ -173,6 +173,6 @@ public class StanceCombat {
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.2F);
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.5F, 1.8F);
+                ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 0.5F, 1.8F);
     }
 }

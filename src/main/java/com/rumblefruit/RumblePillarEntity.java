@@ -36,7 +36,7 @@ public class RumblePillarEntity extends Entity {
         pillar.setPos(x, y, z);
         pillar.entityData.set(HOLY, holy);
         level.addFreshEntity(pillar);
-        level.playSound(null, x, y, z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER,
+        level.playSound(null, x, y, z, ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER,
                 10000.0F, 0.5F + new Random().nextFloat() * 0.2F);
         level.playSound(null, x, y, z, SoundEvents.BEACON_DEACTIVATE, SoundSource.WEATHER, 4.0F, 0.5F);
     }
@@ -65,7 +65,7 @@ public class RumblePillarEntity extends Entity {
         for (int i = 0; i < 25; i++) {
             double angle = random.nextDouble() * Math.PI * 2.0;
             double r = 2.0 + random.nextDouble() * 8.0;
-            this.level().addParticle(ParticleTypes.CLOUD,
+            this.level().addParticle(ModParticles.ELECTRO_CLOUD.get(),
                     this.getX() + Math.cos(angle) * r,
                     this.getY() + CLOUD_Y + (random.nextDouble() - 0.5) * 2.0,
                     this.getZ() + Math.sin(angle) * r,
@@ -78,7 +78,7 @@ public class RumblePillarEntity extends Entity {
         }
         // sparks raining down from the cloud into the beam
         for (int i = 0; i < 8; i++) {
-            this.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
+            this.level().addParticle(ModParticles.ELECTRO_SPARK.get(),
                     this.getX() + (random.nextDouble() - 0.5) * 3.0,
                     this.getY() + CLOUD_Y - random.nextDouble() * 6.0,
                     this.getZ() + (random.nextDouble() - 0.5) * 3.0,
@@ -88,7 +88,7 @@ public class RumblePillarEntity extends Entity {
         for (int i = 0; i < 10; i++) {
             double angle = random.nextDouble() * Math.PI * 2.0;
             double r = 1.5 + random.nextDouble() * 4.0;
-            this.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
+            this.level().addParticle(ModParticles.ELECTRO_SPARK.get(),
                     this.getX() + Math.cos(angle) * r,
                     this.getY() + 0.2,
                     this.getZ() + Math.sin(angle) * r,

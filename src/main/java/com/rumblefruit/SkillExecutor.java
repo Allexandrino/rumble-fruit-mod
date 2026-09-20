@@ -162,8 +162,8 @@ public class SkillExecutor {
     }
 
     private static net.minecraft.core.particles.SimpleParticleType sparkType(boolean holy) {
-        return holy ? net.minecraft.core.particles.ParticleTypes.END_ROD
-                : net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK;
+        return holy ? com.rumblefruit.ModParticles.ELECTRO_GLOW.get()
+                : com.rumblefruit.ModParticles.ELECTRO_SPARK.get();
     }
 
     // Z variants: 0=tap projectile, 1=hold pull+stun, 2=long-hold dragon
@@ -186,7 +186,7 @@ public class SkillExecutor {
                     level.addFreshEntity(orb);
                 }
                 level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                        SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.8F, 1.6F);
+                        ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 0.8F, 1.6F);
             }
             case 1 -> { // Z2: pull enemies in + stun
                 double radius = holy ? 13.0 : 10.0;
@@ -202,7 +202,7 @@ public class SkillExecutor {
                 level.sendParticles(sparkType(holy),
                         player.getX(), player.getY() + 1, player.getZ(), 50, 5.0, 1.5, 5.0, 0.08);
                 level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                        SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 3.0F, 0.8F);
+                        ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 3.0F, 0.8F);
             }
             case 2 -> { // Z3: electrified dragon — bigger, faster orb with more damage
                 ElectroOrbEntity orb = new ElectroOrbEntity(level, player);
@@ -226,7 +226,7 @@ public class SkillExecutor {
                 level.addFreshEntity(arrow);
             }
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 1.5F, 1.0F);
+                    ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 1.5F, 1.0F);
             return;
         }
         Vec3 target = rayTrace(player, 40.0);
@@ -239,7 +239,7 @@ public class SkillExecutor {
         for (int i = 0; i < 60; i++) {
             double angle = RANDOM.nextDouble() * Math.PI * 2.0;
             double r = RANDOM.nextDouble() * 10.0;
-            level.sendParticles(ParticleTypes.CLOUD,
+            level.sendParticles(ModParticles.ELECTRO_CLOUD.get(),
                     target.x + Math.cos(angle) * r,
                     target.y + 12.0 + RANDOM.nextDouble() * 2.0,
                     target.z + Math.sin(angle) * r,
@@ -251,7 +251,7 @@ public class SkillExecutor {
                     1, 0.0, -0.02, 0.0, 0.0);
         }
         level.playSound(null, target.x, target.y, target.z,
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 4.0F, 1.0F);
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 4.0F, 1.0F);
     }
 
     // C: lightning pillar — continuous beam from a thundercloud down to the target
@@ -265,7 +265,7 @@ public class SkillExecutor {
             arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 3.0F, 0.5F);
             level.addFreshEntity(arrow);
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 1.5F, 0.7F);
+                    ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 1.5F, 0.7F);
             return;
         }
         Vec3 target = rayTrace(player, 40.0);
@@ -308,7 +308,7 @@ public class SkillExecutor {
         // golden lance visuals: searing rod line + bolts striking along the path
         for (double d = 1.0; d < length; d += 0.5) {
             Vec3 p = eye.add(view.scale(d));
-            level.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
+            level.sendParticles(ModParticles.ELECTRO_GLOW.get(), p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
         }
         for (double d = 4.0; d < length; d += 6.0) {
             Vec3 p = eye.add(view.scale(d));
@@ -317,7 +317,7 @@ public class SkillExecutor {
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 2.0F, 1.6F);
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 3.0F, 1.4F);
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 3.0F, 1.4F);
     }
 
     // angel X: Judgment — golden pillars rain around the target area
@@ -342,7 +342,7 @@ public class SkillExecutor {
                 new net.minecraft.world.item.ItemStack(RumbleFruitMod.ELECTRO_SWORD.get()));
         level.addFreshEntity(stand);
         // crackling discharge around the planted sword
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.x, target.y + 1.0, target.z, 25, 0.4, 0.6, 0.4, 0.05);
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), target.x, target.y + 1.0, target.z, 25, 0.4, 0.6, 0.4, 0.05);
     }
 
     // shared pillar effect at a position (used by sword C and charged bow shot)

@@ -48,7 +48,7 @@ public class ReleaseSkill {
         player.addEffect(new MobEffectInstance(MobEffects.GLOWING, CHARGE_TICKS + 20, 0, false, false));
         ServerLevel level = (ServerLevel) player.level();
         level.playSound(null, player.blockPosition(),
-                SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 3.0F, 0.6F);
+                ModSounds.ELECTRO_CHARGE.get(), SoundSource.PLAYERS, 3.0F, 0.6F);
         level.playSound(null, player.blockPosition(),
                 SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 2.0F, 0.5F);
     }
@@ -69,12 +69,12 @@ public class ReleaseSkill {
         }
     }
 
-    // rising ~20 blocks into the sky while electricity tears out of the body
+    // rising ~30 blocks into the sky while electricity tears out of the body
     private static void ascension(ServerPlayer player, ServerLevel level, int t) {
         player.fallDistance = 0.0F;
         Vec3 vel = player.getDeltaMovement();
-        // accelerating climb: ~20 blocks over the charge, then hover
-        double up = t < 8 ? 0.12 : t < 52 ? 0.48 : 0.0;
+        // accelerating climb: ~30 blocks over the charge, then hover
+        double up = t < 8 ? 0.12 : t < 52 ? 0.72 : 0.0;
         player.setDeltaMovement(vel.x * 0.4, up, vel.z * 0.4);
         player.hurtMarked = true;
         emitAscensionFx(player, level, t);
@@ -110,7 +110,7 @@ public class ReleaseSkill {
         for (int i = 0; i < coating; i++) {
             double theta = RANDOM.nextDouble() * Math.PI * 2.0;
             double phi = RANDOM.nextDouble() * Math.PI;
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+            level.sendParticles(ModParticles.ELECTRO_SPARK.get(),
                     core.x + Math.sin(phi) * Math.cos(theta) * shell,
                     core.y + Math.cos(phi) * shell,
                     core.z + Math.sin(phi) * Math.sin(theta) * shell,
@@ -132,7 +132,7 @@ public class ReleaseSkill {
         for (int i = 0; i < 5; i++) {
             double angle = RANDOM.nextDouble() * Math.PI * 2.0;
             double rr = RANDOM.nextDouble() * (4.0 + t * 0.2);
-            level.sendParticles(ParticleTypes.CLOUD,
+            level.sendParticles(ModParticles.ELECTRO_CLOUD.get(),
                     player.getX() + Math.cos(angle) * rr,
                     player.getY() + 16.0 + RANDOM.nextDouble() * 3.0,
                     player.getZ() + Math.sin(angle) * rr,
@@ -143,29 +143,29 @@ public class ReleaseSkill {
             double angle = t * 0.35 + i * (Math.PI / 3.0);
             double rr = 2.2;
             double py = player.getY() + ((t * 0.6 + i * 0.7) % 4.0) - 0.5;
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+            level.sendParticles(ModParticles.ELECTRO_SPARK.get(),
                     player.getX() + Math.cos(angle) * rr, py, player.getZ() + Math.sin(angle) * rr,
                     2, 0.05, 0.05, 0.05, 0.02);
-            level.sendParticles(ParticleTypes.END_ROD,
+            level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                     player.getX() - Math.cos(angle) * rr, py, player.getZ() - Math.sin(angle) * rr,
                     1, 0.05, 0.05, 0.05, 0.01);
         }
         // pillar of light from the ground up to the caster
         if (t % 3 == 0) {
             for (double dy = 0.0; dy < 22.0; dy += 1.5) {
-                level.sendParticles(ParticleTypes.END_ROD,
+                level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                         player.getX(), player.getY() - dy, player.getZ(), 1, 0.15, 0.05, 0.15, 0.0);
             }
         }
         // raw power aura
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(),
                 player.getX(), player.getY() + 1.0, player.getZ(), 14, 2.0, 1.5, 2.0, 0.1);
-        level.sendParticles(ParticleTypes.FLASH,
+        level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                 player.getX(), player.getY() + 1.0, player.getZ(), t % 20 == 0 ? 1 : 0, 0, 0, 0, 0);
         if (t % 8 == 0) {
             level.playSound(null, player.blockPosition(), SoundEvents.BEACON_AMBIENT,
                     SoundSource.PLAYERS, 3.0F, 0.5F + t * 0.02F);
-            level.playSound(null, player.blockPosition(), SoundEvents.LIGHTNING_BOLT_IMPACT,
+            level.playSound(null, player.blockPosition(), ModSounds.ELECTRO_ZAP.get(),
                     SoundSource.WEATHER, 2.0F, 0.8F + t * 0.012F);
         }
     }
@@ -173,7 +173,7 @@ public class ReleaseSkill {
     // the nuke: magic damage ("slain by magic"), massive knockback, blinding flash
     private static void detonate(ServerPlayer player, ServerLevel level) {
         Vec3 center = player.position();
-        double radius = 40.0;
+        double radius = 64.0;
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(radius), e -> e != player && e.isAlive())) {
             double dist = entity.position().distanceTo(center);
@@ -183,8 +183,8 @@ public class ReleaseSkill {
             float damage = (float) (1000.0 * (1.0 - dist / (radius * 1.5)));
             entity.hurt(level.damageSources().indirectMagic(player, player), damage);
             Vec3 away = entity.position().subtract(center).normalize()
-                    .scale((1.0 - dist / radius) * 9.0);
-            entity.push(away.x, 2.0, away.z);
+                    .scale((1.0 - dist / radius) * 12.0);
+            entity.push(away.x, 2.5, away.z);
             entity.hurtMarked = true;
             entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 100, 0));
         }
@@ -199,8 +199,8 @@ public class ReleaseSkill {
         if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
             ground = hit.getLocation();
         }
-        level.explode(null, ground.x, ground.y + 1.0, ground.z, 16.0F, Level.ExplosionInteraction.BLOCK);
-        level.explode(null, ground.x, ground.y + 3.0, ground.z, 11.0F, Level.ExplosionInteraction.BLOCK);
+        level.explode(null, ground.x, ground.y + 1.0, ground.z, 24.0F, Level.ExplosionInteraction.BLOCK);
+        level.explode(null, ground.x, ground.y + 3.0, ground.z, 16.0F, Level.ExplosionInteraction.BLOCK);
         level.explode(null, center.x, center.y, center.z, 8.0F, Level.ExplosionInteraction.NONE);
         player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 120, 4, false, false));
         player.setDeltaMovement(0.0, -1.9, 0.0);
@@ -222,22 +222,22 @@ public class ReleaseSkill {
     @com.rumblefruit.core.VisualEffect
     private static void emitBlastFx(ServerPlayer player, ServerLevel level, Vec3 center) {
         for (int i = 0; i < 3; i++) {
-            level.sendParticles(ParticleTypes.FLASH, center.x, center.y + 1.0, center.z, 1, 0, 0, 0, 0);
+            level.sendParticles(ModParticles.ELECTRO_GLOW.get(), center.x, center.y + 1.0, center.z, 1, 0, 0, 0, 0);
         }
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y + 1.0, center.z,
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), center.x, center.y + 1.0, center.z,
                 700, 16.0, 10.0, 16.0, 0.5);
-        level.sendParticles(ParticleTypes.END_ROD, center.x, center.y + 1.0, center.z,
+        level.sendParticles(ModParticles.ELECTRO_GLOW.get(), center.x, center.y + 1.0, center.z,
                 350, 12.0, 8.0, 12.0, 0.4);
         level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, center.x, center.y + 1.0, center.z,
                 10, 5.0, 3.0, 5.0, 0.0);
-        level.sendParticles(ParticleTypes.FLAME, center.x, center.y + 1.0, center.z,
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), center.x, center.y + 1.0, center.z,
                 80, 10.0, 6.0, 10.0, 0.15);
         // shockwave rings on the ground
-        for (double ring = 6.0; ring <= 24.0; ring += 6.0) {
+        for (double ring = 6.0; ring <= 36.0; ring += 6.0) {
             int count = (int) (ring * 4.0);
             for (int i = 0; i < count; i++) {
                 double angle = i * Math.PI * 2.0 / count;
-                level.sendParticles(ParticleTypes.END_ROD,
+                level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                         center.x + Math.cos(angle) * ring, center.y + 0.3, center.z + Math.sin(angle) * ring,
                         1, 0.0, 0.4, 0.0, 0.05);
             }
@@ -245,7 +245,7 @@ public class ReleaseSkill {
         // double crown of lightning
         for (int i = 0; i < 24; i++) {
             double angle = i * Math.PI / 12.0;
-            double rr = i % 2 == 0 ? 8.0 : 16.0;
+            double rr = i % 2 == 0 ? 10.0 : 20.0;
             ElectroBolts.visual(level, center.x + Math.cos(angle) * rr, center.y - 18.0,
                     center.z + Math.sin(angle) * rr, player);
         }
@@ -272,9 +272,9 @@ public class ReleaseSkill {
                     0, (float) angle, 0.0F, 0.0F, 0.0);
         }
         level.playSound(null, center.x, center.y, center.z,
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 16.0F, 0.3F);
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 16.0F, 0.3F);
         level.playSound(null, center.x, center.y, center.z,
-                SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 8.0F, 0.4F);
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.PLAYERS, 8.0F, 0.4F);
         level.playSound(null, center.x, center.y, center.z,
                 SoundEvents.ENDER_DRAGON_DEATH, SoundSource.PLAYERS, 6.0F, 1.4F);
         level.playSound(null, center.x, center.y, center.z,
@@ -288,9 +288,9 @@ public class ReleaseSkill {
         java.util.List<com.rumblefruit.core.Vec> points = com.rumblefruit.core.RayPolyline.generate(
                 new com.rumblefruit.core.Vec(from.x, from.y, from.z), yaw, pitch, length, RANDOM);
         for (com.rumblefruit.core.Vec p : points) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x(), p.y(), p.z(),
+            level.sendParticles(ModParticles.ELECTRO_SPARK.get(), p.x(), p.y(), p.z(),
                     2, 0.03, 0.03, 0.03, 0.0);
-            level.sendParticles(ParticleTypes.END_ROD, p.x(), p.y(), p.z(),
+            level.sendParticles(ModParticles.ELECTRO_GLOW.get(), p.x(), p.y(), p.z(),
                     1, 0.0, 0.0, 0.0, 0.0);
         }
     }

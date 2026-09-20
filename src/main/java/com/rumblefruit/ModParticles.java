@@ -12,4 +12,10 @@ public class ModParticles {
 
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELECTRO_SLASH =
             PARTICLES.register("electro_slash", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELECTRO_SPARK =
+            PARTICLES.register("electro_spark", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELECTRO_GLOW =
+            PARTICLES.register("electro_glow", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELECTRO_CLOUD =
+            PARTICLES.register("electro_cloud", () -> new SimpleParticleType(false));
 }

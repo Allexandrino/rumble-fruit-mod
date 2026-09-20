@@ -59,9 +59,9 @@ public class BossPedestalBlock extends Block {
                     pos.getX() + 0.5 + Math.cos(a) * 6.0, pos.getY() + 1.0,
                     pos.getZ() + 0.5 + Math.sin(a) * 6.0, boss, true);
         }
-        serverLevel.sendParticles(ParticleTypes.END_ROD,
+        serverLevel.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                 pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, 80, 1.5, 1.5, 1.5, 0.1);
-        serverLevel.sendParticles(ParticleTypes.FLASH,
+        serverLevel.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                 pos.getX() + 0.5, pos.getY() + 2.0, pos.getZ() + 0.5, 1, 0.0, 0.0, 0.0, 0.0);
         serverLevel.playSound(null, pos, SoundEvents.TOTEM_USE, SoundSource.BLOCKS, 1.0F, 0.8F);
         serverLevel.playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 2.0F, 0.8F);

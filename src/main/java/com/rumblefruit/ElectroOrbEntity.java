@@ -51,7 +51,7 @@ public class ElectroOrbEntity extends ThrowableItemProjectile {
             int particleCount = this.dragonMode ? 6 : 3;
             double spread = this.dragonMode ? 0.5 : 0.3;
             for (int i = 0; i < particleCount; i++) {
-                this.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
+                this.level().addParticle(ModParticles.ELECTRO_SPARK.get(),
                         this.getX() + (random.nextDouble() - 0.5) * spread,
                         this.getY() + (random.nextDouble() - 0.5) * spread,
                         this.getZ() + (random.nextDouble() - 0.5) * spread,
@@ -59,7 +59,7 @@ public class ElectroOrbEntity extends ThrowableItemProjectile {
             }
             if (this.dragonMode) {
                 // dragon trail: bigger sparks
-                this.level().addParticle(ParticleTypes.END_ROD,
+                this.level().addParticle(ModParticles.ELECTRO_GLOW.get(),
                         this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
             }
         } else if (this.tickCount > (this.dragonMode ? MAX_TICKS_DRAGON : MAX_TICKS)) {
@@ -88,10 +88,10 @@ public class ElectroOrbEntity extends ThrowableItemProjectile {
             entity.push(pull.x, pull.y * 0.3 + 0.3, pull.z);
             entity.hurtMarked = true;
         }
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, point.x, point.y, point.z,
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), point.x, point.y, point.z,
                 this.dragonMode ? 60 : 40, 2.0, 2.0, 2.0, 0.08);
         level.playSound(null, point.x, point.y, point.z,
-                SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 2.0F, 0.8F);
+                ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 2.0F, 0.8F);
         this.discard();
     }
 }

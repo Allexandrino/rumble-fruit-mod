@@ -50,9 +50,9 @@ public class ElectroSwordItem extends SwordItem {
             target.hurt(serverLevel.damageSources().indirectMagic(player, player), 6.0F);
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 0));
             serverLevel.playSound(null, target.getX(), target.getY(), target.getZ(),
-                    SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS,
+                    ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS,
                     1.0F, 1.0F + random.nextFloat() * 0.2F);
-            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+            serverLevel.sendParticles(ModParticles.ELECTRO_SPARK.get(),
                     target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
                     9, 0.4, 0.4, 0.4, 0.05);
             if (random.nextFloat() < 0.1F) {

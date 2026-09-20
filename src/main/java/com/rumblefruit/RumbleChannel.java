@@ -115,7 +115,7 @@ public class RumbleChannel {
 
         // impact sparks; the jagged 3d bolts from the hands are drawn client-side
         // (ChannelBoltRenderer) from the synced channel state
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(),
                 target.x, target.y, target.z, 12, 0.4, 0.4, 0.4, 0.03);
 
         // sounds: crackle every tick, thunder every 8 ticks, deep rumble every 20
@@ -124,12 +124,12 @@ public class RumbleChannel {
                 0.4F, 1.5F + RANDOM.nextFloat() * 0.5F);
         if (tickCounter % 8 == 0) {
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER,
+                    ModSounds.ELECTRO_ZAP.get(), SoundSource.WEATHER,
                     1.0F, 1.2F + RANDOM.nextFloat() * 0.3F);
         }
         if (tickCounter % 20 == 0) {
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER,
+                    ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER,
                     2.0F, 0.8F + RANDOM.nextFloat() * 0.2F);
         }
     }

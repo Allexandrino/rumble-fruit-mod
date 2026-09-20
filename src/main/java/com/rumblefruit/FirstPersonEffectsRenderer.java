@@ -202,7 +202,7 @@ public class FirstPersonEffectsRenderer {
         net.minecraft.world.phys.Vec3 pos = eye.add(view.scale(1.4));
         java.util.Random random = new java.util.Random();
         for (int i = 0; i < 3; i++) {
-            player.level().addParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+            player.level().addParticle(com.rumblefruit.ModParticles.ELECTRO_SPARK.get(),
                     pos.x + (random.nextDouble() - 0.5) * 0.4,
                     pos.y - 0.2 + (random.nextDouble() - 0.5) * 0.4,
                     pos.z + (random.nextDouble() - 0.5) * 0.4,

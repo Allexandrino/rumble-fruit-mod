@@ -57,13 +57,13 @@ public class WingsData {
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 1.2F, 1.2F);
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 2.5F, 1.4F);
+                    ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 2.5F, 1.4F);
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.9F, 1.3F);
             if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                serverLevel.sendParticles(com.rumblefruit.ModParticles.ELECTRO_GLOW.get(),
                         player.getX(), player.getY() + 1.2, player.getZ(), 60, 1.2, 1.0, 1.2, 0.12);
-                serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.FLASH,
+                serverLevel.sendParticles(com.rumblefruit.ModParticles.ELECTRO_GLOW.get(),
                         player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
                 ElectroBolts.visualHoly(serverLevel, player.getX(), player.getY(), player.getZ());
             }
@@ -89,7 +89,7 @@ public class WingsData {
         // god aura: tiny electric sparkles drifting off the electro-angel
         if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel
                 && player.level().getGameTime() % 3 == 0) {
-            serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+            serverLevel.sendParticles(com.rumblefruit.ModParticles.ELECTRO_SPARK.get(),
                     player.getX(), player.getY() + 1.1, player.getZ(), 4, 0.5, 0.6, 0.5, 0.02);
         }
         if (player.onGround() || player.isInWater() || player.isCreative() || player.isSpectator()) {

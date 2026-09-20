@@ -141,7 +141,7 @@ public class ThunderballEntity extends Entity {
         this.setDeltaMovement(Vec3.ZERO);
         if (this.tickCount >= FORMING_TICKS) {
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                    SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER,
+                    ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER,
                     2.0F, 0.9F + random.nextFloat() * 0.2F);
             int flashes = 3 + random.nextInt(3);
             for (int i = 0; i < flashes; i++) {
@@ -209,7 +209,7 @@ public class ThunderballEntity extends Entity {
     private void thunderFlash() {
         int charge = getChargeLevel();
         this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER,
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER,
                 2.0F, 0.8F + random.nextFloat() * 0.2F);
         double radius = 4.0 + 2.0 * charge;
         for (int i = 0; i < 5; i++) {
@@ -224,7 +224,7 @@ public class ThunderballEntity extends Entity {
     private void landingImpact() {
         int charge = getChargeLevel();
         this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER,
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER,
                 10000.0F, 0.6F + random.nextFloat() * 0.2F);
         this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
                 SoundEvents.BEACON_DEACTIVATE, SoundSource.WEATHER, 4.0F, 0.5F);
@@ -260,11 +260,11 @@ public class ThunderballEntity extends Entity {
     private void particleColumn(int height) {
         if (this.level() instanceof ServerLevel serverLevel) {
             for (int i = 0; i <= height; i++) {
-                serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                serverLevel.sendParticles(ModParticles.ELECTRO_SPARK.get(),
                         this.getX(), this.getY() + i, this.getZ(),
                         2, 0.3, 0.1, 0.3, 0.0);
                 if (i % 2 == 0) {
-                    serverLevel.sendParticles(ParticleTypes.END_ROD,
+                    serverLevel.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                             this.getX(), this.getY() + i, this.getZ(),
                             1, 0.15, 0.05, 0.15, 0.0);
                 }
@@ -302,14 +302,14 @@ public class ThunderballEntity extends Entity {
         }
 
         this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER,
+                ModSounds.ELECTRO_ZAP.get(), SoundSource.WEATHER,
                 2.0F, 0.7F + random.nextFloat() * 0.2F);
     }
 
     private void finalBurst() {
         int charge = getChargeLevel();
         this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER,
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER,
                 10000.0F, 0.5F + random.nextFloat() * 0.2F);
         this.level().explode(this, this.getX(), this.getY(), this.getZ(),
                 2.0F * charge, Level.ExplosionInteraction.NONE);
@@ -360,11 +360,11 @@ public class ThunderballEntity extends Entity {
                     double sx = this.getX() + spawnR * Math.sin(phi) * Math.cos(theta);
                     double sy = cy + spawnR * Math.cos(phi);
                     double sz = this.getZ() + spawnR * Math.sin(phi) * Math.sin(theta);
-                    this.level().addParticle(ParticleTypes.ELECTRIC_SPARK, sx, sy, sz,
+                    this.level().addParticle(ModParticles.ELECTRO_SPARK.get(), sx, sy, sz,
                             (this.getX() - sx) * 0.12, (cy - sy) * 0.12, (this.getZ() - sz) * 0.12);
                 }
                 for (int i = 0; i < 3; i++) {
-                    this.level().addParticle(ParticleTypes.CLOUD,
+                    this.level().addParticle(ModParticles.ELECTRO_CLOUD.get(),
                             this.getX() + (random.nextDouble() - 0.5) * radius,
                             cy + radius + 1.0 + random.nextDouble(),
                             this.getZ() + (random.nextDouble() - 0.5) * radius,
@@ -378,18 +378,18 @@ public class ThunderballEntity extends Entity {
             }
             case PHASE_ASCENDING -> {
                 for (int i = 0; i < 20; i++) {
-                    this.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
+                    this.level().addParticle(ModParticles.ELECTRO_SPARK.get(),
                             this.getX() + (random.nextDouble() - 0.5) * radius,
                             this.getY() - 1.0 - random.nextDouble() * 2.0,
                             this.getZ() + (random.nextDouble() - 0.5) * radius,
                             0.0, -0.15, 0.0);
                 }
-                this.level().addParticle(ParticleTypes.END_ROD,
+                this.level().addParticle(ModParticles.ELECTRO_GLOW.get(),
                         this.getX(), cy, this.getZ(), 0.0, -0.3, 0.0);
             }
             case PHASE_GROUNDED -> {
                 for (int i = 0; i < 20; i++) {
-                    this.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
+                    this.level().addParticle(ModParticles.ELECTRO_SPARK.get(),
                             this.getX() + (random.nextDouble() - 0.5) * radius,
                             this.getY() + 0.3,
                             this.getZ() + (random.nextDouble() - 0.5) * radius,
@@ -397,7 +397,7 @@ public class ThunderballEntity extends Entity {
                             0.3 + random.nextDouble() * 0.4,
                             (random.nextDouble() - 0.5) * 0.1);
                 }
-                this.level().addParticle(ParticleTypes.END_ROD,
+                this.level().addParticle(ModParticles.ELECTRO_GLOW.get(),
                         this.getX(), this.getY() + 1.0, this.getZ(),
                         0.0, 0.4, 0.0);
             }
@@ -405,7 +405,7 @@ public class ThunderballEntity extends Entity {
                 for (int i = 0; i < 16; i++) {
                     double theta = random.nextDouble() * Math.PI * 2.0;
                     double phi = Math.acos(2.0 * random.nextDouble() - 1.0);
-                    this.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
+                    this.level().addParticle(ModParticles.ELECTRO_SPARK.get(),
                             this.getX() + radius * Math.sin(phi) * Math.cos(theta),
                             cy + radius * Math.cos(phi),
                             this.getZ() + radius * Math.sin(phi) * Math.sin(theta),
@@ -413,14 +413,14 @@ public class ThunderballEntity extends Entity {
                 }
                 for (int i = 0; i < 8; i++) {
                     double angle = Math.PI * 2.0 * i / 8.0;
-                    this.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
+                    this.level().addParticle(ModParticles.ELECTRO_SPARK.get(),
                             this.getX() + Math.cos(angle) * radius * 1.5,
                             cy,
                             this.getZ() + Math.sin(angle) * radius * 1.5,
                             0.0, 0.1, 0.0);
                 }
                 for (int i = 0; i < 2; i++) {
-                    this.level().addParticle(ParticleTypes.END_ROD,
+                    this.level().addParticle(ModParticles.ELECTRO_GLOW.get(),
                             this.getX(), cy, this.getZ(),
                             (random.nextDouble() - 0.5) * 0.3,
                             0.5 + random.nextDouble() * 0.5,

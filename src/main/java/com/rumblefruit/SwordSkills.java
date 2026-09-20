@@ -48,8 +48,8 @@ public class SwordSkills {
             }
         }
         level.playSound(null, start.x, start.y, start.z,
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 3.0F, 0.9F);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, start.x, start.y + 1, start.z, 40, 4.0, 0.5, 4.0, 0.1);
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.PLAYERS, 3.0F, 0.9F);
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), start.x, start.y + 1, start.z, 40, 4.0, 0.5, 4.0, 0.1);
     }
 
     // X: leap into the air; the slam lands when the player touches down
@@ -78,9 +78,9 @@ public class SwordSkills {
             entity.push(away.x, 0.6, away.z);
             entity.hurtMarked = true;
         }
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.x, pos.y + 0.5, pos.z, 60, 4.0, 1.0, 4.0, 0.1);
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), pos.x, pos.y + 0.5, pos.z, 60, 4.0, 1.0, 4.0, 0.1);
         level.playSound(null, pos.x, pos.y, pos.z,
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 4.0F, 0.7F);
+                ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 4.0F, 0.7F);
     }
 
     // C: Execution — for 12 seconds, wounded enemies (below half HP) take x3 damage

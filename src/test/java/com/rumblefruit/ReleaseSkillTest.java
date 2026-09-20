@@ -55,7 +55,7 @@ class ReleaseSkillTest {
         for (int i = 0; i < 25; i++) {
             ReleaseSkill.tick(caster);
         }
-        assertEquals(0.48, caster.getDeltaMovement().y, 1.0E-9);
+        assertEquals(0.72, caster.getDeltaMovement().y, 1.0E-9);
         // when the apex is reached, the caster hovers
         for (int i = 0; i < 25; i++) {
             ReleaseSkill.tick(caster);
@@ -95,7 +95,7 @@ class ReleaseSkillTest {
     void detonationSkipsOutOfRange() {
         // given a victim far beyond the blast radius
         LivingEntity far = new LivingEntity();
-        far.setPos(50.0, 64.0, 0.0);
+        far.setPos(70.0, 64.0, 0.0);
         level.setQueryResult(java.util.List.of(far));
         // when the blast goes off
         ReleaseSkill.begin(caster);
@@ -167,7 +167,7 @@ class ReleaseSkillTest {
         assertEquals(0.12, caster.getDeltaMovement().y, 1.0E-9);
         // when tick 8 — the fast climb kicks in
         ReleaseSkill.tick(caster);
-        assertEquals(0.48, caster.getDeltaMovement().y, 1.0E-9);
+        assertEquals(0.72, caster.getDeltaMovement().y, 1.0E-9);
     }
 
     @Test
@@ -178,7 +178,7 @@ class ReleaseSkillTest {
         for (int t = 0; t < 51; t++) {
             ReleaseSkill.tick(caster);
         }
-        assertEquals(0.48, caster.getDeltaMovement().y, 1.0E-9);
+        assertEquals(0.72, caster.getDeltaMovement().y, 1.0E-9);
         // when tick 52 — hovering
         ReleaseSkill.tick(caster);
         assertEquals(0.0, caster.getDeltaMovement().y, 1.0E-9);
@@ -216,7 +216,7 @@ class ReleaseSkillTest {
     void blastRadiusBoundaryStillHits() {
         // given a victim exactly at the blast radius edge
         LivingEntity edge = new LivingEntity();
-        edge.setPos(40.0, 64.0, 0.0);
+        edge.setPos(64.0, 64.0, 0.0);
         level.setQueryResult(java.util.List.of(edge));
         // when the blast goes off
         ReleaseSkill.begin(caster);
@@ -238,9 +238,9 @@ class ReleaseSkillTest {
         for (int t = 0; t <= 60; t++) {
             ReleaseSkill.tick(caster);
         }
-        // then it is hurled east, up and away: (1-3/40)*9 = 8.325
-        assertEquals(8.325, east.getDeltaMovement().x, 1.0E-3);
-        assertEquals(2.0, east.getDeltaMovement().y, 1.0E-9);
+        // then it is hurled east, up and away: (1-3/64)*12 = 11.4375
+        assertEquals(11.4375, east.getDeltaMovement().x, 1.0E-3);
+        assertEquals(2.5, east.getDeltaMovement().y, 1.0E-9);
         assertEquals(0.0, east.getDeltaMovement().z, 1.0E-9);
     }
 

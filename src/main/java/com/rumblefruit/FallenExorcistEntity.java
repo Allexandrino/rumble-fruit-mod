@@ -62,7 +62,7 @@ public class FallenExorcistEntity extends Monster {
             LivingEntity target = this.getTarget();
             if (target.isAlive() && this.distanceTo(target) < 28.0F) {
                 ElectroBoltEntity.strike(serverLevel, target.getX(), target.getY(), target.getZ(), this, true);
-                this.playSound(SoundEvents.LIGHTNING_BOLT_THUNDER, 2.0F, 0.6F);
+                this.playSound(ModSounds.ELECTRO_BLAST.get(), 2.0F, 0.6F);
             }
         }
         // roar when acquiring a target

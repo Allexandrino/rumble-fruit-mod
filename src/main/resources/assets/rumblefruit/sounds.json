@@ -1,0 +1,17 @@
+{
+  "electro_zap": {
+    "sounds": [
+      "rumblefruit:electro_zap"
+    ]
+  },
+  "electro_charge": {
+    "sounds": [
+      "rumblefruit:electro_charge"
+    ]
+  },
+  "electro_blast": {
+    "sounds": [
+      "rumblefruit:electro_blast"
+    ]
+  }
+}

@@ -33,7 +33,7 @@ public class StanceData {
         STANCE.put(player.getUUID(), next);
         float pitch = next == SWORD ? 1.4F : next == BOW ? 1.0F : 1.8F;
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.6F, pitch);
+                ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 0.6F, pitch);
         player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
         sync(player);
     }

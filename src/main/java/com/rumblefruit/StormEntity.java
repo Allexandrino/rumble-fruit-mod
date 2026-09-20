@@ -84,7 +84,7 @@ public class StormEntity extends Entity {
             ElectroBolts.strike(level, x, this.target.y, z, owner());
         }
         if (this.tickCount % 3 == 0) {
-            level.sendParticles(ParticleTypes.CLOUD,
+            level.sendParticles(ModParticles.ELECTRO_CLOUD.get(),
                     this.target.x + (random.nextDouble() - 0.5) * 12.0,
                     this.target.y + 12.0,
                     this.target.z + (random.nextDouble() - 0.5) * 12.0,
@@ -96,7 +96,7 @@ public class StormEntity extends Entity {
         if (this.tickCount < JUDGEMENT_WARN_TICKS) {
             // warning: vertical END_ROD column at the target
             for (int i = 0; i < 3; i++) {
-                level.sendParticles(ParticleTypes.END_ROD,
+                level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                         this.target.x, this.target.y + random.nextDouble() * 30.0, this.target.z,
                         1, 0.2, 0.0, 0.2, 0.0);
             }
@@ -120,7 +120,7 @@ public class StormEntity extends Entity {
             entity.hurtMarked = true;
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 4));
         }
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, this.target.x, this.target.y + 1.0, this.target.z,
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), this.target.x, this.target.y + 1.0, this.target.z,
                 40, 3.0, 1.0, 3.0, 0.05);
         this.discard();
     }

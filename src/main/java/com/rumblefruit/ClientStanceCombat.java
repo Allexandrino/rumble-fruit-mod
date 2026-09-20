@@ -80,7 +80,7 @@ public class ClientStanceCombat {
         double rx = fz, rz = -fx; // player's right
         java.util.concurrent.ThreadLocalRandom rnd = java.util.concurrent.ThreadLocalRandom.current();
         for (int side = -1; side <= 1; side += 2) {
-            p.level().addParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+            p.level().addParticle(com.rumblefruit.ModParticles.ELECTRO_SPARK.get(),
                     p.getX() + rx * 0.45 * side + fx * 0.25 + rnd.nextGaussian() * 0.08,
                     p.getY() + 1.25 + rnd.nextGaussian() * 0.08,
                     p.getZ() + rz * 0.45 * side + fz * 0.25 + rnd.nextGaussian() * 0.08,
@@ -89,7 +89,7 @@ public class ClientStanceCombat {
         // during the roundhouse the FOOT discharges instead
         if (ClientCombatAnim.comboOf(p.getUUID()) == 13) {
             for (int i = 0; i < 3; i++) {
-                p.level().addParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+                p.level().addParticle(com.rumblefruit.ModParticles.ELECTRO_SPARK.get(),
                         p.getX() + fx * 0.6 + rnd.nextGaussian() * 0.12,
                         p.getY() + 0.5 + rnd.nextGaussian() * 0.12,
                         p.getZ() + fz * 0.6 + rnd.nextGaussian() * 0.12,

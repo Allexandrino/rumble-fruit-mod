@@ -71,7 +71,7 @@ class ReleaseSkillFxTest {
         assertEquals(0.02, helixPoint.speed, 1.0E-9);
         // and the charge-up sounds carry real parameters
         var chargeSound = level.sounds.get(0);
-        assertEquals("warden_sonic_charge", chargeSound.sound.toString());
+        assertEquals("electro_charge", chargeSound.sound.toString());
         assertEquals(3.0F, chargeSound.volume, 1.0E-9);
         assertEquals(0.6F, chargeSound.pitch, 1.0E-9);
         var beaconSound = level.sounds.get(1);
@@ -104,7 +104,7 @@ class ReleaseSkillFxTest {
         // when the blast fires
         ReleaseSkill.tick(caster);
         // then exactly the golden blast: 1572 particles, 4 thunder sounds
-        assertEquals(1572, level.particles.size());
+        assertEquals(1836, level.particles.size());
         assertEquals(4, level.sounds.size());
         // opening with the triple flash at the caster's chest height
         for (int i = 0; i < 3; i++) {
@@ -182,12 +182,12 @@ class ReleaseSkillFxTest {
         long[][] golden = {
                 {1, 4005581143591340526L},
                 {4, -8476097461590516181L},
-                {8, 6452623816588030867L},
-                {10, -7116542954896958399L},
-                {15, 7655983970571546696L},
-                {30, 1255257902964024123L},
-                {45, -8787094621545129340L},
-                {60, -6782354355691495381L},
+                {8, -2323375850044317351L},
+                {10, 198338141664280123L},
+                {15, 716486681860093838L},
+                {30, 1692726685048110221L},
+                {45, -1328044681363538946L},
+                {60, -7616111126363924559L},
         };
         for (long[] g : golden) {
             assertEquals(g[1], probeHash((int) g[0]), "stream hash diverged at tick " + g[0]);
@@ -232,6 +232,6 @@ class ReleaseSkillFxTest {
             h = hash(h, bc.y);
             h = hash(h, bc.z);
         }
-        assertEquals(-7284949133414171280L, h);
+        assertEquals(5082463725609742085L, h);
     }
 }

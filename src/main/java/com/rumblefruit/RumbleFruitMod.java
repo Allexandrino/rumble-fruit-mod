@@ -51,6 +51,7 @@ public class RumbleFruitMod {
         ModBlocks.BLOCKS.register(modEventBus);
         ModEntities.ENTITIES.register(modEventBus);
         ModParticles.PARTICLES.register(modEventBus);
+        ModSounds.SOUNDS.register(modEventBus);
         CREATIVE_TABS.register(modEventBus);
     }
 

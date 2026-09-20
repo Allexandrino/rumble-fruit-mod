@@ -54,13 +54,13 @@ public class ElectroArrowEntity extends AbstractArrow {
         super.tick();
         if (this.level().isClientSide) {
             for (int i = 0; i < 3; i++) {
-                this.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
+                this.level().addParticle(ModParticles.ELECTRO_SPARK.get(),
                         this.getX() + (random.nextDouble() - 0.5) * 0.2,
                         this.getY() + (random.nextDouble() - 0.5) * 0.2,
                         this.getZ() + (random.nextDouble() - 0.5) * 0.2,
                         0.0, 0.0, 0.0);
             }
-            this.level().addParticle(ParticleTypes.END_ROD, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
+            this.level().addParticle(ModParticles.ELECTRO_GLOW.get(), this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
         }
         if (this.tickCount > 60) {
             this.discard();
@@ -102,8 +102,8 @@ public class ElectroArrowEntity extends AbstractArrow {
                     e -> e != this.getOwner() && e.isAlive())) {
                 entity.hurt(this.getOwner() != null ? level.damageSources().indirectMagic(this.getOwner(), this.getOwner()) : level.damageSources().magic(), 15.0F);
             }
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.x, pos.y + 0.5, pos.z, 30, 1.5, 1.0, 1.5, 0.05);
-            level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 2.0F, 1.0F);
+            level.sendParticles(ModParticles.ELECTRO_SPARK.get(), pos.x, pos.y + 0.5, pos.z, 30, 1.5, 1.0, 1.5, 0.05);
+            level.playSound(null, pos.x, pos.y, pos.z, ModSounds.ELECTRO_ZAP.get(), SoundSource.WEATHER, 2.0F, 1.0F);
         }
         this.discard();
     }

@@ -34,14 +34,14 @@ public class BossMapItem extends Item {
         }
         BlockPos center = BossChamber.getOrCreate(serverLevel);
         // golden flash at the departure point
-        serverLevel.sendParticles(ParticleTypes.END_ROD,
+        serverLevel.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                 player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 1.0, 0.5, 0.08);
         // teleport to the temple entrance (north end of the red carpet)
         serverPlayer.teleportTo(center.getX() + 0.5, center.getY() + 1.0, center.getZ() - 8.5);
-        serverLevel.sendParticles(ParticleTypes.END_ROD,
+        serverLevel.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                 center.getX() + 0.5, center.getY() + 1.5, center.getZ() - 8.5, 60, 0.5, 1.0, 0.5, 0.08);
         serverLevel.playSound(null, center, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 2.0F, 1.2F);
-        serverLevel.playSound(null, center, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 2.0F, 1.4F);
+        serverLevel.playSound(null, center, ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 2.0F, 1.4F);
         player.displayClientMessage(Component.translatable("rumblefruit.chamber_teleport")
                 .withStyle(ChatFormatting.GOLD), true);
         return InteractionResultHolder.consume(stack);

@@ -50,7 +50,7 @@ public class ElectroBoltEntity extends Entity {
                 entity.hurtMarked = true;
             }
         }
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+        level.sendParticles(com.rumblefruit.ModParticles.ELECTRO_SPARK.get(),
                 x, y + 1, z, 30, 2.0, 1.5, 2.0, 0.08);
     }
 
@@ -71,7 +71,7 @@ public class ElectroBoltEntity extends Entity {
         bolt.setPos(x, y, z);
         bolt.entityData.set(HOLY, holy);
         level.addFreshEntity(bolt);
-        level.playSound(null, x, y, z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER,
+        level.playSound(null, x, y, z, ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER,
                 10000.0F, 0.8F + new Random().nextFloat() * 0.2F);
     }
 
