@@ -62,6 +62,7 @@ pitest {
     junit5PluginVersion = '1.2.1'
     threads = 4
     outputFormats = ['HTML', 'XML']
+    exportLineCoverage = true
     mutators = ['DEFAULTS']
     verbose = true
     avoidCallsTo = ['java.util.logging']

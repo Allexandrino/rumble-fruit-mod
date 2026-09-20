@@ -120,4 +120,100 @@ class ReleaseSkillFxTest {
         // then two sky bolts have struck into the caster (t=4 and t=8)
         assertEquals(2, ElectroBolts.STRIKES.size());
     }
+
+    // rolling hash over every emitted particle field — any mutated coordinate,
+    // spread, speed or count breaks the stream and the hash
+    private static long hash(long h, double v) {
+        return h * 31 + Double.doubleToLongBits(v);
+    }
+
+    // fresh caster + world + seed per probe, exactly like the golden capture
+    // (caster faces yaw 37 so no trig factor degenerates to 0 or 1)
+    private long probeHash(int ticks) {
+        ReleaseSkill.RANDOM = new Random(42);
+        ElectroBolts.clear();
+        ServerPlayer probe = new ServerPlayer();
+        ServerLevel probeLevel = new ServerLevel();
+        probe.setServerLevel(probeLevel);
+        probe.setPos(0.0, 64.0, 0.0);
+        probe.setYRot(37.0F);
+        RumblePowerData.grant(probe);
+        ReleaseSkill.begin(probe);
+        long h = 7;
+        for (int t = 0; t < ticks; t++) {
+            probeLevel.particles.clear();
+            probeLevel.sounds.clear();
+            ReleaseSkill.tick(probe);
+            for (var p : probeLevel.particles) {
+                h = hash(h, p.x);
+                h = hash(h, p.y);
+                h = hash(h, p.z);
+                h = hash(h, p.count);
+                h = hash(h, p.dx);
+                h = hash(h, p.dy);
+                h = hash(h, p.dz);
+                h = hash(h, p.speed);
+            }
+            for (String s : probeLevel.sounds) {
+                h = h * 31 + s.hashCode();
+            }
+        }
+        for (String b : ElectroBolts.STRIKES) {
+            h = h * 31 + b.hashCode();
+        }
+        return h;
+    }
+
+    @Test
+    void chargeStreamMatchesGoldenHashes() {
+        // every phase boundary of the ascension, hashed against the golden capture
+        long[][] golden = {
+                {1, 1830378927751236466L},
+                {4, 3295771452895037328L},
+                {8, -5473444450046889394L},
+                {10, 4155257181818601588L},
+                {15, -987783029939817272L},
+                {30, -1231204668925986699L},
+                {45, -6502395068137776905L},
+                {60, 5203240350432331406L},
+        };
+        for (long[] g : golden) {
+            assertEquals(g[1], probeHash((int) g[0]), "stream hash diverged at tick " + g[0]);
+        }
+    }
+
+    @Test
+    void blastStreamMatchesGoldenHash() {
+        // given a full charge (caster rotated so every trig factor counts)
+        ReleaseSkill.RANDOM = new Random(42);
+        ElectroBolts.clear();
+        caster.setYRot(37.0F);
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t < 60; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        level.particles.clear();
+        level.sounds.clear();
+        // when the blast fires
+        ReleaseSkill.tick(caster);
+        // then the whole stream matches the golden capture
+        long h = 7;
+        for (var p : level.particles) {
+            h = hash(h, p.x);
+            h = hash(h, p.y);
+            h = hash(h, p.z);
+            h = hash(h, p.count);
+            h = hash(h, p.dx);
+            h = hash(h, p.dy);
+            h = hash(h, p.dz);
+            h = hash(h, p.speed);
+        }
+        for (String s : level.sounds) {
+            h = h * 31 + s.hashCode();
+        }
+        for (String b : ElectroBolts.STRIKES) {
+            h = h * 31 + b.hashCode();
+        }
+        assertEquals(8670506311394982401L, h);
+    }
 }
