@@ -119,10 +119,11 @@ class ReleaseSkillTest {
         for (int t = 0; t <= 60; t++) {
             ReleaseSkill.tick(caster);
         }
-        // then the near one takes much more
+        // then the near one takes much more — exactly 1000*(1-2/96)
         assertEquals(1, near.damageLog.size());
         assertEquals(1, far.damageLog.size());
         assertTrue(near.damageLog.get(0) > far.damageLog.get(0));
+        assertEquals(979.17F, near.damageLog.get(0), 0.1F);
     }
 
     @Test
@@ -258,6 +259,21 @@ class ReleaseSkillTest {
         // then the crater charges detonate just above the ground, not in the sky
         assertEquals(61.0, level.explosions.get(0).y, 1.0E-9);
         assertEquals(63.0, level.explosions.get(1).y, 1.0E-9);
+    }
+
+    @Test
+    void craterIsWitherStormScale() {
+        // when the blast goes off
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 60; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        // then the whole area is torn out: 2 core charges + 8 inner ring + 8 outer ring
+        assertEquals(19, level.explosions.size());
+        // ring blasts land exactly on their circles: r=16 and r=32 (first of each)
+        assertEquals(16.0, level.explosions.get(2).x, 1.0E-9);
+        assertEquals(Math.cos(Math.PI / 8.0) * 32.0, level.explosions.get(10).x, 1.0E-9);
+        assertEquals(Math.sin(Math.PI / 8.0) * 32.0, level.explosions.get(10).z, 1.0E-9);
     }
 
     @Test

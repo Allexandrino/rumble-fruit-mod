@@ -201,6 +201,17 @@ public class ReleaseSkill {
         }
         level.explode(null, ground.x, ground.y + 1.0, ground.z, 24.0F, Level.ExplosionInteraction.BLOCK);
         level.explode(null, ground.x, ground.y + 3.0, ground.z, 16.0F, Level.ExplosionInteraction.BLOCK);
+        // wither-storm-scale destruction: rings of secondary blasts across the area
+        for (int i = 0; i < 8; i++) {
+            double angle = i * Math.PI / 4.0;
+            level.explode(null, ground.x + Math.cos(angle) * 16.0, ground.y + 1.0,
+                    ground.z + Math.sin(angle) * 16.0, 10.0F, Level.ExplosionInteraction.BLOCK);
+        }
+        for (int i = 0; i < 8; i++) {
+            double angle = i * Math.PI / 4.0 + Math.PI / 8.0;
+            level.explode(null, ground.x + Math.cos(angle) * 32.0, ground.y + 1.0,
+                    ground.z + Math.sin(angle) * 32.0, 8.0F, Level.ExplosionInteraction.BLOCK);
+        }
         level.explode(null, center.x, center.y, center.z, 8.0F, Level.ExplosionInteraction.NONE);
         player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 120, 4, false, false));
         player.setDeltaMovement(0.0, -1.9, 0.0);
