@@ -38,6 +38,18 @@ public class ClientCombatAnim {
         return Math.min(1.0F, (now - entry.tick) / (float) window(entry.combo));
     }
 
+    // ticks since the animation started (-1 when not animating) — the comic
+    // camera cuts between panels on raw elapsed time, not on progress
+    public static long elapsedOf(UUID playerId) {
+        Entry entry = SLASHES.get(playerId);
+        if (entry == null) {
+            return -1L;
+        }
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        long now = mc.level != null ? mc.level.getGameTime() : 0L;
+        return now - entry.tick;
+    }
+
     // the release pose rides out the whole ascension + blast; punches are snappier
     private static int window(int combo) {
         if (combo == 9) {

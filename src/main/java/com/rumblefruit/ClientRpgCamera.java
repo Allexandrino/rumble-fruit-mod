@@ -20,6 +20,8 @@ public class ClientRpgCamera {
     private static float shake = 0.0F;
     private static int prevTicksSinceSlash = 100;
     private static net.minecraft.world.phys.Vec3 cinePos = null;
+    private static int lastPanel = -1;
+    private static final long PANEL_TICKS = 28; // 1.4s per comic panel
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
@@ -84,22 +86,40 @@ public class ClientRpgCamera {
             return;
         }
         int combo = ClientCombatAnim.comboOf(mc.player.getUUID());
-        if (combo == 9 || combo == 20 || combo == 21) {
+        if (combo == 9 || combo == 20) {
             System.out.println("[rumblefruit] cinematic active, combo=" + combo);
         }
-        if (combo != 9 && combo != 20 && combo != 21) {
+        if (combo != 9 && combo != 20) {
+            // the comic is over — the strip is redrawn into real minecraft
             cinePos = null;
+            lastPanel = -1;
             return;
         }
         net.minecraft.world.phys.Vec3 eye = mc.player.getEyePosition();
         net.minecraft.world.phys.Vec3 target;
+        boolean hardCut = false;
         if (combo == 9) {
             // ascension: front shot — level with the face, 15 blocks out
             net.minecraft.world.phys.Vec3 look = mc.player.getLookAngle();
             target = eye.add(look.x * 15.0, 2.5, look.z * 15.0);
+            lastPanel = -1;
         } else {
-            // knockout: crane shot — high above the crater, looking down
-            target = eye.add(5.0, 9.0, 5.0);
+            // the slow-mo fall as a 4-panel comic: every panel is a hard cut
+            // to a new angle on the falling body
+            long elapsed = ClientCombatAnim.elapsedOf(mc.player.getUUID());
+            int panel = (int) Math.min(3, Math.max(0, elapsed) / PANEL_TICKS);
+            hardCut = panel != lastPanel;
+            lastPanel = panel;
+            net.minecraft.world.phys.Vec3 look = mc.player.getLookAngle();
+            float yawRad = mc.player.getYRot() * 0.0174533F;
+            net.minecraft.world.phys.Vec3 side = new net.minecraft.world.phys.Vec3(
+                    Math.cos(yawRad), 0.0, -Math.sin(yawRad));
+            target = switch (panel) {
+                case 0 -> eye.add(look.x * 5.0, -3.5, look.z * 5.0);    // low hero shot
+                case 1 -> eye.add(side.x * 6.0, 0.5, side.z * 6.0);     // side profile
+                case 2 -> eye.add(3.0, 8.0, 3.0);                       // crane overhead
+                default -> eye.add(look.x * 12.0, -6.0, look.z * 12.0); // wide finale
+            };
         }
         var hit = mc.level.clip(new net.minecraft.world.level.ClipContext(
                 eye, target, net.minecraft.world.level.ClipContext.Block.VISUAL,
@@ -111,8 +131,11 @@ public class ClientRpgCamera {
                 target = eye.add(3.0, 10.0, 3.0);
             }
         }
-        // smooth cinematic glide — starts already clear of the body
-        if (cinePos == null) {
+        // comic cut: snap straight to the new panel angle; otherwise glide in
+        // gently from clear of the body
+        if (hardCut) {
+            cinePos = target;
+        } else if (cinePos == null) {
             net.minecraft.world.phys.Vec3 look = mc.player.getLookAngle();
             cinePos = eye.add(look.x * 5.0, 1.5, look.z * 5.0);
         }

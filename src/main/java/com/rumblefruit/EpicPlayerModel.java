@@ -516,22 +516,25 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
     }
 
     // J aftermath, mid-air: the slow-motion plunge — back-first, face to the
-    // sky, limbs sprawled and gently swaying as the descent stretches on
+    // sky, arms thrown forward off the body and gently swaying as the
+    // descent stretches on
     private void applyKnockoutFall(float t) {
-        float k = easeInOut(Math.min(1.0F, t * 6.0F)); // swing horizontal quickly
+        float k = easeInOut(Math.min(1.0F, t * 20.0F)); // snap horizontal within ~1s
         float flat = 1.57F * k;
         body.xRot = flat;
         head.xRot = flat * 0.85F + 0.25F * k;
+        // arms reaching forward past the head — the signature "knocked out
+        // of the sky" silhouette
         rightArm.xRot = flat - 0.55F * k;
-        rightArm.zRot = 0.55F * k;
+        rightArm.zRot = 0.25F * k;
         leftArm.xRot = flat - 0.55F * k;
-        leftArm.zRot = -0.55F * k;
+        leftArm.zRot = -0.25F * k;
+        rightForearm.xRot = -0.1F * k;
+        leftForearm.xRot = -0.1F * k;
         rightLeg.xRot = flat;
         rightLeg.zRot = 0.3F * k;
         leftLeg.xRot = flat;
         leftLeg.zRot = -0.3F * k;
-        rightForearm.xRot = -0.2F * k;
-        leftForearm.xRot = -0.2F * k;
         rightShin.xRot = 0.15F * k;
         leftShin.xRot = 0.15F * k;
         // slow-motion drift: the limbs sway softly while hanging in the air
