@@ -44,7 +44,10 @@ public class ClientCombatAnim {
             return 75;
         }
         if (combo == 20) {
-            return 85; // knockout: the fall, lying in the crater, getting back up
+            return 400; // slow-mo fall: holds until the touchdown packet (21) arrives
+        }
+        if (combo == 21) {
+            return 85; // landed: sprawled in the crater, then getting back up
         }
         return combo >= 10 && combo < 20 ? 18 : 20;
     }

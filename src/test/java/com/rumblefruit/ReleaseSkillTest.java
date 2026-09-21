@@ -481,4 +481,64 @@ class ReleaseSkillTest {
         // then normal fall physics apply again
         assertEquals(12.0F, caster.fallDistance, 1.0E-9);
     }
+
+    @Test
+    void descentIsSlowMotionCapped() {
+        // given the blast went off and the caster is airborne
+        caster.setOnGround(false);
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 60; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        // then the dive starts near-weightless
+        assertEquals(-0.05, caster.getDeltaMovement().y, 1.0E-9);
+        // when the descent stretches on, it eases into a gentle dive and stops there
+        for (int t = 0; t < 40; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        assertEquals(-0.30, caster.getDeltaMovement().y, 1.0E-9);
+        // and even a hundred ticks later it never gets faster than the slow-mo cap
+        for (int t = 0; t < 100; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        assertEquals(-0.30, caster.getDeltaMovement().y, 1.0E-9);
+    }
+
+    @Test
+    void touchdownSwitchesToTheLyingPose() {
+        // given the caster mid slow-mo fall
+        caster.setOnGround(false);
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 60; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        net.neoforged.neoforge.network.PacketDistributor.clear();
+        ReleaseSkill.tick(caster);
+        // while airborne no touchdown packet goes out
+        assertTrue(net.neoforged.neoforge.network.PacketDistributor.SENT.stream()
+                .noneMatch(p -> p instanceof CombatAnimPacket cap && cap.combo() == 21));
+        // when the caster hits the ground
+        caster.setOnGround(true);
+        ReleaseSkill.tick(caster);
+        // then clients switch from the falling pose to the lying one
+        assertTrue(net.neoforged.neoforge.network.PacketDistributor.SENT.stream()
+                .anyMatch(p -> p instanceof CombatAnimPacket cap && cap.combo() == 21));
+    }
+
+    @Test
+    void fallDistanceStaysZeroThroughTheWholeDive() {
+        // given the caster mid slow-mo fall
+        caster.setOnGround(false);
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 60; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        // when the fall stretches on
+        for (int t = 0; t < 20; t++) {
+            caster.fallDistance = 9.0F; // physics keeps piling it up
+            ReleaseSkill.tick(caster);
+            // then the slow-mo handler pins it to zero every single tick
+            assertEquals(0.0F, caster.fallDistance, 1.0E-9);
+        }
+    }
 }

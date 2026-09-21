@@ -37,6 +37,11 @@ public class ReleaseSkill {
     }
     // landing grace: after the slam the caster cannot die from the fall itself
     private static final Map<UUID, Long> NO_FALL = new ConcurrentHashMap<>();
+    // slow-motion descent: after the blast the caster drifts down back-first
+    // instead of slamming into the crater at full speed
+    private static final Map<UUID, Long> FALLING = new ConcurrentHashMap<>();
+    private static final double FALL_MAX_SPEED = -0.30; // ~6 blocks/s: cinematic slow-mo
+    private static final double FALL_ACCEL = 0.012;     // ease into the dive
     // carving state: blast center + current shell
     private record Carve(Vec3 center, int shell) {
     }
@@ -77,6 +82,7 @@ public class ReleaseSkill {
         }
         Integer t0 = ACTIVE.get(player.getUUID());
         if (t0 == null) {
+            slowMoFall(player);
             carveTick(player); // after the blast the sphere keeps eating the world
             return;
         }
@@ -89,6 +95,25 @@ public class ReleaseSkill {
             ACTIVE.remove(player.getUUID());
             detonate(player, level);
         }
+    }
+
+    // the slow-motion plunge: near-weightless at first, easing into a gentle
+    // dive; on touchdown clients switch from the falling pose to the lying one
+    private static void slowMoFall(ServerPlayer player) {
+        if (!FALLING.containsKey(player.getUUID())) {
+            return;
+        }
+        if (player.onGround()) {
+            FALLING.remove(player.getUUID());
+            net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(
+                    new CombatAnimPacket(player.getUUID(), 21));
+            return;
+        }
+        Vec3 vel = player.getDeltaMovement();
+        double vy = Math.max(vel.y - FALL_ACCEL, FALL_MAX_SPEED);
+        player.setDeltaMovement(vel.x * 0.5, vy, vel.z * 0.5);
+        player.hurtMarked = true;
+        player.fallDistance = 0.0F;
     }
 
     // the mountain-eater: after the blast a sphere of the world is erased shell
@@ -293,9 +318,10 @@ public class ReleaseSkill {
         }
         level.explode(null, center.x, center.y, center.z, 8.0F, Level.ExplosionInteraction.NONE);
         player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 120, 4, false, false));
-        player.setDeltaMovement(0.0, -1.9, 0.0);
+        player.setDeltaMovement(0.0, -0.05, 0.0); // near-weightless start of the slow-mo dive
         player.hurtMarked = true;
         NO_FALL.put(player.getUUID(), level.getGameTime() + NO_FALL_TICKS);
+        FALLING.put(player.getUUID(), level.getGameTime());
         net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(
                 new CombatAnimPacket(player.getUUID(), 20));
 

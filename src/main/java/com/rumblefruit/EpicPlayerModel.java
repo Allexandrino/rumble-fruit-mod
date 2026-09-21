@@ -161,6 +161,11 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
             return;
         }
         if (combo == 20) {
+            applyKnockoutFall(ClientCombatAnim.progressOf(player.getUUID()));
+            syncOverlays();
+            return;
+        }
+        if (combo == 21) {
             applyKnockout(ClientCombatAnim.progressOf(player.getUUID()));
             syncOverlays();
             return;
@@ -510,27 +515,38 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
         }
     }
 
-    // R aftermath: blasted out of the sky, then sprawled flat on the back
-    // inside the crater, and only then slowly climbs back up
+    // J aftermath, mid-air: the slow-motion plunge — back-first, face to the
+    // sky, limbs sprawled and gently swaying as the descent stretches on
+    private void applyKnockoutFall(float t) {
+        float k = easeInOut(Math.min(1.0F, t * 6.0F)); // swing horizontal quickly
+        float flat = 1.57F * k;
+        body.xRot = flat;
+        head.xRot = flat * 0.85F + 0.25F * k;
+        rightArm.xRot = flat - 0.55F * k;
+        rightArm.zRot = 0.55F * k;
+        leftArm.xRot = flat - 0.55F * k;
+        leftArm.zRot = -0.55F * k;
+        rightLeg.xRot = flat;
+        rightLeg.zRot = 0.3F * k;
+        leftLeg.xRot = flat;
+        leftLeg.zRot = -0.3F * k;
+        rightForearm.xRot = -0.2F * k;
+        leftForearm.xRot = -0.2F * k;
+        rightShin.xRot = 0.15F * k;
+        leftShin.xRot = 0.15F * k;
+        // slow-motion drift: the limbs sway softly while hanging in the air
+        float drift = Mth.sin(t * 25.0F) * 0.08F * k;
+        rightArm.zRot += drift;
+        leftArm.zRot -= drift;
+        rightLeg.zRot += drift * 0.5F;
+        leftLeg.zRot -= drift * 0.5F;
+    }
+
+    // J aftermath, touchdown: sprawled flat on the back inside the crater,
+    // and only then slowly climbs back up
     private void applyKnockout(float t) {
-        if (t < 0.18F) {
-            // the fall: spread-eagled, limbs trailing
-            float k = easeInOut(phase(t, 0.0F, 0.18F));
-            body.xRot = lerp(body.xRot, -0.25F, k);
-            rightArm.xRot = lerp(rightArm.xRot, -2.5F, k);
-            rightArm.zRot = lerp(rightArm.zRot, 0.9F, k);
-            leftArm.xRot = lerp(leftArm.xRot, -2.5F, k);
-            leftArm.zRot = lerp(leftArm.zRot, -0.9F, k);
-            rightLeg.xRot = lerp(rightLeg.xRot, -0.5F, k);
-            leftLeg.xRot = lerp(leftLeg.xRot, 0.4F, k);
-            rightLeg.zRot = 0.4F * k;
-            leftLeg.zRot = -0.4F * k;
-            rightForearm.xRot = -0.3F * k;
-            leftForearm.xRot = -0.3F * k;
-            return;
-        }
         // lying flat on the back, face to the sky, limbs sprawled
-        float down = easeInOut(phase(t, 0.18F, 0.28F));
+        float down = easeInOut(phase(t, 0.0F, 0.10F));
         float up = easeInOut(phase(t, 0.9F, 1.0F));
         float k = down * (1.0F - up);
         head.y = lerp(0.0F, 20.0F, k);

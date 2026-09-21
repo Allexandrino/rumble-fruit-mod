@@ -108,6 +108,10 @@ public class Entity {
         return onGround;
     }
 
+    public void setOnGround(boolean value) {
+        this.onGround = value;
+    }
+
     public boolean isInWater() {
         return false;
     }

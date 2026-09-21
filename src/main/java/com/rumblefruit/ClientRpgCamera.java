@@ -84,10 +84,10 @@ public class ClientRpgCamera {
             return;
         }
         int combo = ClientCombatAnim.comboOf(mc.player.getUUID());
-        if (combo == 9 || combo == 20) {
+        if (combo == 9 || combo == 20 || combo == 21) {
             System.out.println("[rumblefruit] cinematic active, combo=" + combo);
         }
-        if (combo != 9 && combo != 20) {
+        if (combo != 9 && combo != 20 && combo != 21) {
             cinePos = null;
             return;
         }
