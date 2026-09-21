@@ -28,10 +28,17 @@ public class ServerLevel extends Level {
         public final double dy;
         public final double dz;
         public final double speed;
+        public final boolean longDistance;
 
         public ParticleCall(Object type, double x, double y, double z, int count,
                             double dx, double dy, double dz, double speed) {
+            this(type, false, x, y, z, count, dx, dy, dz, speed);
+        }
+
+        public ParticleCall(Object type, boolean longDistance, double x, double y, double z, int count,
+                            double dx, double dy, double dz, double speed) {
             this.type = type;
+            this.longDistance = longDistance;
             this.x = x;
             this.y = y;
             this.z = z;
@@ -44,6 +51,13 @@ public class ServerLevel extends Level {
     }
 
     public final List<ParticleCall> particles = new ArrayList<>();
+    private final List<ServerPlayer> players = new ArrayList<>();
+
+    // real ServerLevel keeps the online players here — particles flagged
+    // long-distance are sent to every one of them (512 block visibility)
+    public List<ServerPlayer> players() {
+        return players;
+    }
     public final List<BlastCall> explosions = new ArrayList<>();
     public final List<Entity> freshEntities = new ArrayList<>();
     private List<? extends Entity> queryResult = List.of();
@@ -76,6 +90,20 @@ public class ServerLevel extends Level {
             double dx, double dy, double dz, double speed) {
         particles.add(new ParticleCall(type, x, y, z, count, dx, dy, dz, speed));
         return count;
+    }
+
+    public <T extends net.minecraft.core.particles.ParticleOptions> int sendParticles(
+            T type, boolean longDistance, double x, double y, double z, int count,
+            double dx, double dy, double dz, double speed) {
+        particles.add(new ParticleCall(type, longDistance, x, y, z, count, dx, dy, dz, speed));
+        return count;
+    }
+
+    public <T extends net.minecraft.core.particles.ParticleOptions> boolean sendParticles(
+            ServerPlayer player, T type, boolean longDistance, double x, double y, double z, int count,
+            double dx, double dy, double dz, double speed) {
+        particles.add(new ParticleCall(type, longDistance, x, y, z, count, dx, dy, dz, speed));
+        return true;
     }
 
     public <T extends Entity> List<T> getEntitiesOfClass(Class<T> cls, AABB box, Predicate<? super T> predicate) {

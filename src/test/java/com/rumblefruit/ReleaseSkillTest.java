@@ -95,7 +95,7 @@ class ReleaseSkillTest {
     void detonationSkipsOutOfRange() {
         // given a victim far beyond the blast radius
         LivingEntity far = new LivingEntity();
-        far.setPos(70.0, 64.0, 0.0);
+        far.setPos(130.0, 64.0, 0.0);
         level.setQueryResult(java.util.List.of(far));
         // when the blast goes off
         ReleaseSkill.begin(caster);
@@ -119,11 +119,11 @@ class ReleaseSkillTest {
         for (int t = 0; t <= 60; t++) {
             ReleaseSkill.tick(caster);
         }
-        // then the near one takes much more — exactly 1000*(1-2/96)
+        // then the near one takes much more — exactly 1000*(1-2/187.5)
         assertEquals(1, near.damageLog.size());
         assertEquals(1, far.damageLog.size());
         assertTrue(near.damageLog.get(0) > far.damageLog.get(0));
-        assertEquals(979.17F, near.damageLog.get(0), 0.1F);
+        assertEquals(989.33F, near.damageLog.get(0), 0.1F);
     }
 
     @Test
@@ -217,7 +217,7 @@ class ReleaseSkillTest {
     void blastRadiusBoundaryStillHits() {
         // given a victim exactly at the blast radius edge
         LivingEntity edge = new LivingEntity();
-        edge.setPos(64.0, 64.0, 0.0);
+        edge.setPos(125.0, 64.0, 0.0);
         level.setQueryResult(java.util.List.of(edge));
         // when the blast goes off
         ReleaseSkill.begin(caster);
@@ -239,8 +239,8 @@ class ReleaseSkillTest {
         for (int t = 0; t <= 60; t++) {
             ReleaseSkill.tick(caster);
         }
-        // then it is hurled east, up and away: (1-3/64)*12 = 11.4375
-        assertEquals(11.4375, east.getDeltaMovement().x, 1.0E-3);
+        // then it is hurled east, up and away: (1-3/125)*12 = 11.712
+        assertEquals(11.712, east.getDeltaMovement().x, 1.0E-3);
         assertEquals(2.5, east.getDeltaMovement().y, 1.0E-9);
         assertEquals(0.0, east.getDeltaMovement().z, 1.0E-9);
     }
@@ -268,12 +268,20 @@ class ReleaseSkillTest {
         for (int t = 0; t <= 60; t++) {
             ReleaseSkill.tick(caster);
         }
-        // then the whole area is torn out: 2 core charges + 8 inner ring + 8 outer ring
-        assertEquals(19, level.explosions.size());
-        // ring blasts land exactly on their circles: r=16 and r=32 (first of each)
-        assertEquals(16.0, level.explosions.get(2).x, 1.0E-9);
-        assertEquals(Math.cos(Math.PI / 8.0) * 32.0, level.explosions.get(10).x, 1.0E-9);
-        assertEquals(Math.sin(Math.PI / 8.0) * 32.0, level.explosions.get(10).z, 1.0E-9);
+        // then the whole area is torn out: 2 core + 4 rings of 8 + 1 final
+        assertEquals(35, level.explosions.size());
+        // every blast of all four rings lands exactly on its circle
+        double[] ringR = {16.0, 32.0, 48.0, 64.0};
+        double[] ringPhase = {0.0, Math.PI / 8.0, 0.0, Math.PI / 8.0};
+        for (int k = 0; k < 4; k++) {
+            for (int i = 0; i < 8; i++) {
+                double angle = ringPhase[k] + i * Math.PI / 4.0;
+                var blast = level.explosions.get(2 + k * 8 + i);
+                assertEquals(Math.cos(angle) * ringR[k], blast.x, 1.0E-9);
+                assertEquals(65.0, blast.y, 1.0E-9);
+                assertEquals(Math.sin(angle) * ringR[k], blast.z, 1.0E-9);
+            }
+        }
     }
 
     @Test
@@ -344,8 +352,8 @@ class ReleaseSkillTest {
         for (int t = 0; t <= 60; t++) {
             ReleaseSkill.tick(caster);
         }
-        // then the sphere dissolves outward for 6 more ticks
-        for (int t = 0; t < 6; t++) {
+        // then the sphere dissolves outward for 8 more ticks
+        for (int t = 0; t < 8; t++) {
             ReleaseSkill.tick(caster);
         }
         var center = net.minecraft.core.BlockPos.containing(caster.position());
@@ -376,7 +384,7 @@ class ReleaseSkillTest {
         level.setDefaultBlock(net.minecraft.world.level.block.Blocks.BEDROCK);
         // when the blast and the carve complete
         ReleaseSkill.begin(caster);
-        for (int t = 0; t <= 66; t++) {
+        for (int t = 0; t <= 68; t++) {
             ReleaseSkill.tick(caster);
         }
         // then bedrock is untouched
@@ -397,7 +405,7 @@ class ReleaseSkillTest {
     void carveStopsAfterAllShells() {
         // when the blast and the carve complete
         ReleaseSkill.begin(caster);
-        for (int t = 0; t <= 66; t++) {
+        for (int t = 0; t <= 68; t++) {
             ReleaseSkill.tick(caster);
         }
         int afterCarve = level.particles.size();
@@ -416,6 +424,61 @@ class ReleaseSkillTest {
         var center = net.minecraft.core.BlockPos.containing(caster.position());
         // then the shell edge block is carved but one beyond it is not yet
         assertTrue(level.getBlockState(center.offset(2, 0, 0)).isAir());
+        assertTrue(level.getBlockState(center.offset(8, 0, 0)).isAir()); // exact shell edge
         assertFalse(level.getBlockState(center.offset(9, 0, 0)).isAir());
+    }
+
+    @Test
+    void carveShellGlowTracesTheExactSphereEdge() {
+        // given the blast went off and the rng is reseeded for a deterministic carve
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 60; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        ReleaseSkill.RANDOM = new java.util.Random(42);
+        level.particles.clear();
+        // when the first carve shell (radius 8) dissolves
+        ReleaseSkill.tick(caster);
+        // then 40 glow points trace the exact shell edge, in rng order
+        assertEquals(40, level.particles.size());
+        java.util.Random expected = new java.util.Random(42);
+        for (int i = 0; i < 40; i++) {
+            double theta = expected.nextDouble() * Math.PI * 2.0;
+            double phi = expected.nextDouble() * Math.PI;
+            var p = level.particles.get(i);
+            assertEquals(Math.sin(phi) * Math.cos(theta) * 8.0, p.x, 1.0E-9);
+            assertEquals(64.0 + Math.cos(phi) * 8.0, p.y, 1.0E-9);
+            assertEquals(Math.sin(phi) * Math.sin(theta) * 8.0, p.z, 1.0E-9);
+            assertEquals(2, p.count);
+        }
+    }
+
+    @Test
+    void landingGracePinsFallDistanceToZero() {
+        // given the blast went off and the caster is plummeting into the crater
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 60; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        caster.fallDistance = 12.0F;
+        // when a tick passes inside the grace window
+        ReleaseSkill.tick(caster);
+        // then the fall distance is pinned to zero — the slam cannot hurt
+        assertEquals(0.0F, caster.fallDistance, 1.0E-9);
+    }
+
+    @Test
+    void landingGraceExpires() {
+        // given the blast went off long ago (past the 10s grace window)
+        ReleaseSkill.begin(caster);
+        for (int t = 0; t <= 60; t++) {
+            ReleaseSkill.tick(caster);
+        }
+        level.setGameTime(500);
+        caster.fallDistance = 12.0F;
+        // when a tick passes after the grace expired
+        ReleaseSkill.tick(caster);
+        // then normal fall physics apply again
+        assertEquals(12.0F, caster.fallDistance, 1.0E-9);
     }
 }

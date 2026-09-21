@@ -26,14 +26,17 @@ public class ReleaseSkill {
     private ReleaseSkill() {
     }
     private static final int CHARGE_TICKS = 60; // 3s ascension
-    private static final int CARVE_RADIUS = 48; // the sphere that eats the mountain
+    private static final int CARVE_RADIUS = 64; // the sphere that eats the mountain (128x128 crater)
     private static final int CARVE_SHELL = 8;   // blocks carved per tick per shell
     private static final int CARVE_SHELLS = CARVE_RADIUS / CARVE_SHELL;
+    private static final long NO_FALL_TICKS = 200; // 10s of landing grace after the slam
     private static final Map<UUID, Integer> ACTIVE;
 
     static {
         ACTIVE = new ConcurrentHashMap<>();
     }
+    // landing grace: after the slam the caster cannot die from the fall itself
+    private static final Map<UUID, Long> NO_FALL = new ConcurrentHashMap<>();
     // carving state: blast center + current shell
     private record Carve(Vec3 center, int shell) {
     }
@@ -62,6 +65,16 @@ public class ReleaseSkill {
     }
 
     public static void tick(ServerPlayer player) {
+        // the slam into the crater never hurts: fall distance is pinned to zero
+        // for the whole grace window
+        Long grace = NO_FALL.get(player.getUUID());
+        if (grace != null) {
+            if (player.level().getGameTime() >= grace) {
+                NO_FALL.remove(player.getUUID());
+            } else {
+                player.fallDistance = 0.0F;
+            }
+        }
         Integer t0 = ACTIVE.get(player.getUUID());
         if (t0 == null) {
             carveTick(player); // after the blast the sphere keeps eating the world
@@ -228,7 +241,7 @@ public class ReleaseSkill {
     // the nuke: magic damage ("slain by magic"), massive knockback, blinding flash
     private static void detonate(ServerPlayer player, ServerLevel level) {
         Vec3 center = player.position();
-        double radius = 64.0;
+        double radius = 125.0; // the blast covers 250x250 blocks of raw damage
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(radius), e -> e != player && e.isAlive())) {
             double dist = entity.position().distanceTo(center);
@@ -267,10 +280,22 @@ public class ReleaseSkill {
             level.explode(null, ground.x + Math.cos(angle) * 32.0, ground.y + 1.0,
                     ground.z + Math.sin(angle) * 32.0, 8.0F, Level.ExplosionInteraction.BLOCK);
         }
+        // the devastation keeps rolling outward to match the 125-block blast
+        for (int i = 0; i < 8; i++) {
+            double angle = i * Math.PI / 4.0;
+            level.explode(null, ground.x + Math.cos(angle) * 48.0, ground.y + 1.0,
+                    ground.z + Math.sin(angle) * 48.0, 8.0F, Level.ExplosionInteraction.BLOCK);
+        }
+        for (int i = 0; i < 8; i++) {
+            double angle = i * Math.PI / 4.0 + Math.PI / 8.0;
+            level.explode(null, ground.x + Math.cos(angle) * 64.0, ground.y + 1.0,
+                    ground.z + Math.sin(angle) * 64.0, 6.0F, Level.ExplosionInteraction.BLOCK);
+        }
         level.explode(null, center.x, center.y, center.z, 8.0F, Level.ExplosionInteraction.NONE);
         player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 120, 4, false, false));
         player.setDeltaMovement(0.0, -1.9, 0.0);
         player.hurtMarked = true;
+        NO_FALL.put(player.getUUID(), level.getGameTime() + NO_FALL_TICKS);
         net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(
                 new CombatAnimPacket(player.getUUID(), 20));
 
@@ -290,7 +315,7 @@ public class ReleaseSkill {
     @com.rumblefruit.core.VisualEffect
     private static void emitBlastFx(ServerPlayer player, ServerLevel level, Vec3 center) {
         for (int i = 0; i < 3; i++) {
-            level.sendParticles(ModParticles.ELECTRO_GLOW.get(), center.x, center.y + 1.0, center.z, 1, 0, 0, 0, 0);
+            broadcastFar(level, ModParticles.ELECTRO_GLOW.get(), center.x, center.y + 1.0, center.z, 1, 0, 0, 0, 0);
         }
         level.sendParticles(ModParticles.ELECTRO_SPARK.get(), center.x, center.y + 1.0, center.z,
                 700, 16.0, 10.0, 16.0, 0.5);
@@ -317,18 +342,19 @@ public class ReleaseSkill {
             ElectroBolts.visual(level, center.x + Math.cos(angle) * rr, center.y - 18.0,
                     center.z + Math.sin(angle) * rr, player);
         }
-        // sky beams: a mega-column over the crater + 8 pillars around it,
-        // visible from hundreds of blocks away (wither-storm scale)
-        for (double dy = 0.0; dy < 80.0; dy += 2.0) {
-            level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
+        // sky beams: a mega-column over the crater + 8 pillars around it.
+        // the long-distance flag (force) makes the server send them to every
+        // player in a 512-block radius — the blast is visible from kilometers
+        for (double dy = 0.0; dy < 200.0; dy += 2.0) {
+            broadcastFar(level, ModParticles.ELECTRO_GLOW.get(),
                     center.x, center.y + dy, center.z, 3, 0.6, 0.0, 0.6, 0.0);
         }
         for (int i = 0; i < 8; i++) {
             double angle = i * Math.PI / 4.0;
-            double bx = center.x + Math.cos(angle) * 20.0;
-            double bz = center.z + Math.sin(angle) * 20.0;
-            for (double dy = 0.0; dy < 60.0; dy += 2.5) {
-                level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
+            double bx = center.x + Math.cos(angle) * 32.0;
+            double bz = center.z + Math.sin(angle) * 32.0;
+            for (double dy = 0.0; dy < 128.0; dy += 2.0) {
+                broadcastFar(level, ModParticles.ELECTRO_GLOW.get(),
                         bx, center.y + dy, bz, 2, 0.4, 0.0, 0.4, 0.0);
             }
         }
@@ -362,6 +388,18 @@ public class ReleaseSkill {
                 SoundEvents.ENDER_DRAGON_DEATH, SoundSource.PLAYERS, 6.0F, 1.4F);
         level.playSound(null, center.x, center.y, center.z,
                 SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 8.0F, 0.4F);
+    }
+
+    // force-flagged broadcast: the particle packet reaches every player up to
+    // 512 blocks away instead of the vanilla 32 — the blast reads from afar
+    @com.rumblefruit.core.VisualEffect
+    private static void broadcastFar(ServerLevel level,
+                                     net.minecraft.core.particles.SimpleParticleType type,
+                                     double x, double y, double z, int count,
+                                     double dx, double dy, double dz, double speed) {
+        for (ServerPlayer viewer : level.players()) {
+            level.sendParticles(viewer, type, true, x, y, z, count, dx, dy, dz, speed);
+        }
     }
 
     // jagged 3d lightning ray from a point: geometry comes from the pure

@@ -103,16 +103,18 @@ class ReleaseSkillFxTest {
         level.sounds.clear();
         // when the blast fires
         ReleaseSkill.tick(caster);
-        // then exactly the golden blast: 1572 particles, 4 thunder sounds
-        assertEquals(2068, level.particles.size());
+        // then exactly the golden blast: 2448 particles, 4 thunder sounds
+        assertEquals(2448, level.particles.size());
         assertEquals(4, level.sounds.size());
-        // opening with the triple flash at the caster's chest height
+        // opening with the triple flash at the caster's chest height, force-flagged
+        // so the whole show is visible 512 blocks out
         for (int i = 0; i < 3; i++) {
             var flash = level.particles.get(i);
             assertEquals(0.0, flash.x, 1.0E-9);
             assertEquals(65.0, flash.y, 1.0E-9);
             assertEquals(0.0, flash.z, 1.0E-9);
             assertEquals(1, flash.count);
+            assertTrue(flash.longDistance);
         }
     }
 
@@ -232,6 +234,6 @@ class ReleaseSkillFxTest {
             h = hash(h, bc.y);
             h = hash(h, bc.z);
         }
-        assertEquals(1550345765357833861L, h);
+        assertEquals(7292176294049279493L, h);
     }
 }

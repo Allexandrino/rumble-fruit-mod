@@ -13,5 +13,8 @@ public class ServerPlayer extends Player {
 
     public void setServerLevel(ServerLevel level) {
         this.serverLevel = level;
+        if (!level.players().contains(this)) {
+            level.players().add(this);
+        }
     }
 }
