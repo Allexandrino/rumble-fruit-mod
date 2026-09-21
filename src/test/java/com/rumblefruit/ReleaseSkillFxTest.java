@@ -104,7 +104,7 @@ class ReleaseSkillFxTest {
         // when the blast fires
         ReleaseSkill.tick(caster);
         // then exactly the golden blast: 1572 particles, 4 thunder sounds
-        assertEquals(1836, level.particles.size());
+        assertEquals(2068, level.particles.size());
         assertEquals(4, level.sounds.size());
         // opening with the triple flash at the caster's chest height
         for (int i = 0; i < 3; i++) {
@@ -232,6 +232,6 @@ class ReleaseSkillFxTest {
             h = hash(h, bc.y);
             h = hash(h, bc.z);
         }
-        assertEquals(5082463725609742085L, h);
+        assertEquals(1550345765357833861L, h);
     }
 }

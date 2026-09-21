@@ -25,7 +25,7 @@ public class ModKeyBindings {
         SKILL_C = new KeyMapping("key.rumblefruit.skill_c", GLFW.GLFW_KEY_C, "key.categories.rumblefruit");
         SKILL_F = new KeyMapping("key.rumblefruit.skill_f", GLFW.GLFW_KEY_F, "key.categories.rumblefruit");
         SKILL_V = new KeyMapping("key.rumblefruit.skill_v", GLFW.GLFW_KEY_V, "key.categories.rumblefruit");
-        SKILL_R = new KeyMapping("key.rumblefruit.skill_r", GLFW.GLFW_KEY_R, "key.categories.rumblefruit");
+        SKILL_R = new KeyMapping("key.rumblefruit.skill_j", GLFW.GLFW_KEY_J, "key.categories.rumblefruit");
         STANCE = new KeyMapping("key.rumblefruit.stance", GLFW.GLFW_KEY_H, "key.categories.rumblefruit");
         event.register(SKILL_Z);
         event.register(SKILL_X);

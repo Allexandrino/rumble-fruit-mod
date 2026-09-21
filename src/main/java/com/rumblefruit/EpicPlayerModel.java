@@ -157,18 +157,22 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
         int combo = ClientCombatAnim.comboOf(player.getUUID());
         if (combo == 9) {
             applyReleasePose(ClientCombatAnim.progressOf(player.getUUID()), ageInTicks);
+            syncOverlays();
             return;
         }
         if (combo == 20) {
             applyKnockout(ClientCombatAnim.progressOf(player.getUUID()));
+            syncOverlays();
             return;
         }
         if (combo >= 10) {
             applyFistCombo(player, combo - 10);
+            syncOverlays();
             return;
         }
         if (combo >= 0) {
             applyCombo(player, combo);
+            syncOverlays();
             return;
         }
 
@@ -188,6 +192,7 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
             leftArm.yRot = 0.0F;
             leftArm.zRot = -0.45F;
             leftForearm.xRot = -0.2F;
+            syncOverlays();
             return;
         }
 
@@ -276,6 +281,18 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
             rightLeg.zRot += 0.25F;
             leftLeg.zRot += -0.25F;
         }
+        syncOverlays();
+    }
+
+    // overlay parts (hat = hair, jacket, sleeves, pants) copied the vanilla pose
+    // in super.setupAnim — re-sync them to OUR final pose so they never lag behind
+    private void syncOverlays() {
+        hat.copyFrom(head);
+        jacket.copyFrom(body);
+        rightSleeve.copyFrom(rightArm);
+        leftSleeve.copyFrom(leftArm);
+        rightPants.copyFrom(rightLeg);
+        leftPants.copyFrom(leftLeg);
     }
 
     // fighting-game combos with real elbows and knees:
@@ -525,9 +542,10 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
         float flat = 1.57F * k;
         body.xRot = flat;
         head.xRot = flat * 0.85F + 0.25F * k; // face up, chin slightly off the dirt
-        rightArm.xRot = flat;
+        // arms thrown forward off the body — the epic "knocked out" sprawl
+        rightArm.xRot = flat - 0.55F * k;
         rightArm.zRot = 0.55F * k;
-        leftArm.xRot = flat;
+        leftArm.xRot = flat - 0.55F * k;
         leftArm.zRot = -0.55F * k;
         rightLeg.xRot = flat;
         rightLeg.zRot = 0.3F * k;

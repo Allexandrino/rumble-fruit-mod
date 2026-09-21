@@ -18,7 +18,7 @@ public class SkillHudOverlay {
     };
     private static final ResourceLocation ORB = icon("orb");
     private static final ResourceLocation ORB_EMPTY = icon("orb_empty");
-    private static final String[] KEYS = {"Z", "X", "C", "F", "V", "R"};
+    private static final String[] KEYS = {"Z", "X", "C", "F", "V", "J"};
     private static final int ICON_SIZE = 18;
     private static final int SPACING = 22;
 

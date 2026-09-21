@@ -317,6 +317,21 @@ public class ReleaseSkill {
             ElectroBolts.visual(level, center.x + Math.cos(angle) * rr, center.y - 18.0,
                     center.z + Math.sin(angle) * rr, player);
         }
+        // sky beams: a mega-column over the crater + 8 pillars around it,
+        // visible from hundreds of blocks away (wither-storm scale)
+        for (double dy = 0.0; dy < 80.0; dy += 2.0) {
+            level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
+                    center.x, center.y + dy, center.z, 3, 0.6, 0.0, 0.6, 0.0);
+        }
+        for (int i = 0; i < 8; i++) {
+            double angle = i * Math.PI / 4.0;
+            double bx = center.x + Math.cos(angle) * 20.0;
+            double bz = center.z + Math.sin(angle) * 20.0;
+            for (double dy = 0.0; dy < 60.0; dy += 2.5) {
+                level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
+                        bx, center.y + dy, bz, 2, 0.4, 0.0, 0.4, 0.0);
+            }
+        }
         // the final burst: a fan of jagged rays erupts out of the caster
         Vec3 core = center.add(0.0, 1.2, 0.0);
         for (int i = 0; i < 20; i++) {
