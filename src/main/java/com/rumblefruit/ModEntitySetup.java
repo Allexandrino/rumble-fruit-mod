@@ -16,6 +16,7 @@ public class ModEntitySetup {
     @SubscribeEvent
     public static void onAttributeCreate(EntityAttributeCreationEvent event) {
         event.put(ModEntities.FALLEN_EXORCIST.get(), FallenExorcistEntity.createAttributes().build());
+        event.put(ModEntities.CUBE_TITAN.get(), CubeTitanEntity.createAttributes().build());
     }
 
     @SubscribeEvent

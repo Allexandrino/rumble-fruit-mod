@@ -11,4 +11,7 @@ public class ModBlocks {
 
     public static final DeferredHolder<Block, ?> BOSS_PEDESTAL =
             BLOCKS.register("boss_pedestal", BossPedestalBlock::new);
+
+    public static final DeferredHolder<Block, ?> METEOR_CORE =
+            BLOCKS.register("meteor_core", MeteorCoreBlock::new);
 }

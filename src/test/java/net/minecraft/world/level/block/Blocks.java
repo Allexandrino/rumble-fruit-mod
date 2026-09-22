@@ -9,4 +9,9 @@ public class Blocks {
     public static final Block BARRIER = new Block(true, false);
     public static final Block STRUCTURE_BLOCK = new Block(true, false);
     public static final Block MAGMA_BLOCK = new Block(false, false);
+    public static final Block DEEPSLATE_BRICKS = new Block(false, false);
+    public static final Block DEEPSLATE_TILES = new Block(false, false);
+    public static final Block CRYING_OBSIDIAN = new Block(false, false);
+    public static final Block GOLD_BLOCK = new Block(false, false);
+    public static final Block GLOWSTONE = new Block(false, false);
 }

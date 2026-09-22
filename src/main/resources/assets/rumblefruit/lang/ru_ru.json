@@ -31,5 +31,9 @@
   "rumblefruit.chamber_teleport": "Карта переносит тебя в покои Падшего экзорциста...",
   "rumblefruit.execution": "КАЗНЬ: x3 урон по раненым (12с)",
   "key.rumblefruit.skill_r": "Скилл J: Высвобождение (тратит фрукт!)",
-  "rumblefruit.release_spent": "Сила фрукта исчерпана... Съешь новый, чтобы вернуть её"
+  "rumblefruit.release_spent": "Сила фрукта исчерпана... Съешь новый, чтобы вернуть её",
+  "block.rumblefruit.meteor_core": "Ядро метеорита",
+  "item.rumblefruit.meteor_core": "Ядро метеорита",
+  "entity.rumblefruit.cube_titan": "Кубо-Титан",
+  "rumblefruit.dungeon_cleared": "Кубо-Титан повержен! Данж отпускает тебя..."
 }

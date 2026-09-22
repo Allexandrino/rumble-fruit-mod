@@ -31,5 +31,9 @@
   "rumblefruit.chamber_teleport": "The map takes you to the Chambers of the Fallen Exorcist...",
   "rumblefruit.execution": "EXECUTION: x3 damage to the wounded (12s)",
   "key.rumblefruit.skill_r": "Skill J: Release (spends the fruit!)",
-  "rumblefruit.release_spent": "The fruit's power is spent... Eat another to regain it"
+  "rumblefruit.release_spent": "The fruit's power is spent... Eat another to regain it",
+  "block.rumblefruit.meteor_core": "Meteor Core",
+  "item.rumblefruit.meteor_core": "Meteor Core",
+  "entity.rumblefruit.cube_titan": "Cube Titan",
+  "rumblefruit.dungeon_cleared": "The Cube Titan is down! The dungeon releases you..."
 }

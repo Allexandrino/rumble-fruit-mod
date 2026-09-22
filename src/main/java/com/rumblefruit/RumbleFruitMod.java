@@ -46,6 +46,10 @@ public class RumbleFruitMod {
     public static final DeferredHolder<Item, ?> BOSS_MAP =
             ITEMS.register("boss_map", BossMapItem::new);
 
+    public static final DeferredHolder<Item, ?> METEOR_CORE_ITEM =
+            ITEMS.register("meteor_core", () -> new net.minecraft.world.item.BlockItem(
+                    ModBlocks.METEOR_CORE.get(), new Item.Properties()));
+
     public RumbleFruitMod(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
@@ -66,6 +70,7 @@ public class RumbleFruitMod {
                         output.accept(ELECTRO_APPLE.get());
                         output.accept(FALLEN_EXORCIST_SPAWN_EGG.get());
                         output.accept(BOSS_MAP.get());
+                        output.accept(METEOR_CORE_ITEM.get());
                     })
                     .build());
 }

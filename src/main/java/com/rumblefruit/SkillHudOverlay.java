@@ -36,6 +36,11 @@ public class SkillHudOverlay {
             if (mc.player == null || mc.options.hideGui) {
                 return;
             }
+            // meteor countdown, top center — always visible
+            if (ClientMeteorData.getTicksLeft() >= 0) {
+                String meteor = "☄ Метеорит: " + ClientMeteorData.format();
+                graphics.drawString(mc.font, meteor, width / 2 - mc.font.width(meteor) / 2, 6, 0x7FD4FF, true);
+            }
             // skill table is always visible once the player has eaten the fruit
             if (!ClientPowerData.has()) {
                 return;

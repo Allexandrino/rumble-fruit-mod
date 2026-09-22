@@ -58,6 +58,12 @@ public class SkillExecutor {
                 return;
             }
             WingsData.toggle(player);
+            // the transformation flash stabs the sky — visible for kilometers
+            ServerLevel wingLevel = (ServerLevel) player.level();
+            FarFx.column(wingLevel, ModParticles.ELECTRO_GLOW.get(),
+                    player.getX(), player.getY(), player.getZ(), 120.0, 2.0, 3, 0.5);
+            FarFx.crown(wingLevel, ModParticles.ELECTRO_GLOW.get(),
+                    player.getX(), player.getY(), player.getZ(), 10.0, 8, 60.0, 2.5);
             return;
         }
         int idx = skillId >= 0 && skillId <= 3 ? skillId : skillId == 5 ? 4 : -1;
@@ -380,6 +386,9 @@ public class SkillExecutor {
         level.addFreshEntity(thunderball);
         level.playSound(null, player.getX(), player.getEyeY() + 2.5, player.getZ(),
                 SoundEvents.PORTAL_AMBIENT, SoundSource.WEATHER, 1.5F, 1.5F);
+        // the thunderball's birth tears the sky open — a beacon column at the target
+        FarFx.column(level, ModParticles.ELECTRO_GLOW.get(), target.x, target.y, target.z,
+                80.0, 2.0, 2, 0.5);
     }
 
     public static Vec3 rayTracePublic(ServerPlayer player, double range) {

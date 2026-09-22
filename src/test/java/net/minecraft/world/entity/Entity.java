@@ -33,6 +33,10 @@ public class Entity {
         this.z = z;
     }
 
+    public void teleportTo(double x, double y, double z) {
+        setPos(x, y, z);
+    }
+
     public double getX() {
         return x;
     }

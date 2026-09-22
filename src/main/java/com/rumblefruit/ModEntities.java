@@ -67,4 +67,11 @@ public class ModEntities {
                     .sized(0.6F, 1.95F)
                     .clientTrackingRange(10)
                     .build("rumblefruit:fallen_exorcist"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<CubeTitanEntity>> CUBE_TITAN =
+            ENTITIES.register("cube_titan", () -> EntityType.Builder
+                    .<CubeTitanEntity>of(CubeTitanEntity::new, MobCategory.MONSTER)
+                    .sized(3.5F, 7.0F)
+                    .clientTrackingRange(16)
+                    .build("rumblefruit:cube_titan"));
 }

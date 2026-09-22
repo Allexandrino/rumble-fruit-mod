@@ -120,21 +120,27 @@ public class ServerLevel extends Level {
         return freshEntities.add(entity);
     }
 
-    // fake terrain: everything is solid stone unless carved away
+    // fake terrain: everything is solid stone unless carved away or built over
     private final java.util.Set<net.minecraft.core.BlockPos> carvedAir = new java.util.HashSet<>();
+    private final java.util.Map<net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState> placed =
+            new java.util.HashMap<>();
     private net.minecraft.world.level.block.Block blockAt = net.minecraft.world.level.block.Blocks.STONE;
 
     public net.minecraft.world.level.block.state.BlockState getBlockState(net.minecraft.core.BlockPos pos) {
         if (carvedAir.contains(pos)) {
             return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
         }
-        return blockAt.defaultBlockState();
+        return placed.getOrDefault(pos, blockAt.defaultBlockState());
     }
 
     public boolean setBlock(net.minecraft.core.BlockPos pos,
                             net.minecraft.world.level.block.state.BlockState state, int flags) {
         if (state.isAir()) {
             carvedAir.add(pos);
+            placed.remove(pos);
+        } else {
+            placed.put(pos, state);
+            carvedAir.remove(pos);
         }
         return true;
     }
@@ -145,6 +151,10 @@ public class ServerLevel extends Level {
 
     public BlockHitResult clip(ClipContext context) {
         return clipResult;
+    }
+
+    public net.minecraft.core.BlockPos getSharedSpawnPos() {
+        return net.minecraft.core.BlockPos.ZERO;
     }
 
     @Override
