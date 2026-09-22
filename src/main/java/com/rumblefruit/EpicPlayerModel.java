@@ -520,7 +520,15 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
     // descent stretches on
     private void applyKnockoutFall(float t) {
         float k = easeInOut(Math.min(1.0F, t * 20.0F)); // snap horizontal within ~1s
-        float flat = 1.57F * k;
+        // pull every pivot onto one horizontal line first — otherwise the
+        // limbs rotate around their own joints and visually detach
+        head.y = lerp(0.0F, 20.0F, k);
+        body.y = lerp(0.0F, 20.0F, k);
+        rightArm.y = lerp(2.0F, 20.0F, k);
+        leftArm.y = lerp(2.0F, 20.0F, k);
+        rightLeg.y = lerp(12.0F, 20.0F, k);
+        leftLeg.y = lerp(12.0F, 20.0F, k);
+        float flat = -1.57F * k; // negative xRot tips the body BACK — face to the sky
         body.xRot = flat;
         head.xRot = flat * 0.85F + 0.25F * k;
         // arms reaching forward past the head — the signature "knocked out
@@ -558,7 +566,7 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
         leftArm.y = lerp(2.0F, 20.0F, k);
         rightLeg.y = lerp(12.0F, 20.0F, k);
         leftLeg.y = lerp(12.0F, 20.0F, k);
-        float flat = 1.57F * k;
+        float flat = -1.57F * k; // on the back, face to the sky
         body.xRot = flat;
         head.xRot = flat * 0.85F + 0.25F * k; // face up, chin slightly off the dirt
         // arms thrown forward off the body — the epic "knocked out" sprawl
