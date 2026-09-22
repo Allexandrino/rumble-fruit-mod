@@ -8,4 +8,5 @@ public class Blocks {
     public static final Block COMMAND_BLOCK = new Block(true, false);
     public static final Block BARRIER = new Block(true, false);
     public static final Block STRUCTURE_BLOCK = new Block(true, false);
+    public static final Block MAGMA_BLOCK = new Block(false, false);
 }

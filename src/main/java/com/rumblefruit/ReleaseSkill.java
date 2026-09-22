@@ -40,8 +40,8 @@ public class ReleaseSkill {
     // slow-motion descent: after the blast the caster drifts down back-first
     // instead of slamming into the crater at full speed
     private static final Map<UUID, Long> FALLING = new ConcurrentHashMap<>();
-    private static final double FALL_MAX_SPEED = -0.30; // ~6 blocks/s: cinematic slow-mo
-    private static final double FALL_ACCEL = 0.012;     // ease into the dive
+    private static final double FALL_MAX_SPEED = -0.55; // ~11 blocks/s: fast but still cinematic
+    private static final double FALL_ACCEL = 0.03;      // ease into the dive
     // carving state: blast center + current shell
     private record Carve(Vec3 center, int shell) {
     }

@@ -492,16 +492,16 @@ class ReleaseSkillTest {
         }
         // then the dive starts near-weightless
         assertEquals(-0.05, caster.getDeltaMovement().y, 1.0E-9);
-        // when the descent stretches on, it eases into a gentle dive and stops there
+        // when the descent stretches on, it eases into a dive and stops there
         for (int t = 0; t < 40; t++) {
             ReleaseSkill.tick(caster);
         }
-        assertEquals(-0.30, caster.getDeltaMovement().y, 1.0E-9);
-        // and even a hundred ticks later it never gets faster than the slow-mo cap
+        assertEquals(-0.55, caster.getDeltaMovement().y, 1.0E-9);
+        // and even a hundred ticks later it never gets faster than the dive cap
         for (int t = 0; t < 100; t++) {
             ReleaseSkill.tick(caster);
         }
-        assertEquals(-0.30, caster.getDeltaMovement().y, 1.0E-9);
+        assertEquals(-0.55, caster.getDeltaMovement().y, 1.0E-9);
     }
 
     @Test

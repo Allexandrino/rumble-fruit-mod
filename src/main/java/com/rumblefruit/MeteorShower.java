@@ -1,0 +1,115 @@
+package com.rumblefruit;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+// meteors streak out of the sky carrying lightning fruit: a blazing magma
+// block tears down from high above the players, smashes a small crater and
+// leaves an electro-apple smouldering in the middle of it
+@EventBusSubscriber(modid = RumbleFruitMod.MOD_ID)
+public class MeteorShower {
+
+    private MeteorShower() {
+    }
+
+    private static final int SPAWN_ROLL = 3000;     // avg one meteor per ~2.5 min per player
+    private static final double SPAWN_HEIGHT = 55.0;
+    private static final double SPAWN_SPREAD = 40.0;
+    private static final double ENTRY_SPEED = -1.5; // meteors dive fast
+    private static final float IMPACT_POWER = 3.0F;
+
+    // package-visible and swappable in tests so the spawn points are deterministic
+    static Random RANDOM = new Random();
+    private static final Map<UUID, FallingBlockEntity> FALLING = new ConcurrentHashMap<>();
+
+    // test hook: drop all tracked meteors without impacts
+    static void clear() {
+        FALLING.clear();
+    }
+
+    // swappable in tests: how the fruit pod appears at the impact point
+    interface FruitDrop {
+        void drop(ServerLevel level, double x, double y, double z);
+    }
+
+    static FruitDrop FRUIT_DROP = (level, x, y, z) -> level.addFreshEntity(
+            new ItemEntity(level, x, y, z, new ItemStack(RumbleFruitMod.ELECTRO_APPLE.get())));
+
+    @SubscribeEvent
+    public static void onServerTick(ServerTickEvent.Post event) {
+        for (ServerLevel level : event.getServer().getAllLevels()) {
+            for (ServerPlayer player : level.players()) {
+                if (RANDOM.nextInt(SPAWN_ROLL) == 0) {
+                    spawnMeteor(level, player);
+                }
+            }
+        }
+        tickMeteors();
+    }
+
+    // a meteor tears into the sky above the player: blazing magma block with
+    // an entry flash and a roar
+    static FallingBlockEntity spawnMeteor(ServerLevel level, ServerPlayer player) {
+        double x = player.getX() + (RANDOM.nextDouble() - 0.5) * SPAWN_SPREAD * 2.0;
+        double z = player.getZ() + (RANDOM.nextDouble() - 0.5) * SPAWN_SPREAD * 2.0;
+        double y = player.getY() + SPAWN_HEIGHT;
+        BlockPos pos = BlockPos.containing(x, y, z);
+        FallingBlockEntity meteor = FallingBlockEntity.fall(level, pos,
+                Blocks.MAGMA_BLOCK.defaultBlockState());
+        meteor.setDeltaMovement(0.0, ENTRY_SPEED, 0.0);
+        FALLING.put(meteor.getUUID(), meteor);
+        level.sendParticles(ModParticles.ELECTRO_GLOW.get(), x, y, z, 40, 1.5, 1.5, 1.5, 0.2);
+        level.playSound(null, x, y, z, SoundEvents.GENERIC_EXPLODE, SoundSource.WEATHER, 3.0F, 0.5F);
+        return meteor;
+    }
+
+    // every tracked meteor burns a trail; on touchdown it detonates and the
+    // fruit pod is left smouldering in the crater
+    static void tickMeteors() {
+        for (var it = FALLING.values().iterator(); it.hasNext(); ) {
+            FallingBlockEntity meteor = it.next();
+            if (meteor.onGround() || !meteor.isAlive()) {
+                it.remove();
+                impact(meteor);
+            } else {
+                trail(meteor);
+            }
+        }
+    }
+
+    private static void trail(FallingBlockEntity meteor) {
+        ServerLevel level = (ServerLevel) meteor.level();
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(),
+                meteor.getX(), meteor.getY() + 0.5, meteor.getZ(), 12, 0.4, 0.4, 0.4, 0.05);
+        level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
+                meteor.getX(), meteor.getY() + 0.5, meteor.getZ(), 3, 0.3, 0.3, 0.3, 0.02);
+    }
+
+    static void impact(FallingBlockEntity meteor) {
+        ServerLevel level = (ServerLevel) meteor.level();
+        double x = meteor.getX();
+        double y = meteor.getY();
+        double z = meteor.getZ();
+        level.explode(null, x, y, z, IMPACT_POWER, Level.ExplosionInteraction.BLOCK);
+        FRUIT_DROP.drop(level, x, y + 1.0, z);
+        level.sendParticles(ModParticles.ELECTRO_GLOW.get(), x, y + 1.0, z, 120, 3.0, 2.0, 3.0, 0.3);
+        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), x, y + 1.0, z, 80, 2.0, 1.5, 2.0, 0.2);
+        level.playSound(null, x, y, z, ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 6.0F, 0.6F);
+    }
+}

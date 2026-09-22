@@ -104,6 +104,10 @@ public class Entity {
         return alive;
     }
 
+    public void discard() {
+        this.alive = false;
+    }
+
     public boolean onGround() {
         return onGround;
     }
