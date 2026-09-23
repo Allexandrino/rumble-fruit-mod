@@ -33,6 +33,9 @@ public class ClientSkillInput {
         Minecraft mc = Minecraft.getInstance();
         lastCastTick = mc.player != null ? mc.player.tickCount : 0;
         lastCastSkill = skillId;
+        if (skillId == 5) {
+            ImpactShaders.spaceTear(); // the V cast rips the screen open
+        }
         int idx = skillId >= 0 && skillId <= 3 ? skillId : skillId == 5 ? 4 : -1;
         if (idx >= 0) {
             lastSkillUseTick[idx] = tick;

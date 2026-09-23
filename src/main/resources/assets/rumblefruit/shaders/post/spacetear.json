@@ -1,0 +1,10 @@
+{
+    "targets": ["swap"],
+    "passes": [
+        {
+            "name": "rumblefruit:spacetear",
+            "intarget": "minecraft:main",
+            "outtarget": "swap"
+        }
+    ]
+}
