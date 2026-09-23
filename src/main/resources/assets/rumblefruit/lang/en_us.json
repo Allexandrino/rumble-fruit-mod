@@ -34,6 +34,5 @@
   "rumblefruit.release_spent": "The fruit's power is spent... Eat another to regain it",
   "block.rumblefruit.meteor_core": "Meteor Core",
   "item.rumblefruit.meteor_core": "Meteor Core",
-  "entity.rumblefruit.cube_titan": "Cube Titan",
-  "rumblefruit.dungeon_cleared": "The Cube Titan is down! The dungeon releases you..."
+  "rumblefruit.dungeon_cleared": "The Fallen Exorcist is down! The chambers release you..."
 }

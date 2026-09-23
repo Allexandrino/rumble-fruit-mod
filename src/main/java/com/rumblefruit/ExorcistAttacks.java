@@ -13,12 +13,12 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.Random;
 
-// the Cube Titan's arsenal: 25 distinct attacks. every pattern is built from
+// the Fallen Exorcist.s arsenal: 25 distinct attacks. every pattern is built from
 // vacuum-safe primitives (bolts, particles, sounds, explosions, effects) so
 // the whole arsenal is unit-testable. the entity just calls perform().
-public final class CubeTitanAttacks {
+public final class ExorcistAttacks {
 
-    private CubeTitanAttacks() {
+    private ExorcistAttacks() {
     }
 
     public static final int COUNT = 25;

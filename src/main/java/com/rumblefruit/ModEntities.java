@@ -64,14 +64,7 @@ public class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<FallenExorcistEntity>> FALLEN_EXORCIST =
             ENTITIES.register("fallen_exorcist", () -> EntityType.Builder
                     .<FallenExorcistEntity>of(FallenExorcistEntity::new, MobCategory.MONSTER)
-                    .sized(0.6F, 1.95F)
-                    .clientTrackingRange(10)
-                    .build("rumblefruit:fallen_exorcist"));
-
-    public static final DeferredHolder<EntityType<?>, EntityType<CubeTitanEntity>> CUBE_TITAN =
-            ENTITIES.register("cube_titan", () -> EntityType.Builder
-                    .<CubeTitanEntity>of(CubeTitanEntity::new, MobCategory.MONSTER)
-                    .sized(3.5F, 7.0F)
+                    .sized(0.8F, 2.0F) // SCALE 25 makes it a 20x50 colossus
                     .clientTrackingRange(16)
-                    .build("rumblefruit:cube_titan"));
+                    .build("rumblefruit:fallen_exorcist"));
 }

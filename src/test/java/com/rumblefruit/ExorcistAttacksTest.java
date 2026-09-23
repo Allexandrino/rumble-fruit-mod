@@ -10,9 +10,9 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// the Cube Titan's arsenal: all 25 attacks must actually DO something —
+// the Fallen Exorcist.s arsenal: all 25 attacks must actually DO something —
 // particles, bolts, explosions, damage or effects — and the index wraps
-class CubeTitanAttacksTest {
+class ExorcistAttacksTest {
     private ServerLevel level;
     private LivingEntity boss;
     private LivingEntity target;
@@ -20,7 +20,7 @@ class CubeTitanAttacksTest {
     @BeforeEach
     void setUp() {
         ElectroBolts.clear();
-        CubeTitanAttacks.RANDOM = new Random(42);
+        ExorcistAttacks.RANDOM = new Random(42);
         level = new ServerLevel();
         boss = new LivingEntity();
         boss.setPos(0.0, 64.0, 0.0);
@@ -37,10 +37,10 @@ class CubeTitanAttacksTest {
 
     @Test
     void everyAttackDoesSomething() {
-        for (int i = 0; i < CubeTitanAttacks.COUNT; i++) {
+        for (int i = 0; i < ExorcistAttacks.COUNT; i++) {
             setUp();
             // when attack i fires
-            CubeTitanAttacks.perform(i, level, boss, target);
+            ExorcistAttacks.perform(i, level, boss, target);
             // then the world noticed
             assertTrue(somethingHappened(), "attack " + i + " was a dud");
         }
@@ -49,7 +49,7 @@ class CubeTitanAttacksTest {
     @Test
     void attackIndexWrapsAroundTheArsenal() {
         // when attack 25 fires (one past the end)
-        CubeTitanAttacks.perform(25, level, boss, target);
+        ExorcistAttacks.perform(25, level, boss, target);
         // then it is attack 0 again: a single crushing bolt plus 15 damage
         assertEquals(1, ElectroBolts.STRIKES.size());
         assertEquals(1, target.damageLog.size());
@@ -59,7 +59,7 @@ class CubeTitanAttacksTest {
     @Test
     void groundSlamKnocksTheCloseTargetAway() {
         // when the floor detonates next to the prey
-        CubeTitanAttacks.perform(9, level, boss, target);
+        ExorcistAttacks.perform(9, level, boss, target);
         // then it takes 20 damage and is hurled away and up
         assertEquals(1, target.damageLog.size());
         assertEquals(20.0F, target.damageLog.get(0), 1.0E-9);
@@ -70,7 +70,7 @@ class CubeTitanAttacksTest {
     @Test
     void blinkStrikeMaterialisesTheTitanOnThePrey() {
         // when the titan blinks
-        CubeTitanAttacks.perform(11, level, boss, target);
+        ExorcistAttacks.perform(11, level, boss, target);
         // then it stands on top of the prey
         assertEquals(4.5, boss.getX(), 1.0E-9);
         assertEquals(4.5, boss.getZ(), 1.0E-9);
@@ -79,7 +79,7 @@ class CubeTitanAttacksTest {
     @Test
     void theCageSlowsThePrey() {
         // when the lightning cage closes
-        CubeTitanAttacks.perform(15, level, boss, target);
+        ExorcistAttacks.perform(15, level, boss, target);
         // then the prey is slowed and zapped
         assertEquals(1, target.effectLog.size());
         assertEquals(1, target.damageLog.size());
@@ -89,7 +89,7 @@ class CubeTitanAttacksTest {
     @Test
     void miniMeteorDropsABurningCube() {
         // when the mini meteor fires
-        CubeTitanAttacks.perform(14, level, boss, target);
+        ExorcistAttacks.perform(14, level, boss, target);
         // then a falling magma block dives at the prey from above
         assertEquals(1, level.freshEntities.size());
         var mini = (net.minecraft.world.entity.item.FallingBlockEntity) level.freshEntities.get(0);

@@ -3,47 +3,47 @@ package com.rumblefruit;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-// the Fallen Exorcist: an insanely strong elite enemy — a corrupted angel hunter.
-// huge health pool, fast, heavy melee, calls golden lightning down on its target.
+// the Fallen Exorcist: a 50-block colossus assembled from hundreds of cubes,
+// the corrupted angel hunter reigning over the vault of the exorcist realm.
+// stationary, all-seeing, armed with a 25-move arsenal (see ExorcistAttacks);
+// below half health it attacks twice as fast.
 public class FallenExorcistEntity extends Monster {
+
+    private int attackCooldown = 70;
+    private int attackIndex = 0;
 
     public FallenExorcistEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
-        this.xpReward = 60;
+        this.xpReward = 300;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, 400.0)
-                .add(Attributes.ATTACK_DAMAGE, 16.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.38)
-                .add(Attributes.ARMOR, 10.0)
-                .add(Attributes.ARMOR_TOUGHNESS, 6.0)
+                .add(Attributes.MAX_HEALTH, 1500.0)
+                .add(Attributes.ATTACK_DAMAGE, 30.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.0) // it does not chase — it reigns
+                .add(Attributes.ARMOR, 20.0)
+                .add(Attributes.ARMOR_TOUGHNESS, 10.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
-                .add(Attributes.FOLLOW_RANGE, 48.0);
+                .add(Attributes.FOLLOW_RANGE, 96.0)
+                .add(Attributes.SCALE, 25.0); // 0.8 x 25 = 20 wide, 2.0 x 25 = 50 blocks tall
     }
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.4, true));
-        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 16.0F));
-        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 64.0F));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
@@ -56,24 +56,33 @@ public class FallenExorcistEntity extends Monster {
     @Override
     public void tick() {
         super.tick();
-        // golden lightning on the target every 4 seconds (insane pressure)
-        if (!this.level().isClientSide && this.level() instanceof ServerLevel serverLevel
-                && this.getTarget() != null && this.tickCount % 80 == 0) {
-            LivingEntity target = this.getTarget();
-            if (target.isAlive() && this.distanceTo(target) < 28.0F) {
-                ElectroBoltEntity.strike(serverLevel, target.getX(), target.getY(), target.getZ(), this, true);
-                this.playSound(ModSounds.ELECTRO_BLAST.get(), 2.0F, 0.6F);
-            }
+        if (this.level().isClientSide || !(this.level() instanceof ServerLevel serverLevel)) {
+            return;
         }
-        // roar when acquiring a target
-        if (!this.level().isClientSide && this.getTarget() != null && this.tickCount % 200 == 0) {
-            this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                    SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.5F, 0.7F);
+        LivingEntity target = this.getTarget();
+        if (target == null || !target.isAlive()) {
+            return;
+        }
+        // the colossus bleeds fury: below half health it attacks twice as fast
+        int period = this.getHealth() < this.getMaxHealth() * 0.5F ? 40 : 70;
+        if (--attackCooldown > 0) {
+            return;
+        }
+        attackCooldown = period;
+        ExorcistAttacks.perform(attackIndex++, serverLevel, this, target);
+        if (attackIndex % 5 == 0) {
+            this.playSound(SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.6F);
         }
     }
 
     @Override
-    protected void dropCustomDeathLoot(ServerLevel serverLevel, net.minecraft.world.damagesource.DamageSource source,
+    public boolean hurt(DamageSource source, float amount) {
+        // the cube shell shrugs off a third of everything
+        return super.hurt(source, amount * 0.67F);
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource source,
                                        boolean recentlyHit) {
         super.dropCustomDeathLoot(serverLevel, source, recentlyHit);
         // drops the lightning fruit so the boss is worth hunting

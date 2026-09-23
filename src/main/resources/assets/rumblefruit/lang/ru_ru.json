@@ -34,6 +34,5 @@
   "rumblefruit.release_spent": "Сила фрукта исчерпана... Съешь новый, чтобы вернуть её",
   "block.rumblefruit.meteor_core": "Ядро метеорита",
   "item.rumblefruit.meteor_core": "Ядро метеорита",
-  "entity.rumblefruit.cube_titan": "Кубо-Титан",
-  "rumblefruit.dungeon_cleared": "Кубо-Титан повержен! Данж отпускает тебя..."
+  "rumblefruit.dungeon_cleared": "Падший экзорцист повержен! Покои отпускают тебя..."
 }

@@ -11,82 +11,105 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// the meteor dungeon: built once deep underground, the core drags you in with
-// a fruit in hand, the Cube Titan wakes, and only its death lets you out
+// the exorcist chambers: a colossal hall built once in the void realm, the
+// core drags you across dimensions with a fruit in hand, the Fallen Exorcist
+// wakes, and only its death lets you out
 class MeteorDungeonTest {
     private ServerLevel level;
+    private ServerLevel realm;
     private ServerPlayer player;
     private int fruitGranted;
     private List<BlockPos> bossSpawns;
+
+    private record TpCall(ServerPlayer player, ServerLevel dest, double x, double y, double z) {
+    }
+
+    private List<TpCall> teleports;
 
     @BeforeEach
     void setUp() {
         MeteorDungeon.reset();
         fruitGranted = 0;
         bossSpawns = new ArrayList<>();
+        teleports = new ArrayList<>();
         MeteorDungeon.FRUIT_GRANT = p -> fruitGranted++;
         MeteorDungeon.BOSS_SPAWNER = (lvl, at) -> bossSpawns.add(at);
         level = new ServerLevel();
+        realm = new ServerLevel();
+        MeteorDungeon.REALM_OPENER = from -> {
+            MeteorDungeon.getOrCreate(realm);
+            return realm;
+        };
+        MeteorDungeon.TELEPORTER = (p, dest, x, y, z) -> {
+            teleports.add(new TpCall(p, dest, x, y, z));
+            p.setPos(x, y, z);
+        };
         player = new ServerPlayer();
         player.setServerLevel(level);
         player.setPos(5.0, 70.0, 5.0);
     }
 
     @Test
-    void vaultIsBuiltOnceDeepUnderground() {
-        // when the dungeon is located
-        BlockPos c = MeteorDungeon.getOrCreate(level);
-        // then it sits at y=-50, far from spawn
-        assertEquals(-50, c.getY());
-        assertEquals(2000, c.getX());
-        // the arena cross is gold, the walls are deepslate with an open middle
-        assertEquals(Blocks.GOLD_BLOCK, level.getBlockState(c).getBlock());
-        assertEquals(Blocks.DEEPSLATE_BRICKS, level.getBlockState(c.offset(12, 1, 5)).getBlock());
-        assertTrue(level.getBlockState(c.offset(0, 3, 0)).isAir());
-        // and it is never rebuilt
-        assertEquals(c, MeteorDungeon.getOrCreate(level));
+    void chambersAreBuiltOnceInTheVoidRealm() {
+        // when the chambers are located
+        BlockPos c = MeteorDungeon.getOrCreate(realm);
+        // then they sit at the heart of the void, colossal (walls at ±40, 60 high)
+        assertArrayEquals(new int[]{0, 10, 0}, new int[]{c.getX(), c.getY(), c.getZ()});
+        assertEquals(Blocks.GLOWSTONE, realm.getBlockState(c).getBlock()); // the glowing heart
+        assertEquals(Blocks.GOLD_BLOCK, realm.getBlockState(c.offset(2, 0, 0)).getBlock()); // arena cross
+        assertEquals(Blocks.BLACKSTONE, realm.getBlockState(c.offset(40, 1, 5)).getBlock());
+        assertEquals(Blocks.BLACKSTONE, realm.getBlockState(c.offset(0, 60, 0)).getBlock()); // ceiling
+        assertTrue(realm.getBlockState(c.offset(0, 3, 0)).isAir());
+        // and they are never rebuilt
+        assertEquals(c, MeteorDungeon.getOrCreate(realm));
     }
 
     @Test
-    void enterDragsYouInWithFruitAndWakesTheTitan() {
-        // when the player right-clicks the meteor core
+    void enterDragsYouAcrossDimensionsWithFruitAndWakesTheExorcist() {
+        // when the player right-clicks the meteor core in the overworld
         MeteorDungeon.enter(level, player);
-        // then they are inside the vault, fruit in hand, titan awake at the dais
-        BlockPos c = MeteorDungeon.getOrCreate(level);
-        assertEquals(c.getX() + 0.5, player.getX(), 1.0E-9);
-        assertEquals(c.getY() + 1.0, player.getY(), 1.0E-9);
+        // then they cross into the realm, near the entrance of the hall
+        assertEquals(1, teleports.size());
+        assertEquals(realm, teleports.get(0).dest());
+        assertEquals(0.5, teleports.get(0).x(), 1.0E-9);
+        assertEquals(11.0, teleports.get(0).y(), 1.0E-9);
+        // fruit in hand, exorcist awake at the dais
         assertEquals(1, fruitGranted);
         assertEquals(1, bossSpawns.size());
-        assertEquals(c, bossSpawns.get(0));
+        assertArrayEquals(new int[]{0, 10, 0}, new int[]{bossSpawns.get(0).getX(),
+                bossSpawns.get(0).getY(), bossSpawns.get(0).getZ()});
         // and the way home is remembered
         var home = MeteorDungeon.returnPos(player.getUUID());
         assertEquals(5.0, home.x, 1.0E-9);
         assertEquals(70.0, home.y, 1.0E-9);
-        assertEquals(5.0, home.z, 1.0E-9);
     }
 
     @Test
-    void titanIsNotDuplicatedOnReentry() {
-        // given the titan already guards the room
+    void exorcistIsNotDuplicatedOnReentry() {
+        // given the exorcist already reigns over the hall
         MeteorDungeon.enter(level, player);
         // when the player enters again
         MeteorDungeon.enter(level, player);
-        // then no second titan wakes
+        // then no second exorcist wakes
         assertEquals(1, bossSpawns.size());
     }
 
     @Test
-    void releaseAllSendsEveryoneHomeAndRearmsTheVault() {
-        // given a player inside the dungeon
+    void releaseAllSendsEveryoneHomeAcrossDimensionsAndRearms() {
+        // given a player inside the chambers
+        realm.players().add(player);
         MeteorDungeon.enter(level, player);
-        // when the titan falls
-        MeteorDungeon.releaseAll(level);
-        // then the player is back where they touched the core
-        assertEquals(5.0, player.getX(), 1.0E-9);
-        assertEquals(70.0, player.getY(), 1.0E-9);
+        // when the exorcist falls
+        MeteorDungeon.releaseAll(realm);
+        // then the player crosses back to where they touched the core
+        assertEquals(2, teleports.size());
+        assertEquals(level, teleports.get(1).dest());
+        assertEquals(5.0, teleports.get(1).x(), 1.0E-9);
+        assertEquals(70.0, teleports.get(1).y(), 1.0E-9);
         assertTrue(player.messages.contains("rumblefruit.dungeon_cleared"));
         assertNull(MeteorDungeon.returnPos(player.getUUID()));
         // and the vault re-arms for the next visit
@@ -96,13 +119,13 @@ class MeteorDungeonTest {
 
     @Test
     void strangersOutsideAreNotReleased() {
-        // given a bystander far away from the vault
+        // given a bystander in the realm but far outside the hall
         ServerPlayer bystander = new ServerPlayer();
-        bystander.setServerLevel(level);
+        bystander.setServerLevel(realm);
         bystander.setPos(100.0, 70.0, 100.0);
         MeteorDungeon.enter(level, player);
-        // when the titan falls
-        MeteorDungeon.releaseAll(level);
+        // when the exorcist falls
+        MeteorDungeon.releaseAll(realm);
         // then the bystander never moved
         assertEquals(100.0, bystander.getX(), 1.0E-9);
         assertEquals(70.0, bystander.getY(), 1.0E-9);

@@ -14,4 +14,6 @@ public class Blocks {
     public static final Block CRYING_OBSIDIAN = new Block(false, false);
     public static final Block GOLD_BLOCK = new Block(false, false);
     public static final Block GLOWSTONE = new Block(false, false);
+    public static final Block BLACKSTONE = new Block(false, false);
+    public static final Block GILDED_BLACKSTONE = new Block(false, false);
 }
