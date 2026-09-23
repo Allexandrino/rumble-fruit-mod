@@ -34,5 +34,19 @@
   "rumblefruit.release_spent": "The fruit's power is spent... Eat another to regain it",
   "block.rumblefruit.meteor_core": "Meteor Core",
   "item.rumblefruit.meteor_core": "Meteor Core",
-  "rumblefruit.dungeon_cleared": "The Fallen Exorcist is down! The chambers release you..."
+  "rumblefruit.dungeon_cleared": "The Fallen Exorcist is down! The chambers release you...",
+  "item.rumblefruit.inferno_fruit": "Inferno Fruit",
+  "item.rumblefruit.void_fruit": "Void Fruit",
+  "item.rumblefruit.frost_fruit": "Frost Fruit",
+  "item.rumblefruit.nature_fruit": "Nature Fruit",
+  "rumblefruit.element.lightning": "Lightning",
+  "rumblefruit.element.inferno": "Inferno",
+  "rumblefruit.element.void": "Void",
+  "rumblefruit.element.frost": "Frost",
+  "rumblefruit.element.nature": "Nature",
+  "rumblefruit.form.lightning": "Electro Angel",
+  "rumblefruit.form.inferno": "Fallen Archangel of Fire",
+  "rumblefruit.form.void": "King of Darkness",
+  "rumblefruit.form.frost": "Ice Seraphim",
+  "rumblefruit.form.nature": "Mother Nature"
 }

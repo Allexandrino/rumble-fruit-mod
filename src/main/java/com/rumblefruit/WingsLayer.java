@@ -58,7 +58,9 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         float scale = WING_SCALE * eased;
         poseStack.scale(scale, scale, scale);
         poseStack.translate(0.0, -0.05, -0.14);
-        model.renderWings(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY);
+        // elemental tint: fire burns orange, void purple, frost pale, nature green
+        int tint = 0xFF000000 | com.rumblefruit.core.ElementCatalog.byId(ClientPowerData.element()).color();
+        model.renderWings(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, tint);
 
         // golden lightning arcs crackling ON the wings (wing space: they follow the flaps)
         if (unfold > 0.4F) {
@@ -75,7 +77,7 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         poseStack.pushPose();
         this.getParentModel().body.translateAndRotate(poseStack);
         VertexConsumer robeConsumer = buffer.getBuffer(RenderType.entityCutoutNoCull(ROBE));
-        model.renderCostume(poseStack, robeConsumer, packedLight, OverlayTexture.NO_OVERLAY);
+        model.renderCostume(poseStack, robeConsumer, packedLight, OverlayTexture.NO_OVERLAY, tint);
         poseStack.popPose();
 
         poseStack.pushPose();

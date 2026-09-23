@@ -34,5 +34,19 @@
   "rumblefruit.release_spent": "Сила фрукта исчерпана... Съешь новый, чтобы вернуть её",
   "block.rumblefruit.meteor_core": "Ядро метеорита",
   "item.rumblefruit.meteor_core": "Ядро метеорита",
-  "rumblefruit.dungeon_cleared": "Падший экзорцист повержен! Покои отпускают тебя..."
+  "rumblefruit.dungeon_cleared": "Падший экзорцист повержен! Покои отпускают тебя...",
+  "item.rumblefruit.inferno_fruit": "Фрукт Инферно",
+  "item.rumblefruit.void_fruit": "Фрукт Пустоты",
+  "item.rumblefruit.frost_fruit": "Фрукт Холода",
+  "item.rumblefruit.nature_fruit": "Фрукт Природы",
+  "rumblefruit.element.lightning": "Молния",
+  "rumblefruit.element.inferno": "Инферно",
+  "rumblefruit.element.void": "Пустота",
+  "rumblefruit.element.frost": "Холод",
+  "rumblefruit.element.nature": "Природа",
+  "rumblefruit.form.lightning": "Электро-Ангел",
+  "rumblefruit.form.inferno": "Падший Архангел Огня",
+  "rumblefruit.form.void": "Король Тьмы",
+  "rumblefruit.form.frost": "Ледяной Серафим",
+  "rumblefruit.form.nature": "Природа-Мать"
 }

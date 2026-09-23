@@ -163,13 +163,25 @@ public class SkillExecutor {
     }
 
     // angel transformation (wings out): skills hit harder and burn golden-white
-    private static boolean holy(ServerPlayer player) {
+    private static boolean holy(net.minecraft.world.entity.player.Player player) {
         return WingsData.isActive(player.getUUID());
     }
 
-    private static net.minecraft.core.particles.SimpleParticleType sparkType(boolean holy) {
-        return holy ? com.rumblefruit.ModParticles.ELECTRO_GLOW.get()
-                : com.rumblefruit.ModParticles.ELECTRO_SPARK.get();
+    // the fruit element the caster carries (lightning by default)
+    private static Element element(ServerPlayer player) {
+        return Element.byId(RumblePowerData.elementOf(player));
+    }
+
+    // the rider every skill hit carries: fire burns, void withers, frost
+    // freezes, nature poisons and feeds the caster
+    private static void rider(ServerPlayer player, LivingEntity target) {
+        element(player).applyRider(target, player);
+    }
+
+    private static net.minecraft.core.particles.SimpleParticleType sparkType(
+            net.minecraft.world.entity.player.Player player) {
+        return holy(player) ? com.rumblefruit.ModParticles.ELECTRO_GLOW.get()
+                : Element.byId(RumblePowerData.elementOf(player)).spark();
     }
 
     // Z variants: 0=tap projectile, 1=hold pull+stun, 2=long-hold dragon
@@ -203,9 +215,10 @@ public class SkillExecutor {
                     entity.push(pull.x, 0.4, pull.z);
                     entity.hurtMarked = true;
                     entity.hurt(level.damageSources().indirectMagic(player, player), holy ? 26.0F : 15.0F);
+                    rider(player, entity);
                     entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 4)); // stun
                 }
-                level.sendParticles(sparkType(holy),
+                level.sendParticles(sparkType(player),
                         player.getX(), player.getY() + 1, player.getZ(), 50, 5.0, 1.5, 5.0, 0.08);
                 level.playSound(null, player.getX(), player.getY(), player.getZ(),
                         ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 3.0F, 0.8F);
@@ -307,6 +320,7 @@ public class SkillExecutor {
             }
             if (eye.add(view.scale(along)).distanceTo(entity.position().add(0.0, entity.getBbHeight() * 0.5, 0.0)) <= 2.0) {
                 entity.hurt(level.damageSources().indirectMagic(player, player), 32.0F);
+                rider(player, entity);
                 entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 60, 0));
                 entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 2));
             }
@@ -360,10 +374,13 @@ public class SkillExecutor {
                 new AABB(target.x - 8, target.y - 8, target.z - 8, target.x + 8, target.y + 8, target.z + 8),
                 e -> e != player && e.isAlive())) {
             entity.hurt(level.damageSources().indirectMagic(player, player), holy ? 60.0F : 40.0F);
+            if (player instanceof LivingEntity caster) {
+                Element.byId(RumblePowerData.elementOf(player)).applyRider(entity, caster);
+            }
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 3));
             entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0));
         }
-        level.sendParticles(sparkType(holy),
+        level.sendParticles(sparkType(player),
                 target.x, target.y + 1, target.z, 80, 6.0, 1.0, 6.0, 0.1);
     }
 

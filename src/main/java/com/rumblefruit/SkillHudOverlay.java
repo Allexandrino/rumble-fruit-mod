@@ -16,6 +16,7 @@ public class SkillHudOverlay {
     private static final ResourceLocation[] ICONS = {
             icon("z"), icon("x"), icon("c"), icon("f"), icon("v"), icon("r")
     };
+    private static final String[] SKILL_KEYS = {"z", "x", "c", "f", "v", "j"};
     private static final ResourceLocation ORB = icon("orb");
     private static final ResourceLocation ORB_EMPTY = icon("orb_empty");
     private static final String[] KEYS = {"Z", "X", "C", "F", "V", "J"};
@@ -24,6 +25,15 @@ public class SkillHudOverlay {
 
     private static ResourceLocation icon(String name) {
         return ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "textures/gui/skills/" + name + ".png");
+    }
+
+    // every element has its own icon set (lightning keeps the classic bolts)
+    private static ResourceLocation iconFor(com.rumblefruit.core.ElementCatalog element, int index) {
+        if (element.isLightning()) {
+            return ICONS[index];
+        }
+        return ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID,
+                "textures/gui/skills/" + element.key() + "/" + SKILL_KEYS[index] + ".png");
     }
 
     @SubscribeEvent
@@ -60,10 +70,17 @@ public class SkillHudOverlay {
             int stanceColor = holy ? 0xFFD24A : stance == 1 ? 0x7FD4FF : stance == 2 ? 0xB0FF9E : 0xC0C0C0;
             graphics.drawString(mc.font, stanceName, x + ICON_SIZE - mc.font.width(stanceName), y - 12, stanceColor, true);
 
+            // the fruit (or the transformation) above the stance, in the element's color
+            var element = com.rumblefruit.core.ElementCatalog.byId(ClientPowerData.element());
+            String elementName = net.minecraft.network.chat.Component.translatable(
+                    holy ? "rumblefruit.form." + element.key() : "rumblefruit.element." + element.key()).getString();
+            graphics.drawString(mc.font, elementName, x + ICON_SIZE - mc.font.width(elementName), y - 24,
+                    element.color(), true);
+
             for (int i = 0; i < ICONS.length; i++) {
                 int iconY = y + i * SPACING;
-                // icon
-                graphics.blit(ICONS[i], x, iconY, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+                // every element has its own icon art: flames, spirals, snowflakes, leaves
+                graphics.blit(iconFor(element, i), x, iconY, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
                 // cooldown sweep (dark overlay from bottom up); Z, F and R have no cooldown
                 if (i != 0 && i != 3 && i != 5) {
                     float frac = ClientSkillInput.cooldownFraction(i);
@@ -76,13 +93,18 @@ public class SkillHudOverlay {
                 graphics.drawString(mc.font, KEYS[i], x - 10, iconY + 5, 0xFFFFFF, true);
             }
 
-            // orb pips under the skills
+            // orb pips under the skills (also tinted by the element)
             int orbs = ClientOrbData.getOrbs(mc.player.getUUID());
             int orbY = y + ICONS.length * SPACING + 2;
+            com.mojang.blaze3d.systems.RenderSystem.setShaderColor(
+                    ((element.color() >> 16) & 0xFF) / 255.0F,
+                    ((element.color() >> 8) & 0xFF) / 255.0F,
+                    (element.color() & 0xFF) / 255.0F, 1.0F);
             for (int i = 0; i < OrbManager.MAX_ORBS; i++) {
                 ResourceLocation tex = i < orbs ? ORB : ORB_EMPTY;
                 graphics.blit(tex, x + 1 + (i % 2) * 9, orbY + (i / 2) * 9, 0, 0, 8, 8, 8, 8);
             }
+            com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
             // transformation power bar: vertical golden meter left of the skill icons
             float charge = ClientChargeData.get(mc.player.getUUID());

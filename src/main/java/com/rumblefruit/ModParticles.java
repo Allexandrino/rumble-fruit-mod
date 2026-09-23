@@ -18,4 +18,13 @@ public class ModParticles {
             PARTICLES.register("electro_glow", () -> new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELECTRO_CLOUD =
             PARTICLES.register("electro_cloud", () -> new SimpleParticleType(false));
+
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> INFERNO_SPARK =
+            PARTICLES.register("inferno_spark", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> VOID_SPARK =
+            PARTICLES.register("void_spark", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> FROST_SPARK =
+            PARTICLES.register("frost_spark", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NATURE_SPARK =
+            PARTICLES.register("nature_spark", () -> new SimpleParticleType(false));
 }

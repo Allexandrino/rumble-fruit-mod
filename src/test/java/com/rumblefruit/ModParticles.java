@@ -15,4 +15,12 @@ public class ModParticles {
             new DeferredHolder<>(new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELECTRO_CLOUD =
             new DeferredHolder<>(new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> INFERNO_SPARK =
+            new DeferredHolder<>(new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> VOID_SPARK =
+            new DeferredHolder<>(new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> FROST_SPARK =
+            new DeferredHolder<>(new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NATURE_SPARK =
+            new DeferredHolder<>(new SimpleParticleType(false));
 }

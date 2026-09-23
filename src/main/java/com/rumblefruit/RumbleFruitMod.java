@@ -22,6 +22,15 @@ public class RumbleFruitMod {
     public static final DeferredHolder<Item, ?> ELECTRO_APPLE =
             ITEMS.register("electro_apple", ElectroAppleItem::new);
 
+    public static final DeferredHolder<Item, ?> INFERNO_FRUIT =
+            ITEMS.register("inferno_fruit", () -> new ElementFruitItem(1));
+    public static final DeferredHolder<Item, ?> VOID_FRUIT =
+            ITEMS.register("void_fruit", () -> new ElementFruitItem(2));
+    public static final DeferredHolder<Item, ?> FROST_FRUIT =
+            ITEMS.register("frost_fruit", () -> new ElementFruitItem(3));
+    public static final DeferredHolder<Item, ?> NATURE_FRUIT =
+            ITEMS.register("nature_fruit", () -> new ElementFruitItem(4));
+
     public static final DeferredHolder<Item, ?> ELECTRO_BOW =
             ITEMS.register("electro_bow", ElectroBowItem::new);
 
@@ -68,6 +77,10 @@ public class RumbleFruitMod {
                     .icon(() -> new ItemStack(ELECTRO_APPLE.get()))
                     .displayItems((params, output) -> {
                         output.accept(ELECTRO_APPLE.get());
+                        output.accept(INFERNO_FRUIT.get());
+                        output.accept(VOID_FRUIT.get());
+                        output.accept(FROST_FRUIT.get());
+                        output.accept(NATURE_FRUIT.get());
                         output.accept(FALLEN_EXORCIST_SPAWN_EGG.get());
                         output.accept(BOSS_MAP.get());
                         output.accept(METEOR_CORE_ITEM.get());

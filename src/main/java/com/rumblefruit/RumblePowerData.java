@@ -19,6 +19,7 @@ import net.neoforged.fml.common.Mod;
 @EventBusSubscriber(modid = RumbleFruitMod.MOD_ID)
 public class RumblePowerData {
     private static final String TAG = "hasLightningPower";
+    private static final String TAG_ELEMENT = "fruitElement";
     private static final net.minecraft.resources.ResourceLocation HP_MODIFIER_ID =
             net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "hp_boost");
 
@@ -27,11 +28,24 @@ public class RumblePowerData {
         return player.getPersistentData().getBoolean(TAG);
     }
 
+    // which fruit element the player carries (0 = lightning)
+    public static int elementOf(Player player) {
+        return player.getPersistentData().getInt(TAG_ELEMENT);
+    }
+
     public static void grant(Player player) {
-        if (player.level().isClientSide || hasPower(player)) {
+        grant(player, 0);
+    }
+
+    public static void grant(Player player, int element) {
+        if (player.level().isClientSide) {
+            return;
+        }
+        if (hasPower(player) && elementOf(player) == element) {
             return;
         }
         player.getPersistentData().putBoolean(TAG, true);
+        player.getPersistentData().putInt(TAG_ELEMENT, element);
         // resistance + extra max HP so the user feels tougher
         player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, MobEffectInstance.INFINITE_DURATION, 1, false, false));
         var attr = player.getAttribute(Attributes.MAX_HEALTH);
@@ -48,6 +62,7 @@ public class RumblePowerData {
             return;
         }
         player.getPersistentData().putBoolean(TAG, false);
+        player.getPersistentData().putInt(TAG_ELEMENT, 0);
         player.removeEffect(MobEffects.DAMAGE_RESISTANCE);
         var attr = player.getAttribute(Attributes.MAX_HEALTH);
         if (attr != null && attr.getModifier(HP_MODIFIER_ID) != null) {
@@ -62,7 +77,7 @@ public class RumblePowerData {
     private static void syncToClient(Player player) {
         if (player instanceof ServerPlayer serverPlayer) {
             net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(serverPlayer,
-                    new PowerSyncPacket(hasPower(serverPlayer)));
+                    new PowerSyncPacket(hasPower(serverPlayer), elementOf(serverPlayer)));
         }
     }
 
@@ -84,6 +99,7 @@ public class RumblePowerData {
         CompoundTag original = event.getOriginal().getPersistentData();
         if (original.getBoolean(TAG)) {
             event.getEntity().getPersistentData().putBoolean(TAG, true);
+            event.getEntity().getPersistentData().putInt(TAG_ELEMENT, original.getInt(TAG_ELEMENT));
             // re-apply resistance (attributes persist through clone, but effects don't)
             event.getEntity().addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,
                     MobEffectInstance.INFINITE_DURATION, 1, false, false));

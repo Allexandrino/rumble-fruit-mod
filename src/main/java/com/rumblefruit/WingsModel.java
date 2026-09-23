@@ -179,6 +179,16 @@ public class WingsModel extends Model {
         bodyRoot.render(poseStack, buffer, packedLight, packedOverlay);
     }
 
+    public void renderWings(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
+                            int color) {
+        bodyRoot.render(poseStack, buffer, packedLight, packedOverlay, color);
+    }
+
+    public void renderCostume(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
+                              int color) {
+        costume.render(poseStack, buffer, packedLight, packedOverlay, color);
+    }
+
     public void renderMask(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay) {
         mask.render(poseStack, buffer, packedLight, packedOverlay);
     }

@@ -46,8 +46,14 @@ public class MeteorDungeon {
         void teleport(ServerPlayer player, ServerLevel dest, double x, double y, double z);
     }
 
-    static FruitGrant FRUIT_GRANT = player -> player.getInventory().add(
-            new net.minecraft.world.item.ItemStack(RumbleFruitMod.ELECTRO_APPLE.get()));
+    static FruitGrant FRUIT_GRANT = player -> {
+        // the vault feeds you a random elemental fruit
+        var fruits = java.util.List.of(
+                RumbleFruitMod.ELECTRO_APPLE, RumbleFruitMod.INFERNO_FRUIT, RumbleFruitMod.VOID_FRUIT,
+                RumbleFruitMod.FROST_FRUIT, RumbleFruitMod.NATURE_FRUIT);
+        player.getInventory().add(new net.minecraft.world.item.ItemStack(
+                fruits.get(new java.util.Random().nextInt(fruits.size())).get()));
+    };
     static BossSpawner BOSS_SPAWNER = (level, at) -> {
         FallenExorcistEntity boss = new FallenExorcistEntity(ModEntities.FALLEN_EXORCIST.get(), level);
         boss.setPos(at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5);
