@@ -21,6 +21,19 @@ public class ElementWeaponAura {
         if (mc.player == null || mc.level == null || !ClientPowerData.has()) {
             return;
         }
+        // the fists smolder only in the heat of action: a recent cast, swing
+        // or taken hit — never while idling
+        boolean active = ClientSkillInput.lastCastTick >= 0
+                && mc.player.tickCount - ClientSkillInput.lastCastTick < 60;
+        if (ClientStanceCombat.ticksSinceSlash() < 60) {
+            active = true;
+        }
+        if (mc.player.hurtTime > 0) {
+            active = true;
+        }
+        if (!active) {
+            return;
+        }
         if (mc.player.tickCount % 2 != 0) {
             return;
         }
