@@ -78,6 +78,11 @@ public class AngelRobeLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
         if (!ClientWingsData.isActive(player.getUUID())) {
             return;
         }
+        // the white angel robe belongs to the lightning form only — the
+        // elemental forms go bare so the cracked skin shows through
+        if (!com.rumblefruit.core.ElementCatalog.byId(ClientPowerData.element()).isLightning()) {
+            return;
+        }
         PlayerModel<AbstractClientPlayer> parent = this.getParentModel();
         copyPose(parent.body, body);
         copyPose(parent.rightArm, rightArm);
