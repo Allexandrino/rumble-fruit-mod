@@ -136,4 +136,16 @@ class ElementSkillsTest {
         assertFalse(victim.effectLog.isEmpty());
         assertFalse(victim.damageLog.isEmpty());
     }
+
+    @Test
+    void transformedCasterCarriesEmpoweredRiders() {
+        // given the transformation active
+        WingsData.setActive(player, true);
+        // when the flame jet hits
+        ElementSkills.cast(Element.INFERNO, player, 0, 1);
+        // then the burn is the empowered 200 ticks and damage is 60% up
+        assertEquals(200, victim.fireTicks);
+        assertEquals(14.0F * 1.6F, victim.damageLog.get(0), 0.01F);
+        WingsData.setActive(player, false);
+    }
 }

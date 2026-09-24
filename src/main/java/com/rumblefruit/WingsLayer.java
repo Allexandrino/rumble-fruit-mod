@@ -58,9 +58,11 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         float scale = WING_SCALE * eased;
         poseStack.scale(scale, scale, scale);
         poseStack.translate(0.0, -0.05, -0.14);
-        // elemental tint: fire burns orange, void purple, frost pale, nature green
-        int tint = 0xFF000000 | com.rumblefruit.core.ElementCatalog.byId(ClientPowerData.element()).color();
-        model.renderWings(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, tint);
+        // elemental transformation: own wing shape AND color per element —
+        // angel feathers, flame tongues, bat membrane, ice shards, leaf fan
+        var element = com.rumblefruit.core.ElementCatalog.byId(ClientPowerData.element());
+        int tint = 0xFF000000 | element.color();
+        model.renderWings(element.id(), poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, tint);
 
         // golden lightning arcs crackling ON the wings (wing space: they follow the flaps)
         if (unfold > 0.4F) {
@@ -85,8 +87,19 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         // fullbright: the exorcist mask and the halo glow in the dark
         VertexConsumer emissive = buffer.getBuffer(RenderType.eyes(TEXTURE));
         model.renderMask(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY);
-        model.renderHalo(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY);
+        model.renderHalo(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY, tint);
         poseStack.popPose();
+
+        // elemental aura: embers, void wisps, snowflakes or petals drift off
+        // the transformed body
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level != null && player.tickCount % 4 == 0) {
+            mc.level.addParticle(Element.byId(ClientPowerData.element()).spark(),
+                    player.getX() + (Math.random() - 0.5) * 1.2,
+                    player.getY() + 0.6 + Math.random() * 1.4,
+                    player.getZ() + (Math.random() - 0.5) * 1.2,
+                    0.0, 0.02, 0.0);
+        }
     }
 
     // jagged golden arcs along each wing, attached in wing space (post-scale),

@@ -23,6 +23,7 @@ public class WingsModel extends Model {
     private final ModelPart bodyRoot;
     private final ModelPart rightWing;
     private final ModelPart leftWing;
+    private final ModelPart[][] wings = new ModelPart[5][2]; // [style][right,left]
     private final ModelPart mask;
     private final ModelPart halo;
     private final ModelPart costume;
@@ -32,6 +33,12 @@ public class WingsModel extends Model {
         this.bodyRoot = root.getChild("body");
         this.rightWing = bodyRoot.getChild("right_wing");
         this.leftWing = bodyRoot.getChild("left_wing");
+        wings[0][0] = rightWing;
+        wings[0][1] = leftWing;
+        for (int s = 1; s <= 4; s++) {
+            wings[s][0] = bodyRoot.getChild("rw" + s);
+            wings[s][1] = bodyRoot.getChild("lw" + s);
+        }
         this.mask = root.getChild("mask");
         this.halo = root.getChild("halo");
         this.costume = root.getChild("costume");
@@ -105,6 +112,124 @@ public class WingsModel extends Model {
         }
     }
 
+    // flame tongues: slim vertical flames licking upward (inferno archangel)
+    private static void buildFlameWing(PartDefinition wing, boolean mirrored) {
+        float[][] t = {
+                {0.8F, -0.4F, 0.95F, 5.0F},
+                {1.8F, -0.9F, 0.60F, 6.5F},
+                {2.6F, -1.5F, 0.25F, 8.0F},
+                {3.2F, -2.1F, -0.10F, 8.5F},
+                {3.6F, -2.6F, -0.45F, 7.0F},
+        };
+        for (int i = 0; i < t.length; i++) {
+            float px = mirrored ? -t[i][0] : t[i][0];
+            float zRot = mirrored ? -t[i][2] : t[i][2];
+            float len = t[i][3];
+            wing.addOrReplaceChild("f" + i,
+                    CubeListBuilder.create().texOffs(0, 4).addBox(-0.4F, -len, -0.3F, 0.8F, len, 0.6F),
+                    PartPose.offsetAndRotation(px, t[i][1], 0.0F, 0.0F, 0.0F, zRot));
+        }
+    }
+
+    // bat wing: three bone fingers with a membrane stretched between (void king)
+    private static void buildBatWing(PartDefinition wing, boolean mirrored) {
+        float[][] fingers = {
+                {0.8F, -0.8F, -0.75F, 8.0F},
+                {1.2F, -1.6F, -0.25F, 9.5F},
+                {1.2F, -2.4F, 0.35F, 8.5F},
+        };
+        for (int i = 0; i < fingers.length; i++) {
+            float px = mirrored ? -fingers[i][0] : fingers[i][0];
+            float zRot = mirrored ? -fingers[i][2] : fingers[i][2];
+            float len = fingers[i][3];
+            CubeListBuilder cube = CubeListBuilder.create().texOffs(0, 8);
+            if (mirrored) {
+                cube.addBox(-len, -0.3F, -0.25F, len, 0.6F, 0.5F);
+            } else {
+                cube.addBox(0.0F, -0.3F, -0.25F, len, 0.6F, 0.5F);
+            }
+            wing.addOrReplaceChild("bf" + i, cube,
+                    PartPose.offsetAndRotation(px, fingers[i][1], 0.0F, 0.0F, 0.0F, zRot));
+        }
+        float[][] mem = {
+                {0.6F, -0.6F, -0.55F, 7.0F},
+                {1.0F, -1.4F, -0.05F, 8.5F},
+        };
+        for (int i = 0; i < mem.length; i++) {
+            float px = mirrored ? -mem[i][0] : mem[i][0];
+            float zRot = mirrored ? -mem[i][2] : mem[i][2];
+            float len = mem[i][3];
+            CubeListBuilder cube = CubeListBuilder.create().texOffs(0, 12);
+            if (mirrored) {
+                cube.addBox(-len, -1.6F, 0.15F, len, 3.2F, 0.25F);
+            } else {
+                cube.addBox(0.0F, -1.6F, 0.15F, len, 3.2F, 0.25F);
+            }
+            wing.addOrReplaceChild("bm" + i, cube,
+                    PartPose.offsetAndRotation(px, mem[i][1], 0.1F, 0.0F, 0.0F, zRot));
+        }
+    }
+
+    // crystal shards: slim icy prisms fanned upward (ice seraphim)
+    private static void buildCrystalWing(PartDefinition wing, boolean mirrored) {
+        float[][] shards = {
+                {0.7F, -0.6F, 0.70F, 5.5F},
+                {1.6F, -1.2F, 0.40F, 7.0F},
+                {2.4F, -1.8F, 0.10F, 8.5F},
+                {3.0F, -2.4F, -0.20F, 8.0F},
+                {3.4F, -2.9F, -0.50F, 6.5F},
+        };
+        for (int i = 0; i < shards.length; i++) {
+            float px = mirrored ? -shards[i][0] : shards[i][0];
+            float zRot = mirrored ? -shards[i][2] : shards[i][2];
+            float len = shards[i][3];
+            wing.addOrReplaceChild("cr" + i,
+                    CubeListBuilder.create().texOffs(0, 4).addBox(-0.5F, -len, -0.4F, 1.0F, len, 0.8F),
+                    PartPose.offsetAndRotation(px, shards[i][1], 0.0F, 0.0F, 0.0F, zRot));
+        }
+    }
+
+    // leaf fan: broad leaves layered in a row (mother nature)
+    private static void buildLeafWing(PartDefinition wing, boolean mirrored) {
+        float[][] leaves = {
+                {0.8F, -0.7F, -0.80F, 5.5F},
+                {1.9F, -1.4F, -0.45F, 6.5F},
+                {2.7F, -2.1F, -0.10F, 7.0F},
+                {3.2F, -2.7F, 0.30F, 6.0F},
+        };
+        for (int i = 0; i < leaves.length; i++) {
+            float px = mirrored ? -leaves[i][0] : leaves[i][0];
+            float zRot = mirrored ? -leaves[i][2] : leaves[i][2];
+            float len = leaves[i][3];
+            CubeListBuilder cube = CubeListBuilder.create().texOffs(0, 0);
+            if (mirrored) {
+                cube.addBox(-len, -1.4F, -0.5F, len, 2.8F, 0.5F);
+            } else {
+                cube.addBox(0.0F, -1.4F, -0.5F, len, 2.8F, 0.5F);
+            }
+            wing.addOrReplaceChild("lf" + i, cube,
+                    PartPose.offsetAndRotation(px, leaves[i][1], 0.0F, 0.0F, 0.0F, zRot));
+        }
+    }
+
+    private static void buildStylePair(PartDefinition body, int style, boolean ignored) {
+        PartDefinition rw = body.addOrReplaceChild("rw" + style,
+                CubeListBuilder.create(), PartPose.offset(1.2F, 0.8F, 2.2F));
+        buildStyledWing(rw, false, style);
+        PartDefinition lw = body.addOrReplaceChild("lw" + style,
+                CubeListBuilder.create(), PartPose.offset(-1.2F, 0.8F, 2.2F));
+        buildStyledWing(lw, true, style);
+    }
+
+    private static void buildStyledWing(PartDefinition wing, boolean mirrored, int style) {
+        switch (style) {
+            case 1 -> buildFlameWing(wing, mirrored);
+            case 2 -> buildBatWing(wing, mirrored);
+            case 3 -> buildCrystalWing(wing, mirrored);
+            default -> buildLeafWing(wing, mirrored);
+        }
+    }
+
     public static LayerDefinition createBodyLayer() {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
@@ -117,6 +242,11 @@ public class WingsModel extends Model {
         PartDefinition left = body.addOrReplaceChild("left_wing",
                 CubeListBuilder.create(), PartPose.offset(-1.2F, 0.8F, 2.2F));
         buildWing(left, true);
+        // elemental wing styles: flame, bat, crystal, leaf
+        buildStylePair(body, 1, false);
+        buildStylePair(body, 2, false);
+        buildStylePair(body, 3, false);
+        buildStylePair(body, 4, false);
 
         // hazbin-hotel exorcist mask: white horned mask over the face (head space)
         PartDefinition mask = root.addOrReplaceChild("mask",
@@ -168,20 +298,43 @@ public class WingsModel extends Model {
         float speed = flying ? 0.35F : 0.1F;
         float amp = flying ? 0.5F : 0.05F;
         float fold = Mth.sin(ageInTicks * speed) * amp;
-        rightWing.yRot = -0.15F - fold;
-        leftWing.yRot = 0.15F + fold;
         float lift = Mth.cos(ageInTicks * speed) * amp * 0.6F;
-        rightWing.zRot = -lift;
-        leftWing.zRot = lift;
+        for (ModelPart[] pair : wings) {
+            if (pair[0] == null) {
+                continue;
+            }
+            pair[0].yRot = -0.15F - fold;
+            pair[1].yRot = 0.15F + fold;
+            pair[0].zRot = -lift;
+            pair[1].zRot = lift;
+        }
     }
 
     public void renderWings(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay) {
-        bodyRoot.render(poseStack, buffer, packedLight, packedOverlay);
+        renderWings(0, poseStack, buffer, packedLight, packedOverlay);
+    }
+
+    public void renderWings(int style, PoseStack poseStack, VertexConsumer buffer,
+                            int packedLight, int packedOverlay) {
+        wings[Math.floorMod(style, 5)][0].render(poseStack, buffer, packedLight, packedOverlay);
+        wings[Math.floorMod(style, 5)][1].render(poseStack, buffer, packedLight, packedOverlay);
     }
 
     public void renderWings(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
                             int color) {
-        bodyRoot.render(poseStack, buffer, packedLight, packedOverlay, color);
+        renderWings(0, poseStack, buffer, packedLight, packedOverlay, color);
+    }
+
+    public void renderWings(int style, PoseStack poseStack, VertexConsumer buffer,
+                            int packedLight, int packedOverlay, int color) {
+        int s = Math.floorMod(style, 5);
+        wings[s][0].render(poseStack, buffer, packedLight, packedOverlay, color);
+        wings[s][1].render(poseStack, buffer, packedLight, packedOverlay, color);
+    }
+
+    public void renderHalo(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
+                           int color) {
+        halo.render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 
     public void renderCostume(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,

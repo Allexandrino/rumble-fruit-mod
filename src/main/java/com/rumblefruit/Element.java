@@ -56,21 +56,30 @@ public enum Element {
     // the rider every skill hit carries: fire burns, void withers, frost
     // freezes, nature poisons and feeds the caster
     public void applyRider(LivingEntity target, LivingEntity caster) {
+        applyRider(target, caster, false);
+    }
+
+    // empowered variant while the transformation (F) is active: riders burn
+    // longer and hit a level higher
+    public void applyRider(LivingEntity target, LivingEntity caster, boolean empowered) {
         switch (this) {
             case LIGHTNING -> {
+                if (empowered) {
+                    target.addEffect(new MobEffectInstance(MobEffects.GLOWING, 60, 0));
+                }
             }
-            case INFERNO -> target.setRemainingFireTicks(100);
+            case INFERNO -> target.setRemainingFireTicks(empowered ? 200 : 100);
             case VOID -> {
-                target.addEffect(new MobEffectInstance(MobEffects.WITHER, 60, 1));
-                target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 0));
+                target.addEffect(new MobEffectInstance(MobEffects.WITHER, empowered ? 120 : 60, empowered ? 2 : 1));
+                target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, empowered ? 100 : 60, 0));
             }
             case FROST -> {
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 2));
-                target.setTicksFrozen(200);
+                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, empowered ? 120 : 80, empowered ? 3 : 2));
+                target.setTicksFrozen(empowered ? 320 : 200);
             }
             case NATURE -> {
-                target.addEffect(new MobEffectInstance(MobEffects.POISON, 80, 1));
-                caster.heal(2.0F);
+                target.addEffect(new MobEffectInstance(MobEffects.POISON, empowered ? 120 : 80, empowered ? 2 : 1));
+                caster.heal(empowered ? 4.0F : 2.0F);
             }
         }
     }

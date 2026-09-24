@@ -250,9 +250,12 @@ public final class ElementSkills {
 
     private static void hurt(ServerLevel level, ServerPlayer player, LivingEntity target,
                              float amount, Element element) {
-        target.hurt(level.damageSources().indirectMagic(player, player), amount);
+        // transformed (F): skills hit 60% harder and carry empowered riders
+        boolean empowered = WingsData.isActive(player.getUUID());
+        target.hurt(level.damageSources().indirectMagic(player, player),
+                empowered ? amount * 1.6F : amount);
         target.hurtMarked = true;
-        element.applyRider(target, player);
+        element.applyRider(target, player, empowered);
     }
 
     private static java.util.List<LivingEntity> nearby(ServerPlayer player, ServerLevel level,
