@@ -27,4 +27,7 @@ public class SoundEvents {
     public static final SoundEvent ARROW_SHOOT = new SoundEvent("arrow_shoot");
     public static final SoundEvent ENDER_DRAGON_FLAP = new SoundEvent("dragon_flap");
     public static final SoundEvent TOTEM_USE = new SoundEvent("totem_use");
+    public static final SoundEvent BLAZE_SHOOT = new SoundEvent("blaze_shoot");
+    public static final SoundEvent PLAYER_HURT_FREEZE = new SoundEvent("hurt_freeze");
+    public static final SoundEvent BONE_MEAL_USE = new SoundEvent("bone_meal");
 }

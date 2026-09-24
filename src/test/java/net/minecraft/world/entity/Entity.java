@@ -124,6 +124,17 @@ public class Entity {
         return false;
     }
 
+    public int fireTicks = 0;
+    public int frozenTicks = 0;
+
+    public void setRemainingFireTicks(int ticks) {
+        this.fireTicks = ticks;
+    }
+
+    public void setTicksFrozen(int ticks) {
+        this.frozenTicks = ticks;
+    }
+
     public Level level() {
         return level;
     }

@@ -104,6 +104,12 @@ public class SkillExecutor {
         // stance-based skill sets: fists = blox fruits lightning,
         // sword = "Крыло Ангела", bow = "Перо Бури"
         int stance = StanceData.get(player.getUUID());
+        // elemental fruits have their OWN skill kits — not a lightning recolor
+        Element el = element(player);
+        if (el != Element.LIGHTNING && (skillId == 0 || skillId == 1 || skillId == 2 || skillId == 5)) {
+            ElementSkills.cast(el, player, skillId, variantOrCharge);
+            return;
+        }
         switch (skillId) {
             case 0 -> { // Z
                 if (stance == StanceData.SWORD) {

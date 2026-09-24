@@ -48,6 +48,10 @@ public class Level implements BlockGetter {
         return new net.minecraft.world.damagesource.DamageSources();
     }
 
+    public net.minecraft.world.phys.BlockHitResult clip(ClipContext context) {
+        return net.minecraft.world.phys.BlockHitResult.miss(net.minecraft.world.phys.Vec3.ZERO);
+    }
+
     public void playSound(net.minecraft.world.entity.player.Player except,
                           BlockPos pos, SoundEvent sound, SoundSource source,
                           float volume, float pitch) {

@@ -9,4 +9,6 @@ public class MobEffects {
     public static final Holder<MobEffect> SLOW_FALLING = Holder.direct(new MobEffect());
     public static final Holder<MobEffect> BLINDNESS = Holder.direct(new MobEffect());
     public static final Holder<MobEffect> MOVEMENT_SLOWDOWN = Holder.direct(new MobEffect());
+    public static final Holder<MobEffect> WITHER = Holder.direct(new MobEffect());
+    public static final Holder<MobEffect> POISON = Holder.direct(new MobEffect());
 }

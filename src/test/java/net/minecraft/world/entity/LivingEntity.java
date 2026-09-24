@@ -39,4 +39,8 @@ public class LivingEntity extends Entity {
     public float getMaxHealth() {
         return maxHealth;
     }
+
+    public void heal(float amount) {
+        health = Math.min(maxHealth, health + amount);
+    }
 }
