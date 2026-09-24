@@ -27,6 +27,7 @@ public class ClientSetup {
             if (renderer != null) {
                 renderer.addLayer(new WingsLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new AngelRobeLayer(renderer, event.getEntityModels()));
+                renderer.addLayer(new CrackedSkinLayer(renderer));
                 renderer.addLayer(new VirtualWeaponLayer(renderer));
             }
         }
