@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -90,15 +91,57 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         model.renderHalo(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY, tint);
         poseStack.popPose();
 
-        // elemental aura: embers, void wisps, snowflakes or petals drift off
-        // the transformed body
-        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-        if (mc.level != null && player.tickCount % 4 == 0) {
-            mc.level.addParticle(Element.byId(ClientPowerData.element()).spark(),
-                    player.getX() + (Math.random() - 0.5) * 1.2,
-                    player.getY() + 0.6 + Math.random() * 1.4,
-                    player.getZ() + (Math.random() - 0.5) * 1.2,
-                    0.0, 0.02, 0.0);
+        // the seraphim is NOT an angel: a biblically accurate being — spinning
+        // rings of a hundred eyes around the frost form
+        if (element.id() == 3) {
+            renderSeraphimRings(poseStack, buffer, ageInTicks, tint);
+        }
+    }
+
+    // biblically accurate seraphim: concentric counter-rotating rings of a
+    // hundred eyes around the frost form
+    private ModelPart seraphCube;
+    private ModelPart seraphEye;
+
+    private void renderSeraphimRings(PoseStack poseStack, MultiBufferSource buffer,
+                                     float ageInTicks, int tint) {
+        if (seraphCube == null) {
+            net.minecraft.client.model.geom.builders.MeshDefinition mesh =
+                    new net.minecraft.client.model.geom.builders.MeshDefinition();
+            mesh.getRoot().addOrReplaceChild("c",
+                    net.minecraft.client.model.geom.builders.CubeListBuilder.create().texOffs(0, 0)
+                            .addBox(-0.9F, -0.9F, -0.9F, 1.8F, 1.8F, 1.8F),
+                    net.minecraft.client.model.geom.PartPose.ZERO);
+            seraphCube = mesh.getRoot().bake(64, 64);
+            net.minecraft.client.model.geom.builders.MeshDefinition eyeMesh =
+                    new net.minecraft.client.model.geom.builders.MeshDefinition();
+            eyeMesh.getRoot().addOrReplaceChild("e",
+                    net.minecraft.client.model.geom.builders.CubeListBuilder.create().texOffs(0, 8)
+                            .addBox(-1.3F, -1.3F, -1.3F, 2.6F, 2.6F, 2.6F),
+                    net.minecraft.client.model.geom.PartPose.ZERO);
+            seraphEye = eyeMesh.getRoot().bake(64, 64);
+        }
+        VertexConsumer emissive = buffer.getBuffer(RenderType.eyes(TEXTURE));
+        seraphRing(poseStack, emissive, 14.0F, 0.0F, ageInTicks * 0.045F, tint);
+        seraphRing(poseStack, emissive, 20.0F, 1.05F, -ageInTicks * 0.03F, tint);
+    }
+
+    private void seraphRing(PoseStack poseStack, VertexConsumer buffer, float radius,
+                            float tiltX, float angle, int tint) {
+        int cubes = 28;
+        for (int i = 0; i < cubes; i++) {
+            double a = i * Math.PI * 2.0 / cubes + angle;
+            poseStack.pushPose();
+            poseStack.translate(0.0, 12.0, 0.0); // chest height in model units
+            poseStack.mulPose(com.mojang.math.Axis.XP.rotation(tiltX));
+            poseStack.translate(Math.cos(a) * radius, 0.0, Math.sin(a) * radius);
+            // every third point is a big glowing eye
+            if (i % 3 == 0) {
+                seraphEye.render(poseStack, buffer, 0xF000F0, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
+            } else {
+                seraphCube.render(poseStack, buffer, 0xF000F0, OverlayTexture.NO_OVERLAY, tint);
+            }
+            poseStack.popPose();
         }
     }
 

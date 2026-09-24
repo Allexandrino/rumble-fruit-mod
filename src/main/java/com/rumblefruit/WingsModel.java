@@ -23,7 +23,7 @@ public class WingsModel extends Model {
     private final ModelPart bodyRoot;
     private final ModelPart rightWing;
     private final ModelPart leftWing;
-    private final ModelPart[][] wings = new ModelPart[5][2]; // [style][right,left]
+    private final ModelPart[] styleRoots = new ModelPart[5]; // 0 = angel body
     private final ModelPart mask;
     private final ModelPart halo;
     private final ModelPart costume;
@@ -33,11 +33,9 @@ public class WingsModel extends Model {
         this.bodyRoot = root.getChild("body");
         this.rightWing = bodyRoot.getChild("right_wing");
         this.leftWing = bodyRoot.getChild("left_wing");
-        wings[0][0] = rightWing;
-        wings[0][1] = leftWing;
+        styleRoots[0] = bodyRoot;
         for (int s = 1; s <= 4; s++) {
-            wings[s][0] = bodyRoot.getChild("rw" + s);
-            wings[s][1] = bodyRoot.getChild("lw" + s);
+            styleRoots[s] = root.getChild("wings" + s);
         }
         this.mask = root.getChild("mask");
         this.halo = root.getChild("halo");
@@ -213,10 +211,12 @@ public class WingsModel extends Model {
     }
 
     private static void buildStylePair(PartDefinition body, int style, boolean ignored) {
-        PartDefinition rw = body.addOrReplaceChild("rw" + style,
+        PartDefinition pair = body.addOrReplaceChild("wings" + style,
+                CubeListBuilder.create(), PartPose.ZERO);
+        PartDefinition rw = pair.addOrReplaceChild("rw",
                 CubeListBuilder.create(), PartPose.offset(1.2F, 0.8F, 2.2F));
         buildStyledWing(rw, false, style);
-        PartDefinition lw = body.addOrReplaceChild("lw" + style,
+        PartDefinition lw = pair.addOrReplaceChild("lw",
                 CubeListBuilder.create(), PartPose.offset(-1.2F, 0.8F, 2.2F));
         buildStyledWing(lw, true, style);
     }
@@ -242,11 +242,12 @@ public class WingsModel extends Model {
         PartDefinition left = body.addOrReplaceChild("left_wing",
                 CubeListBuilder.create(), PartPose.offset(-1.2F, 0.8F, 2.2F));
         buildWing(left, true);
-        // elemental wing styles: flame, bat, crystal, leaf
-        buildStylePair(body, 1, false);
-        buildStylePair(body, 2, false);
-        buildStylePair(body, 3, false);
-        buildStylePair(body, 4, false);
+        // elemental wing styles: flame, bat, crystal, leaf — each its own root
+        // (same render path as the classic angel body root)
+        buildStylePair(root, 1, false);
+        buildStylePair(root, 2, false);
+        buildStylePair(root, 3, false);
+        buildStylePair(root, 4, false);
 
         // hazbin-hotel exorcist mask: white horned mask over the face (head space)
         PartDefinition mask = root.addOrReplaceChild("mask",
@@ -299,14 +300,20 @@ public class WingsModel extends Model {
         float amp = flying ? 0.5F : 0.05F;
         float fold = Mth.sin(ageInTicks * speed) * amp;
         float lift = Mth.cos(ageInTicks * speed) * amp * 0.6F;
-        for (ModelPart[] pair : wings) {
-            if (pair[0] == null) {
-                continue;
-            }
+        ModelPart[][] pairs = {{rightWing, leftWing}};
+        for (ModelPart[] pair : pairs) {
             pair[0].yRot = -0.15F - fold;
             pair[1].yRot = 0.15F + fold;
             pair[0].zRot = -lift;
             pair[1].zRot = lift;
+        }
+        for (int s = 1; s <= 4; s++) {
+            ModelPart rw = styleRoots[s].getChild("rw");
+            ModelPart lw = styleRoots[s].getChild("lw");
+            rw.yRot = -0.15F - fold;
+            lw.yRot = 0.15F + fold;
+            rw.zRot = -lift;
+            lw.zRot = lift;
         }
     }
 
@@ -316,8 +323,7 @@ public class WingsModel extends Model {
 
     public void renderWings(int style, PoseStack poseStack, VertexConsumer buffer,
                             int packedLight, int packedOverlay) {
-        wings[Math.floorMod(style, 5)][0].render(poseStack, buffer, packedLight, packedOverlay);
-        wings[Math.floorMod(style, 5)][1].render(poseStack, buffer, packedLight, packedOverlay);
+        styleRoots[Math.floorMod(style, 5)].render(poseStack, buffer, packedLight, packedOverlay);
     }
 
     public void renderWings(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
@@ -327,9 +333,7 @@ public class WingsModel extends Model {
 
     public void renderWings(int style, PoseStack poseStack, VertexConsumer buffer,
                             int packedLight, int packedOverlay, int color) {
-        int s = Math.floorMod(style, 5);
-        wings[s][0].render(poseStack, buffer, packedLight, packedOverlay, color);
-        wings[s][1].render(poseStack, buffer, packedLight, packedOverlay, color);
+        styleRoots[Math.floorMod(style, 5)].render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 
     public void renderHalo(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
