@@ -361,31 +361,29 @@ public final class ElementSkills {
     }
 
     // ---------------- visuals & sound ----------------
+    // alastor-sharp: a needle-straight beam of light, no fuzz
     private static void jetFx(ServerLevel level, ServerPlayer player, Element element,
                               double range, int count) {
         Vec3 eye = player.getEyePosition();
         Vec3 view = player.getLookAngle();
-        for (int i = 0; i < count; i++) {
-            double d = 1.0 + i * (range / count);
-            double spread = 0.15 + d * 0.06;
-            level.sendParticles(element.spark(),
-                    eye.x + view.x * d + (Math.random() - 0.5) * spread,
-                    eye.y + view.y * d + (Math.random() - 0.5) * spread,
-                    eye.z + view.z * d + (Math.random() - 0.5) * spread,
-                    2, 0.05, 0.05, 0.05, 0.02);
+        for (double d = 0.8; d < range; d += 0.45) {
+            Vec3 p = eye.add(view.scale(d));
+            level.sendParticles(element.spark(), p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
         }
     }
 
+    // perfect geometric circles: crisp points on two rings, no random spread
     private static void ringFx(ServerLevel level, Vec3 center, Element element,
                                double radius, int count) {
         for (int i = 0; i < count; i++) {
             double a = i * Math.PI * 2.0 / count;
             level.sendParticles(element.spark(),
-                    center.x + Math.cos(a) * radius, center.y + 0.5, center.z + Math.sin(a) * radius,
-                    5, 0.3, 0.6, 0.3, 0.06);
+                    center.x + Math.cos(a) * radius, center.y + 0.4, center.z + Math.sin(a) * radius,
+                    1, 0.0, 0.0, 0.0, 0.0);
             level.sendParticles(element.spark(),
-                    center.x + Math.cos(a) * radius * 0.6, center.y + 1.0, center.z + Math.sin(a) * radius * 0.6,
-                    3, 0.2, 0.5, 0.2, 0.05);
+                    center.x + Math.cos(a + 0.06) * radius * 0.65, center.y + 0.9,
+                    center.z + Math.sin(a + 0.06) * radius * 0.65,
+                    1, 0.0, 0.0, 0.0, 0.0);
         }
     }
 

@@ -28,6 +28,13 @@ public class ModCommands {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
                             MeteorDungeon.enter((ServerLevel) player.level(), player);
                             return 1;
+                        }))
+                .then(Commands.literal("charge")
+                        .executes(ctx -> {
+                            ServerPlayer player = ctx.getSource().getPlayerOrException();
+                            PowerChargeData.add(player, PowerChargeData.MAX);
+                            PowerChargeData.sync(player);
+                            return 1;
                         })));
     }
 }
