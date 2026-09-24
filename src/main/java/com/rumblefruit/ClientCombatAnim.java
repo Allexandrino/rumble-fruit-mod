@@ -61,6 +61,9 @@ public class ClientCombatAnim {
         if (combo == 21) {
             return 85; // landed: sprawled in the crater, then getting back up
         }
+        if (combo >= 30) {
+            return 22; // skill cast poses: Z thrust / X burst / C call / V channel
+        }
         return combo >= 10 && combo < 20 ? 18 : 20;
     }
 }

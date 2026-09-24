@@ -180,18 +180,32 @@ public final class ElementSkills {
                 areaDamage(player, level, target, 12.0, 45.0F, element);
                 level.explode(null, target.x, target.y + 1.0, target.z, 6.0F,
                         Level.ExplosionInteraction.BLOCK);
+                // fire ring on the ground + a pillar of flame, not a sphere
+                ringFx(level, target, element, 10.0, 56);
+                for (double dy = 0.0; dy < 25.0; dy += 1.2) {
+                    level.sendParticles(element.spark(), target.x, target.y + dy, target.z,
+                            6, 0.5, 0.2, 0.5, 0.04);
+                }
                 FarFx.column(level, element.spark(), target.x, target.y, target.z, 80.0, 2.0, 3, 0.6);
                 sound(level, target, element.castSound(), 4.0F, 0.6F);
             }
-            case VOID -> { // Singularity: a black hole inhales the battlefield
+            case VOID -> { // Singularity: a flat vortex that inhales the battlefield
                 for (LivingEntity e : at(level, player, target, 14.0)) {
                     Vec3 pull = target.subtract(e.position()).normalize().scale(2.5);
                     e.push(pull.x, 0.2, pull.z);
                     e.hurtMarked = true;
                     hurt(level, player, e, 40.0F, element);
                 }
-                level.sendParticles(element.spark(), target.x, target.y + 2.0, target.z,
-                        400, 4.0, 4.0, 4.0, 0.08);
+                // a spinning disc on the ground, not a sphere: rings spiralling in
+                for (int i = 0; i < 90; i++) {
+                    double a = i * 0.45;
+                    double r = 1.0 + (i % 30) * 0.35;
+                    level.sendParticles(element.spark(),
+                            target.x + Math.cos(a) * r, target.y + 0.3 + (i % 5) * 0.12,
+                            target.z + Math.sin(a) * r, 2, 0.05, 0.02, 0.05, 0.03);
+                }
+                level.sendParticles(element.spark(), target.x, target.y + 0.6, target.z,
+                        30, 0.6, 0.3, 0.6, 0.02); // the dark core
                 FarFx.column(level, element.spark(), target.x, target.y, target.z, 100.0, 2.0, 3, 0.7);
                 sound(level, target, element.castSound(), 4.0F, 0.5F);
             }

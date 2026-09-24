@@ -148,7 +148,14 @@ public class FirstPersonEffectsRenderer {
         }
 
         int light = Minecraft.getInstance().getEntityRenderDispatcher().getPackedLightCoords(player, partial);
-        model.renderWeapon(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(texture)), light);
+        // elemental tint: the weapon burns in the fruit's color
+        var element = com.rumblefruit.core.ElementCatalog.byId(ClientPowerData.element());
+        if (element.isLightning()) {
+            model.renderWeapon(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(texture)), light);
+        } else {
+            model.renderWeapon(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(texture)), light,
+                    0xFF000000 | element.color());
+        }
         poseStack.popPose();
     }
 

@@ -100,7 +100,19 @@ public class SkillExecutor {
         // cast animation: vanilla synced arm swing (visible to everyone) + brief use-pose
         player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
         player.startUsingItem(net.minecraft.world.InteractionHand.MAIN_HAND);
-        PENDING_POSE_STOP.put(player.getUUID(), now + 25);
+        PENDING_POSE_STOP.put(player.getUUID(), now + 12);
+        // our own cast pose per skill family: Z thrust / X burst / C call / V channel
+        int poseCode = switch (skillId) {
+            case 0 -> 30;
+            case 1 -> 31;
+            case 2 -> 32;
+            case 5 -> 33;
+            default -> -1;
+        };
+        if (poseCode > 0) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(
+                    new CombatAnimPacket(player.getUUID(), poseCode));
+        }
         // stance-based skill sets: fists = blox fruits lightning,
         // sword = "Крыло Ангела", bow = "Перо Бури"
         int stance = StanceData.get(player.getUUID());

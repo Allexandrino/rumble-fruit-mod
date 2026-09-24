@@ -136,6 +136,11 @@ public class WeaponModels extends Model {
                 net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
     }
 
+    public void renderWeapon(PoseStack poseStack, VertexConsumer buffer, int packedLight, int color) {
+        root.render(poseStack, buffer, packedLight,
+                net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, color);
+    }
+
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
                                int color) {

@@ -149,8 +149,8 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
         rightShin.resetPose();
         leftShin.resetPose();
 
-        if (player.isUsingItem()) {
-            return;
+        if (player.isUsingItem() && ClientCombatAnim.comboOf(player.getUUID()) < 30) {
+            return; // the vanilla use-pose yields to our cast poses
         }
         float pitchRad = headPitch * 0.0174533F;
 
@@ -167,6 +167,11 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
         }
         if (combo == 21) {
             applyKnockout(ClientCombatAnim.progressOf(player.getUUID()));
+            syncOverlays();
+            return;
+        }
+        if (combo >= 30) {
+            applyCastPose(combo - 30, ClientCombatAnim.progressOf(player.getUUID()));
             syncOverlays();
             return;
         }
@@ -582,6 +587,44 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
         leftForearm.xRot = -0.2F * k;
         rightShin.xRot = 0.15F * k;
         leftShin.xRot = 0.15F * k;
+    }
+
+    // skill cast poses: a distinct silhouette per skill family — Z pierces
+    // forward, X bursts outward, C calls the sky down, V channels with both hands
+    private void applyCastPose(int kind, float t) {
+        float raise = easeInOut(phase(t, 0.0F, 0.3F));
+        float lower = easeInOut(phase(t, 0.75F, 1.0F));
+        float k = raise * (1.0F - lower);
+        switch (kind) {
+            case 0 -> { // Z: piercing thrust
+                rightArm.xRot = lerp(rightArm.xRot, -1.55F, k);
+                rightArm.yRot = lerp(rightArm.yRot, -0.15F, k);
+                rightForearm.xRot = lerp(rightForearm.xRot, -0.1F, k);
+                body.yRot = lerp(body.yRot, 0.35F, k);
+                head.yRot = lerp(head.yRot, -0.3F, k);
+            }
+            case 1 -> { // X: arms burst outward
+                rightArm.xRot = lerp(rightArm.xRot, -0.4F, k);
+                rightArm.zRot = lerp(rightArm.zRot, 1.35F, k);
+                leftArm.xRot = lerp(leftArm.xRot, -0.4F, k);
+                leftArm.zRot = lerp(leftArm.zRot, -1.35F, k);
+                body.xRot = lerp(body.xRot, 0.12F, k);
+            }
+            case 2 -> { // C: one arm calls the sky down
+                rightArm.xRot = lerp(rightArm.xRot, -2.9F, k);
+                rightArm.zRot = lerp(rightArm.zRot, 0.25F, k);
+                head.xRot = lerp(head.xRot, -0.45F, k);
+            }
+            case 3 -> { // V: both hands channel the ultimate
+                rightArm.xRot = lerp(rightArm.xRot, -2.6F, k);
+                rightArm.zRot = lerp(rightArm.zRot, 0.45F, k);
+                leftArm.xRot = lerp(leftArm.xRot, -2.6F, k);
+                leftArm.zRot = lerp(leftArm.zRot, -0.45F, k);
+                body.xRot = lerp(body.xRot, -0.1F, k);
+            }
+            default -> {
+            }
+        }
     }
 
     // R ascension: arms thrown skyward, elbows slightly bent, trembling with power

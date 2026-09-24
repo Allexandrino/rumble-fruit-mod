@@ -53,7 +53,14 @@ public class VirtualWeaponLayer extends RenderLayer<AbstractClientPlayer, Player
         poseStack.translate(1.0F / 16.0F, 0.125D, -0.55D); // grip sits in the fist
         poseStack.scale(1.3F, 1.3F, 1.3F);
         VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.entityCutoutNoCull(texture));
-        model.renderWeapon(poseStack, vertexConsumer, packedLight);
+        // elemental tint: the weapon burns in the fruit's color
+        var element = com.rumblefruit.core.ElementCatalog.byId(ClientPowerData.element());
+        if (element.isLightning()) {
+            model.renderWeapon(poseStack, vertexConsumer, packedLight);
+        } else {
+            model.renderWeapon(poseStack, vertexConsumer, packedLight,
+                    0xFF000000 | element.color());
+        }
         poseStack.popPose();
     }
 }
