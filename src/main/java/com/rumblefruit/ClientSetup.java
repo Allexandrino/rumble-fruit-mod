@@ -49,5 +49,27 @@ public class ClientSetup {
         event.registerSpriteSet(ModParticles.ELECTRO_SLASH.get(),
                 sprites -> (type, level, x, y, z, yaw, pitch, roll) ->
                         new ElectroSlashParticle(level, x, y, z, yaw, pitch, roll, sprites));
+        // simple glow quads: sparks of every element + glow + cloud
+        event.registerSpriteSet(ModParticles.ELECTRO_SPARK.get(),
+                sprites -> (type, level, x, y, z, dx, dy, dz) ->
+                        ElectroSparkParticle.spark(level, x, y, z, dx, dy, dz, sprites));
+        event.registerSpriteSet(ModParticles.INFERNO_SPARK.get(),
+                sprites -> (type, level, x, y, z, dx, dy, dz) ->
+                        ElectroSparkParticle.spark(level, x, y, z, dx, dy, dz, sprites));
+        event.registerSpriteSet(ModParticles.VOID_SPARK.get(),
+                sprites -> (type, level, x, y, z, dx, dy, dz) ->
+                        ElectroSparkParticle.spark(level, x, y, z, dx, dy, dz, sprites));
+        event.registerSpriteSet(ModParticles.FROST_SPARK.get(),
+                sprites -> (type, level, x, y, z, dx, dy, dz) ->
+                        ElectroSparkParticle.spark(level, x, y, z, dx, dy, dz, sprites));
+        event.registerSpriteSet(ModParticles.NATURE_SPARK.get(),
+                sprites -> (type, level, x, y, z, dx, dy, dz) ->
+                        ElectroSparkParticle.spark(level, x, y, z, dx, dy, dz, sprites));
+        event.registerSpriteSet(ModParticles.ELECTRO_GLOW.get(),
+                sprites -> (type, level, x, y, z, dx, dy, dz) ->
+                        ElectroSparkParticle.glow(level, x, y, z, dx, dy, dz, sprites));
+        event.registerSpriteSet(ModParticles.ELECTRO_CLOUD.get(),
+                sprites -> (type, level, x, y, z, dx, dy, dz) ->
+                        ElectroSparkParticle.cloud(level, x, y, z, dx, dy, dz, sprites));
     }
 }

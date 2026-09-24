@@ -365,7 +365,10 @@ public final class ElementSkills {
             double a = i * Math.PI * 2.0 / count;
             level.sendParticles(element.spark(),
                     center.x + Math.cos(a) * radius, center.y + 0.5, center.z + Math.sin(a) * radius,
-                    3, 0.2, 0.4, 0.2, 0.05);
+                    5, 0.3, 0.6, 0.3, 0.06);
+            level.sendParticles(element.spark(),
+                    center.x + Math.cos(a) * radius * 0.6, center.y + 1.0, center.z + Math.sin(a) * radius * 0.6,
+                    3, 0.2, 0.5, 0.2, 0.05);
         }
     }
 
