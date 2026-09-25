@@ -49,15 +49,19 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         eased = Math.max(0.05F, eased);
 
         boolean flying = !player.onGround();
-        model.setFlap(ageInTicks, flying);
+        // hover stance vs fast flight vs parachute fall — wings follow physics
+        var delta = player.getDeltaMovement();
+        boolean fastFlight = Math.hypot(delta.x, delta.z) > 0.5;
+        float fallSpeed = (float) -delta.y;
+        model.setFlap(ageInTicks, flying, fastFlight, fallSpeed);
         VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
 
         poseStack.pushPose();
         this.getParentModel().body.translateAndRotate(poseStack);
         // adam-scale angel wings: scale the whole wing model up around the shoulder attach point
-        // wings sweep out from the back like a real bird's at rest — not
-        // sticking straight up; wider than tall, they drape the shoulders
-        poseStack.translate(0.0, 0.05, 0.14);
+        // wings sweep out from the BACK like a real bird's at rest — not
+        // sticking out of the shoulders; wider than tall, draping the spine
+        poseStack.translate(0.0, 0.05, 0.30);
         float scale = WING_SCALE * eased;
         poseStack.scale(scale * 1.3F, scale, scale); // wingspan over height
         poseStack.translate(0.0, -0.05, -0.14);

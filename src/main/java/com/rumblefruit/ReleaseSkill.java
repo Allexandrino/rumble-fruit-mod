@@ -50,6 +50,13 @@ public class ReleaseSkill {
     // package-visible and swappable in tests so the fx emission is deterministic
     static Random RANDOM = new Random();
 
+    // the ultimate burns in the caster's fruit color: lightning blue for the
+    // classic fruit, element-colored for the rest
+    private static net.minecraft.core.particles.SimpleParticleType spark(ServerPlayer player) {
+        int el = RumblePowerData.elementOf(player);
+        return el == 0 ? ModParticles.ELECTRO_SPARK.get() : Element.byId(el).spark();
+    }
+
     public static boolean isActive(UUID playerId) {
         return ACTIVE.containsKey(playerId);
     }
@@ -193,7 +200,7 @@ public class ReleaseSkill {
             for (int j = 0; j < 2; j++) {
                 double yaw = RANDOM.nextDouble() * Math.PI * 2.0;
                 double pitch = (RANDOM.nextDouble() - 0.4) * 1.8;
-                ray(level, limb, yaw, pitch, 8.0 + RANDOM.nextDouble() * 8.0);
+                ray(level, limb, yaw, pitch, 8.0 + RANDOM.nextDouble() * 8.0, spark(player));
             }
         }
         // the caster BECOMES electricity: a shell of sparks collapses onto the
@@ -203,7 +210,7 @@ public class ReleaseSkill {
         for (int i = 0; i < coating; i++) {
             double theta = RANDOM.nextDouble() * Math.PI * 2.0;
             double phi = RANDOM.nextDouble() * Math.PI;
-            level.sendParticles(ModParticles.ELECTRO_SPARK.get(),
+            level.sendParticles(spark(player),
                     core.x + Math.sin(phi) * Math.cos(theta) * shell,
                     core.y + Math.cos(phi) * shell,
                     core.z + Math.sin(phi) * Math.sin(theta) * shell,
@@ -236,7 +243,7 @@ public class ReleaseSkill {
             double angle = t * 0.35 + i * (Math.PI / 3.0);
             double rr = 2.2;
             double py = player.getY() + ((t * 0.6 + i * 0.7) % 4.0) - 0.5;
-            level.sendParticles(ModParticles.ELECTRO_SPARK.get(),
+            level.sendParticles(spark(player),
                     player.getX() + Math.cos(angle) * rr, py, player.getZ() + Math.sin(angle) * rr,
                     2, 0.05, 0.05, 0.05, 0.02);
             level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
@@ -251,7 +258,7 @@ public class ReleaseSkill {
             }
         }
         // raw power aura
-        level.sendParticles(ModParticles.ELECTRO_SPARK.get(),
+        level.sendParticles(spark(player),
                 player.getX(), player.getY() + 1.0, player.getZ(), 14, 2.0, 1.5, 2.0, 0.1);
         level.sendParticles(ModParticles.ELECTRO_GLOW.get(),
                 player.getX(), player.getY() + 1.0, player.getZ(), t % 20 == 0 ? 1 : 0, 0, 0, 0, 0);
@@ -343,13 +350,13 @@ public class ReleaseSkill {
         for (int i = 0; i < 3; i++) {
             broadcastFar(level, ModParticles.ELECTRO_GLOW.get(), center.x, center.y + 1.0, center.z, 1, 0, 0, 0, 0);
         }
-        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), center.x, center.y + 1.0, center.z,
+        level.sendParticles(spark(player), center.x, center.y + 1.0, center.z,
                 700, 16.0, 10.0, 16.0, 0.5);
         level.sendParticles(ModParticles.ELECTRO_GLOW.get(), center.x, center.y + 1.0, center.z,
                 350, 12.0, 8.0, 12.0, 0.4);
         level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, center.x, center.y + 1.0, center.z,
                 10, 5.0, 3.0, 5.0, 0.0);
-        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), center.x, center.y + 1.0, center.z,
+        level.sendParticles(spark(player), center.x, center.y + 1.0, center.z,
                 80, 10.0, 6.0, 10.0, 0.15);
         // shockwave rings on the ground
         for (double ring = 6.0; ring <= 36.0; ring += 6.0) {
@@ -389,7 +396,7 @@ public class ReleaseSkill {
         for (int i = 0; i < 20; i++) {
             double yaw = RANDOM.nextDouble() * Math.PI * 2.0;
             double pitch = (RANDOM.nextDouble() - 0.3) * Math.PI;
-            ray(level, core, yaw, pitch, 14.0 + RANDOM.nextDouble() * 10.0);
+            ray(level, core, yaw, pitch, 14.0 + RANDOM.nextDouble() * 10.0, spark(player));
         }
         // the sky shatters: a crown of giant gashes tears across the heavens
         for (int i = 0; i < 5; i++) {
@@ -431,11 +438,12 @@ public class ReleaseSkill {
     // jagged 3d lightning ray from a point: geometry comes from the pure
     // RayPolyline generator (unit-tested), here we only emit particles
     @com.rumblefruit.core.VisualEffect
-    private static void ray(ServerLevel level, Vec3 from, double yaw, double pitch, double length) {
+    private static void ray(ServerLevel level, Vec3 from, double yaw, double pitch, double length,
+                            net.minecraft.core.particles.SimpleParticleType sparkType) {
         java.util.List<com.rumblefruit.core.Vec> points = com.rumblefruit.core.RayPolyline.generate(
                 new com.rumblefruit.core.Vec(from.x, from.y, from.z), yaw, pitch, length, RANDOM);
         for (com.rumblefruit.core.Vec p : points) {
-            level.sendParticles(ModParticles.ELECTRO_SPARK.get(), p.x(), p.y(), p.z(),
+            level.sendParticles(sparkType, p.x(), p.y(), p.z(),
                     2, 0.03, 0.03, 0.03, 0.0);
             level.sendParticles(ModParticles.ELECTRO_GLOW.get(), p.x(), p.y(), p.z(),
                     1, 0.0, 0.0, 0.0, 0.0);

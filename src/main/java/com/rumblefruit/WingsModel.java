@@ -228,10 +228,10 @@ public class WingsModel extends Model {
         PartDefinition pair = body.addOrReplaceChild("wings" + style,
                 CubeListBuilder.create(), PartPose.ZERO);
         PartDefinition rw = pair.addOrReplaceChild("rw",
-                CubeListBuilder.create(), PartPose.offset(1.2F, 0.8F, 2.2F));
+                CubeListBuilder.create(), PartPose.offset(1.2F, 0.6F, 3.4F));
         buildStyledWing(rw, false, style);
         PartDefinition lw = pair.addOrReplaceChild("lw",
-                CubeListBuilder.create(), PartPose.offset(-1.2F, 0.8F, 2.2F));
+                CubeListBuilder.create(), PartPose.offset(-1.2F, 0.6F, 3.4F));
         buildStyledWing(lw, true, style);
     }
 
@@ -251,10 +251,10 @@ public class WingsModel extends Model {
         PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.ZERO);
 
         PartDefinition right = body.addOrReplaceChild("right_wing",
-                CubeListBuilder.create(), PartPose.offset(1.2F, 0.8F, 2.2F));
+                CubeListBuilder.create(), PartPose.offset(1.2F, 0.6F, 3.4F));
         buildWing(right, false);
         PartDefinition left = body.addOrReplaceChild("left_wing",
-                CubeListBuilder.create(), PartPose.offset(-1.2F, 0.8F, 2.2F));
+                CubeListBuilder.create(), PartPose.offset(-1.2F, 0.6F, 3.4F));
         buildWing(left, true);
         // elemental wing styles: flame, bat, crystal, leaf — each its own root
         // (same render path as the classic angel body root)
@@ -265,10 +265,10 @@ public class WingsModel extends Model {
         // the seraphim is many-winged: a second crystal fan rides behind the first
         PartDefinition wings3 = root.getChild("wings3");
         PartDefinition rw2 = wings3.addOrReplaceChild("rw2",
-                CubeListBuilder.create(), PartPose.offset(1.0F, 1.8F, 3.4F));
+                CubeListBuilder.create(), PartPose.offset(1.0F, 1.6F, 4.4F));
         buildCrystalWing(rw2, false);
         PartDefinition lw2 = wings3.addOrReplaceChild("lw2",
-                CubeListBuilder.create(), PartPose.offset(-1.0F, 1.8F, 3.4F));
+                CubeListBuilder.create(), PartPose.offset(-1.0F, 1.6F, 4.4F));
         buildCrystalWing(lw2, true);
 
         // hazbin-hotel exorcist mask: white horned mask over the face (head space)
@@ -356,27 +356,37 @@ public class WingsModel extends Model {
         return LayerDefinition.create(mesh, 64, 64);
     }
 
-    // flap the wings: slow powerful beats while airborne, gentle sway on the ground
-    public void setFlap(float ageInTicks, boolean flying) {
-        float speed = flying ? 0.35F : 0.1F;
-        float amp = flying ? 0.5F : 0.05F;
+    // flap the wings by flight mode: idle hover = wide spread + strong slow
+    // beats; fast flight = swept back; ground = folded drape; plummeting =
+    // wings stream UP like a parachute
+    public void setFlap(float ageInTicks, boolean flying, boolean fastFlight, float fallSpeed) {
+        float speed;
+        float amp;
+        float base;
+        float liftBase;
+        if (!flying) {
+            speed = 0.1F; amp = 0.05F; base = 0.55F; liftBase = 0.12F;
+        } else if (fastFlight) {
+            speed = 0.45F; amp = 0.45F; base = 0.30F; liftBase = 0.10F; // swept for speed
+        } else {
+            speed = 0.18F; amp = 0.30F; base = 0.75F; liftBase = 0.15F; // hover stance: WIDE
+        }
         float fold = Mth.sin(ageInTicks * speed) * amp;
         float lift = Mth.cos(ageInTicks * speed) * amp * 0.6F;
-        ModelPart[][] pairs = {{rightWing, leftWing}};
-        for (ModelPart[] pair : pairs) {
-            pair[0].yRot = -0.55F - fold;   // swept out to the sides, resting
-            pair[1].yRot = 0.55F + fold;
-            pair[0].zRot = -0.12F - lift;   // gentle downward drape
-            pair[1].zRot = 0.12F + lift;
-        }
+        float trail = Mth.clamp(fallSpeed * 0.25F, 0.0F, 0.8F); // fall physics
+        flapPair(rightWing, leftWing, base, fold, liftBase, lift, trail);
         for (int s = 1; s <= 4; s++) {
-            ModelPart rw = styleRoots[s].getChild("rw");
-            ModelPart lw = styleRoots[s].getChild("lw");
-            rw.yRot = -0.55F - fold;
-            lw.yRot = 0.55F + fold;
-            rw.zRot = -0.12F - lift;
-            lw.zRot = 0.12F + lift;
+            flapPair(styleRoots[s].getChild("rw"), styleRoots[s].getChild("lw"),
+                    base, fold, liftBase, lift, trail);
         }
+    }
+
+    private static void flapPair(ModelPart right, ModelPart left,
+                                 float base, float fold, float liftBase, float lift, float trail) {
+        right.yRot = -base - fold;
+        left.yRot = base + fold;
+        right.zRot = -(liftBase + lift + trail);
+        left.zRot = liftBase + lift + trail;
     }
 
     public void renderWings(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay) {
