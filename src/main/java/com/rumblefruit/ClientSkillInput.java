@@ -38,6 +38,19 @@ public class ClientSkillInput {
         if (skillId == 5) {
             ImpactShaders.spaceTear(); // the V cast rips the screen open
         }
+        // recoil on every cast: heavier skills kick the camera harder
+        float kick = switch (skillId) {
+            case 0 -> 0.3F;
+            case 1 -> 0.55F;
+            case 2 -> 0.7F;
+            case 5 -> 0.95F;
+            case 9 -> 1.4F;
+            default -> 0.2F;
+        };
+        ClientRpgCamera.addShake(kick);
+        if (skillId == 2 || skillId == 5 || skillId == 9) {
+            ClientRpgCamera.impactPulse(); // brief punch-in: the world zooms with the hit
+        }
         int idx = skillId >= 0 && skillId <= 3 ? skillId : skillId == 5 ? 4 : -1;
         if (idx >= 0) {
             lastSkillUseTick[idx] = tick;

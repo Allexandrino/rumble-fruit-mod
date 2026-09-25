@@ -79,7 +79,7 @@ public final class ElementSkills {
         switch (element) {
             case INFERNO -> { // Flame Ring: a burning nova around the caster
                 areaDamage(player, level, 9.0, 16.0F, element);
-                ringFx(level, player.position(), element, 9.0, 48);
+                shatterFx(level, player.position(), element, 9.0);
                 level.explode(null, player.getX(), player.getY() + 1.0, player.getZ(), 3.0F,
                         Level.ExplosionInteraction.NONE);
                 sound(level, player, element.castSound(), 2.0F, 0.8F);
@@ -96,21 +96,24 @@ public final class ElementSkills {
                 level.sendParticles(element.spark(), well.x, well.y, well.z, 120, 1.5, 1.5, 1.5, 0.1);
                 sound(level, player, element.castSound(), 2.0F, 0.6F);
             }
-            case FROST -> { // Blizzard: a howling white-out, everything freezes stiff
+            case FROST -> { // Blizzard: a lattice of razor ice shards, everything freezes stiff
                 areaDamage(player, level, 10.0, 10.0F, element);
-                for (int i = 0; i < 120; i++) {
-                    double a = i * 0.15;
-                    double r = 2.0 + (i % 40) * 0.2;
-                    level.sendParticles(element.spark(),
-                            player.getX() + Math.cos(a) * r, player.getY() + 0.2 + (i % 10) * 0.35,
-                            player.getZ() + Math.sin(a) * r, 1, 0.05, 0.05, 0.05, 0.0);
+                // straight shard lines in a hard lattice — no circles
+                for (int arm = 0; arm < 6; arm++) {
+                    double a = arm * Math.PI / 3.0;
+                    for (double d = 0.5; d <= 10.0; d += 0.8) {
+                        level.sendParticles(element.spark(),
+                                player.getX() + Math.cos(a) * d,
+                                player.getY() + 0.3 + (d % 2.5) * 0.9,
+                                player.getZ() + Math.sin(a) * d, 1, 0.0, 0.0, 0.0, 0.0);
+                    }
                 }
                 sound(level, player, element.castSound(), 2.0F, 0.9F);
             }
             case NATURE -> { // Bloom Burst: friends mend, enemies rot
                 player.heal(8.0F);
                 areaDamage(player, level, 9.0, 12.0F, element);
-                ringFx(level, player.position(), element, 9.0, 40);
+                shatterFx(level, player.position(), element, 9.0);
                 sound(level, player, element.castSound(), 1.5F, 1.2F);
             }
             default -> {
@@ -181,7 +184,7 @@ public final class ElementSkills {
                 level.explode(null, target.x, target.y + 1.0, target.z, 6.0F,
                         Level.ExplosionInteraction.BLOCK);
                 // fire ring on the ground + a pillar of flame, not a sphere
-                ringFx(level, target, element, 10.0, 56);
+                shatterFx(level, target, element, 10.0);
                 for (double dy = 0.0; dy < 25.0; dy += 1.2) {
                     level.sendParticles(element.spark(), target.x, target.y + dy, target.z,
                             6, 0.5, 0.2, 0.5, 0.04);
@@ -196,13 +199,15 @@ public final class ElementSkills {
                     e.hurtMarked = true;
                     hurt(level, player, e, 40.0F, element);
                 }
-                // a spinning disc on the ground, not a sphere: rings spiralling in
-                for (int i = 0; i < 90; i++) {
-                    double a = i * 0.45;
-                    double r = 1.0 + (i % 30) * 0.35;
-                    level.sendParticles(element.spark(),
-                            target.x + Math.cos(a) * r, target.y + 0.3 + (i % 5) * 0.12,
-                            target.z + Math.sin(a) * r, 2, 0.05, 0.02, 0.05, 0.03);
+                // straight void beams converging from eight directions — hard
+                // geometry, no circles
+                for (int arm = 0; arm < 8; arm++) {
+                    double a = arm * Math.PI / 4.0;
+                    for (double d = 1.0; d <= 12.0; d += 0.8) {
+                        level.sendParticles(element.spark(),
+                                target.x + Math.cos(a) * d, target.y + 0.3 + (12.0 - d) * 0.12,
+                                target.z + Math.sin(a) * d, 2, 0.0, 0.0, 0.0, 0.0);
+                    }
                 }
                 level.sendParticles(element.spark(), target.x, target.y + 0.6, target.z,
                         30, 0.6, 0.3, 0.6, 0.02); // the dark core
@@ -372,18 +377,21 @@ public final class ElementSkills {
         }
     }
 
-    // perfect geometric circles: crisp points on two rings, no random spread
-    private static void ringFx(ServerLevel level, Vec3 center, Element element,
-                               double radius, int count) {
-        for (int i = 0; i < count; i++) {
-            double a = i * Math.PI * 2.0 / count;
-            level.sendParticles(element.spark(),
-                    center.x + Math.cos(a) * radius, center.y + 0.4, center.z + Math.sin(a) * radius,
-                    1, 0.0, 0.0, 0.0, 0.0);
-            level.sendParticles(element.spark(),
-                    center.x + Math.cos(a + 0.06) * radius * 0.65, center.y + 0.9,
-                    center.z + Math.sin(a + 0.06) * radius * 0.65,
-                    1, 0.0, 0.0, 0.0, 0.0);
+    // hard angular shatter: four straight diagonal beams crossing the point
+    // (an X pattern) plus jagged slash arcs — no circles, ever
+    private static void shatterFx(ServerLevel level, Vec3 center, Element element, double radius) {
+        for (int arm = 0; arm < 4; arm++) {
+            double a = arm * Math.PI / 2.0 + Math.PI / 4.0;
+            for (double d = 1.0; d <= radius; d += 1.0) {
+                level.sendParticles(element.spark(),
+                        center.x + Math.cos(a) * d, center.y + 0.4 + (d % 3.0) * 0.3,
+                        center.z + Math.sin(a) * d, 3, 0.0, 0.0, 0.0, 0.0);
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            level.sendParticles(ModParticles.ELECTRO_SLASH.get(),
+                    center.x + (i - 1) * 3.0, center.y + 1.5, center.z + (i - 1) * 2.0,
+                    0, (float) (i * 1.05), (float) (i * 0.5 - 0.5), 0.0F, 0.0);
         }
     }
 

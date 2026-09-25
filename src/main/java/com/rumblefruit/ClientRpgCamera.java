@@ -23,6 +23,15 @@ public class ClientRpgCamera {
     private static int lastPanel = -1;
     private static final long PANEL_TICKS = 28; // 1.4s per comic panel
 
+    // impact feedback: every cast kicks the camera (recoil shake + fov punch)
+    public static void addShake(float amount) {
+        shake = Math.max(shake, amount);
+    }
+
+    public static void impactPulse() {
+        fovKick -= 11.0F;
+    }
+
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();

@@ -67,9 +67,9 @@ public class WingsModel extends Model {
             float len = primaries[i][3];
             CubeListBuilder cube = CubeListBuilder.create().texOffs(0, 4);
             if (mirrored) {
-                cube.addBox(-len, -1.0F, -0.60F, len, 2.0F, 0.5F);
+                cube.addBox(-len, -1.3F, -0.75F, len, 2.6F, 1.1F);
             } else {
-                cube.addBox(0.0F, -1.0F, -0.60F, len, 2.0F, 0.5F);
+                cube.addBox(0.0F, -1.3F, -0.75F, len, 2.6F, 1.1F);
             }
             wing.addOrReplaceChild("p" + i, cube,
                     PartPose.offsetAndRotation(px, primaries[i][1], 0.0F, 0.0F, 0.0F, zRot));
@@ -87,9 +87,9 @@ public class WingsModel extends Model {
             float len = secondaries[i][3];
             CubeListBuilder cube = CubeListBuilder.create().texOffs(0, 8);
             if (mirrored) {
-                cube.addBox(-len, -1.0F, 0.10F, len, 2.2F, 0.5F);
+                cube.addBox(-len, -1.4F, 0.15F, len, 2.9F, 1.2F);
             } else {
-                cube.addBox(0.0F, -1.0F, 0.10F, len, 2.2F, 0.5F);
+                cube.addBox(0.0F, -1.4F, 0.15F, len, 2.9F, 1.2F);
             }
             wing.addOrReplaceChild("s" + i, cube,
                     PartPose.offsetAndRotation(px, secondaries[i][1], 0.15F, 0.0F, 0.0F, zRot));
@@ -107,9 +107,9 @@ public class WingsModel extends Model {
             float len = coverts[i][3];
             CubeListBuilder cube = CubeListBuilder.create().texOffs(0, 0);
             if (mirrored) {
-                cube.addBox(-len, -0.9F, -1.05F, len, 1.8F, 0.4F);
+                cube.addBox(-len, -1.15F, -1.25F, len, 2.3F, 0.9F);
             } else {
-                cube.addBox(0.0F, -0.9F, -1.05F, len, 1.8F, 0.4F);
+                cube.addBox(0.0F, -1.15F, -1.25F, len, 2.3F, 0.9F);
             }
             wing.addOrReplaceChild("c" + i, cube,
                     PartPose.offsetAndRotation(px, coverts[i][1], 0.3F, 0.0F, 0.0F, zRot));
@@ -130,7 +130,7 @@ public class WingsModel extends Model {
             float zRot = mirrored ? -t[i][2] : t[i][2];
             float len = t[i][3];
             wing.addOrReplaceChild("f" + i,
-                    CubeListBuilder.create().texOffs(0, 4).addBox(-0.4F, -len, -0.3F, 0.8F, len, 0.6F),
+                    CubeListBuilder.create().texOffs(0, 4).addBox(-0.65F, -len, -0.55F, 1.3F, len, 1.1F),
                     PartPose.offsetAndRotation(px, t[i][1], 0.0F, 0.0F, 0.0F, zRot));
         }
     }
@@ -148,9 +148,9 @@ public class WingsModel extends Model {
             float len = fingers[i][3];
             CubeListBuilder cube = CubeListBuilder.create().texOffs(0, 8);
             if (mirrored) {
-                cube.addBox(-len, -0.3F, -0.25F, len, 0.6F, 0.5F);
+                cube.addBox(-len, -0.5F, -0.4F, len, 1.0F, 0.9F);
             } else {
-                cube.addBox(0.0F, -0.3F, -0.25F, len, 0.6F, 0.5F);
+                cube.addBox(0.0F, -0.5F, -0.4F, len, 1.0F, 0.9F);
             }
             wing.addOrReplaceChild("bf" + i, cube,
                     PartPose.offsetAndRotation(px, fingers[i][1], 0.0F, 0.0F, 0.0F, zRot));
@@ -165,9 +165,9 @@ public class WingsModel extends Model {
             float len = mem[i][3];
             CubeListBuilder cube = CubeListBuilder.create().texOffs(0, 12);
             if (mirrored) {
-                cube.addBox(-len, -1.6F, 0.15F, len, 3.2F, 0.25F);
+                cube.addBox(-len, -2.1F, 0.15F, len, 4.2F, 0.7F);
             } else {
-                cube.addBox(0.0F, -1.6F, 0.15F, len, 3.2F, 0.25F);
+                cube.addBox(0.0F, -2.1F, 0.15F, len, 4.2F, 0.7F);
             }
             wing.addOrReplaceChild("bm" + i, cube,
                     PartPose.offsetAndRotation(px, mem[i][1], 0.1F, 0.0F, 0.0F, zRot));
@@ -189,7 +189,7 @@ public class WingsModel extends Model {
             float zRot = mirrored ? -shards[i][2] : shards[i][2];
             float len = shards[i][3];
             wing.addOrReplaceChild("cr" + i,
-                    CubeListBuilder.create().texOffs(0, 4).addBox(-0.5F, -len, -0.4F, 1.0F, len, 0.8F),
+                    CubeListBuilder.create().texOffs(0, 4).addBox(-0.7F, -len, -0.6F, 1.4F, len, 1.2F),
                     PartPose.offsetAndRotation(px, shards[i][1], 0.0F, 0.0F, 0.0F, zRot));
             // an eye at the shard's tip: white sclera + dark pupil staring out
             wing.addOrReplaceChild("eye_w" + i,
@@ -215,9 +215,9 @@ public class WingsModel extends Model {
             float len = leaves[i][3];
             CubeListBuilder cube = CubeListBuilder.create().texOffs(0, 0);
             if (mirrored) {
-                cube.addBox(-len, -1.4F, -0.5F, len, 2.8F, 0.5F);
+                cube.addBox(-len, -1.8F, -0.6F, len, 3.6F, 1.0F);
             } else {
-                cube.addBox(0.0F, -1.4F, -0.5F, len, 2.8F, 0.5F);
+                cube.addBox(0.0F, -1.8F, -0.6F, len, 3.6F, 1.0F);
             }
             wing.addOrReplaceChild("lf" + i, cube,
                     PartPose.offsetAndRotation(px, leaves[i][1], 0.0F, 0.0F, 0.0F, zRot));
