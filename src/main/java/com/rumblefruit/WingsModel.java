@@ -26,6 +26,9 @@ public class WingsModel extends Model {
     private final ModelPart[] styleRoots = new ModelPart[5]; // 0 = angel body
     private final ModelPart mask;
     private final ModelPart halo;
+    private final ModelPart horns;
+    private final ModelPart crown;
+    private final ModelPart circlet;
     private final ModelPart costume;
 
     public WingsModel(ModelPart root) {
@@ -39,6 +42,9 @@ public class WingsModel extends Model {
         }
         this.mask = root.getChild("mask");
         this.halo = root.getChild("halo");
+        this.horns = root.getChild("horns");
+        this.crown = root.getChild("crown");
+        this.circlet = root.getChild("circlet");
         this.costume = root.getChild("costume");
     }
 
@@ -307,6 +313,46 @@ public class WingsModel extends Model {
                 CubeListBuilder.create().texOffs(24, 32).addBox(0.2F, 0.0F, 0.0F, 4.0F, 9.0F, 0.6F),
                 PartPose.offsetAndRotation(0.0F, 11.5F, 2.9F, 0.14F, 0.0F, -0.06F));
 
+        // DEMON HORNS (inferno): big curved horns sweeping up from the temples
+        PartDefinition horns = root.addOrReplaceChild("horns", CubeListBuilder.create(), PartPose.ZERO);
+        for (int side = -1; side <= 1; side += 2) {
+            horns.addOrReplaceChild("horn_base" + side,
+                    CubeListBuilder.create().texOffs(32, 0).addBox(-0.9F, -3.2F, -0.9F, 1.8F, 3.2F, 1.8F),
+                    PartPose.offsetAndRotation(4.2F * side, -6.2F, -0.6F, -0.35F, 0.0F, 0.45F * side));
+            horns.addOrReplaceChild("horn_tip" + side,
+                    CubeListBuilder.create().texOffs(32, 0).addBox(-0.6F, -2.8F, -0.6F, 1.2F, 2.8F, 1.2F),
+                    PartPose.offsetAndRotation(5.6F * side, -8.6F, -1.4F, -0.7F, 0.0F, 0.75F * side));
+        }
+        // CROWN OF DARKNESS (void): jagged spiked crown around the head
+        PartDefinition crown = root.addOrReplaceChild("crown", CubeListBuilder.create(), PartPose.ZERO);
+        float[][] crownSpikes = {{-3.6F, -3.6F}, {3.6F, -3.6F}, {-3.6F, 3.6F}, {3.6F, 3.6F},
+                {0.0F, -4.2F}, {0.0F, 4.2F}, {-4.2F, 0.0F}, {4.2F, 0.0F}};
+        for (int i = 0; i < crownSpikes.length; i++) {
+            crown.addOrReplaceChild("spike" + i,
+                    CubeListBuilder.create().texOffs(32, 24).addBox(-0.55F, -3.4F, -0.55F, 1.1F, 3.4F, 1.1F),
+                    PartPose.offset(crownSpikes[i][0], -7.2F, crownSpikes[i][1]));
+        }
+        crown.addOrReplaceChild("band_front",
+                CubeListBuilder.create().texOffs(32, 16).addBox(-4.2F, -1.0F, -4.2F, 8.4F, 1.4F, 1.0F),
+                PartPose.offset(0.0F, -7.0F, 0.0F));
+        crown.addOrReplaceChild("band_back",
+                CubeListBuilder.create().texOffs(32, 16).addBox(-4.2F, -1.0F, 3.2F, 8.4F, 1.4F, 1.0F),
+                PartPose.offset(0.0F, -7.0F, 0.0F));
+        crown.addOrReplaceChild("band_left",
+                CubeListBuilder.create().texOffs(32, 18).addBox(-4.2F, -1.0F, -3.2F, 1.0F, 1.4F, 6.4F),
+                PartPose.offset(0.0F, -7.0F, 0.0F));
+        crown.addOrReplaceChild("band_right",
+                CubeListBuilder.create().texOffs(32, 18).addBox(3.2F, -1.0F, -3.2F, 1.0F, 1.4F, 6.4F),
+                PartPose.offset(0.0F, -7.0F, 0.0F));
+        // FLOWER CIRCLET (nature): a ring of little leaf-flowers around the head
+        PartDefinition circlet = root.addOrReplaceChild("circlet", CubeListBuilder.create(), PartPose.ZERO);
+        for (int i = 0; i < 10; i++) {
+            double a = i * Math.PI / 5.0;
+            circlet.addOrReplaceChild("flower" + i,
+                    CubeListBuilder.create().texOffs(0, 0).addBox(-0.8F, -0.8F, -0.8F, 1.6F, 1.6F, 1.6F),
+                    PartPose.offset((float) (Math.cos(a) * 4.4), -7.6F, (float) (Math.sin(a) * 4.4)));
+        }
+
         return LayerDefinition.create(mesh, 64, 64);
     }
 
@@ -355,6 +401,22 @@ public class WingsModel extends Model {
     public void renderHalo(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
                            int color) {
         halo.render(poseStack, buffer, packedLight, packedOverlay, color);
+    }
+
+    // themed headgear: demon horns / crown of darkness / flower circlet
+    public void renderHorns(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
+                            int color) {
+        horns.render(poseStack, buffer, packedLight, packedOverlay, color);
+    }
+
+    public void renderCrown(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
+                            int color) {
+        crown.render(poseStack, buffer, packedLight, packedOverlay, color);
+    }
+
+    public void renderCirclet(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
+                              int color) {
+        circlet.render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 
     public void renderCostume(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,

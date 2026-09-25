@@ -25,7 +25,7 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
             ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "textures/entity/wings.png");
     private static final ResourceLocation ROBE =
             ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "textures/entity/angel_robe.png");
-    private static final float WING_SCALE = 4.0F;
+    private static final float WING_SCALE = 5.5F; // huge long wings on every fruit
 
     private final WingsModel model;
 
@@ -83,10 +83,24 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
 
         poseStack.pushPose();
         this.getParentModel().head.translateAndRotate(poseStack);
-        // fullbright: the exorcist mask and the halo glow in the dark
+        // headgear fits the fruit: the exorcist mask belongs ONLY to the
+        // lightning angel; the fire demon gets horns, the void king a crown,
+        // the seraphim keeps the halo, mother nature wears a flower circlet
         VertexConsumer emissive = buffer.getBuffer(RenderType.eyes(TEXTURE));
-        model.renderMask(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY);
-        model.renderHalo(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY, tint);
+        switch (element.id()) {
+            case 0 -> {
+                model.renderMask(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY);
+                model.renderHalo(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY, tint);
+            }
+            case 1 -> model.renderHorns(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY,
+                    0xFF3A1A10); // charcoal demon horns
+            case 2 -> model.renderCrown(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY,
+                    0xFFFFD24A); // royal gold on the king of darkness
+            case 3 -> model.renderHalo(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY, tint);
+            case 4 -> model.renderCirclet(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY, tint);
+            default -> {
+            }
+        }
         poseStack.popPose();
     }
 

@@ -42,7 +42,16 @@ public class WingsData {
         }
     }
 
+    public static void setMoving(UUID playerId, boolean moving) {
+        if (moving) {
+            MOVE_HELD.add(playerId);
+        } else {
+            MOVE_HELD.remove(playerId);
+        }
+    }
+
     private static final java.util.Set<UUID> SNEAK_HELD = ConcurrentHashMap.newKeySet();
+    private static final java.util.Set<UUID> MOVE_HELD = ConcurrentHashMap.newKeySet();
 
     public static void toggle(ServerPlayer player) {
         setActive(player, !isActive(player.getUUID()));
@@ -107,16 +116,23 @@ public class WingsData {
         }
         Vec3 delta = player.getDeltaMovement();
         Vec3 look = player.getLookAngle();
-        if (JUMP_HELD.contains(player.getUUID())) {
+        if (MOVE_HELD.contains(player.getUUID())) {
+            // fast flight: the wings drive you exactly where the camera points
+            double speed = 1.6;
+            player.setDeltaMovement(
+                    delta.x * 0.75 + look.x * speed * 0.25,
+                    delta.y * 0.75 + look.y * speed * 0.25,
+                    delta.z * 0.75 + look.z * speed * 0.25);
+            long now = player.level().getGameTime();
+            if (now - LAST_FLAP.getOrDefault(player.getUUID(), -100L) >= 12) {
+                LAST_FLAP.put(player.getUUID(), now);
+                player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                        SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.5F, 1.4F);
+            }
+        } else if (JUMP_HELD.contains(player.getUUID())) {
             // wing climb: smooth strong lift while SPACE is held
             player.setDeltaMovement(delta.x * 0.98 + look.x * 0.02,
                     Math.min(delta.y + 0.09, 0.32), delta.z * 0.98 + look.z * 0.02);
-            long now = player.level().getGameTime();
-            if (now - LAST_FLAP.getOrDefault(player.getUUID(), -100L) >= 10) {
-                LAST_FLAP.put(player.getUUID(), now);
-                player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                        SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.6F, 1.5F);
-            }
         } else if (SNEAK_HELD.contains(player.getUUID())) {
             // fold the wings slightly: a controlled sink while SHIFT is held
             player.setDeltaMovement(delta.x * 0.98, Math.max(delta.y - 0.07, -0.45), delta.z * 0.98);
