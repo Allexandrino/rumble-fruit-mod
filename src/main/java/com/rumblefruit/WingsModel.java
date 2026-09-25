@@ -228,10 +228,10 @@ public class WingsModel extends Model {
         PartDefinition pair = body.addOrReplaceChild("wings" + style,
                 CubeListBuilder.create(), PartPose.ZERO);
         PartDefinition rw = pair.addOrReplaceChild("rw",
-                CubeListBuilder.create(), PartPose.offset(1.2F, 0.6F, 3.4F));
+                CubeListBuilder.create(), PartPose.offset(3.4F, 0.2F, 0.9F));
         buildStyledWing(rw, false, style);
         PartDefinition lw = pair.addOrReplaceChild("lw",
-                CubeListBuilder.create(), PartPose.offset(-1.2F, 0.6F, 3.4F));
+                CubeListBuilder.create(), PartPose.offset(-3.4F, 0.2F, 0.9F));
         buildStyledWing(lw, true, style);
     }
 
@@ -251,10 +251,10 @@ public class WingsModel extends Model {
         PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.ZERO);
 
         PartDefinition right = body.addOrReplaceChild("right_wing",
-                CubeListBuilder.create(), PartPose.offset(1.2F, 0.6F, 3.4F));
+                CubeListBuilder.create(), PartPose.offset(3.4F, 0.2F, 0.9F));
         buildWing(right, false);
         PartDefinition left = body.addOrReplaceChild("left_wing",
-                CubeListBuilder.create(), PartPose.offset(-1.2F, 0.6F, 3.4F));
+                CubeListBuilder.create(), PartPose.offset(-3.4F, 0.2F, 0.9F));
         buildWing(left, true);
         // elemental wing styles: flame, bat, crystal, leaf — each its own root
         // (same render path as the classic angel body root)
@@ -265,10 +265,10 @@ public class WingsModel extends Model {
         // the seraphim is many-winged: a second crystal fan rides behind the first
         PartDefinition wings3 = root.getChild("wings3");
         PartDefinition rw2 = wings3.addOrReplaceChild("rw2",
-                CubeListBuilder.create(), PartPose.offset(1.0F, 1.6F, 4.4F));
+                CubeListBuilder.create(), PartPose.offset(2.6F, 1.4F, 1.8F));
         buildCrystalWing(rw2, false);
         PartDefinition lw2 = wings3.addOrReplaceChild("lw2",
-                CubeListBuilder.create(), PartPose.offset(-1.0F, 1.6F, 4.4F));
+                CubeListBuilder.create(), PartPose.offset(-2.6F, 1.4F, 1.8F));
         buildCrystalWing(lw2, true);
 
         // hazbin-hotel exorcist mask: white horned mask over the face (head space)
@@ -365,15 +365,15 @@ public class WingsModel extends Model {
         float base;
         float liftBase;
         if (!flying) {
-            speed = 0.1F; amp = 0.05F; base = 0.55F; liftBase = 0.12F;
+            speed = 0.1F; amp = 0.05F; base = 0.55F; liftBase = 0.04F;
         } else if (fastFlight) {
-            speed = 0.45F; amp = 0.45F; base = 0.30F; liftBase = 0.10F; // swept for speed
+            speed = 0.45F; amp = 0.45F; base = 0.30F; liftBase = 0.04F; // swept for speed
         } else {
-            speed = 0.18F; amp = 0.30F; base = 0.75F; liftBase = 0.15F; // hover stance: WIDE
+            speed = 0.18F; amp = 0.30F; base = 0.75F; liftBase = 0.06F; // hover stance: WIDE
         }
         float fold = Mth.sin(ageInTicks * speed) * amp;
         float lift = Mth.cos(ageInTicks * speed) * amp * 0.6F;
-        float trail = Mth.clamp(fallSpeed * 0.25F, 0.0F, 0.8F); // fall physics
+        float trail = Mth.clamp(fallSpeed * 0.15F, 0.0F, 0.35F); // fall physics, subtle
         flapPair(rightWing, leftWing, base, fold, liftBase, lift, trail);
         for (int s = 1; s <= 4; s++) {
             flapPair(styleRoots[s].getChild("rw"), styleRoots[s].getChild("lw"),
