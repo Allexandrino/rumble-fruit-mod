@@ -16,6 +16,7 @@ public class ClientSkillInput {
     private static boolean prevF = false;
     private static boolean prevR = false;
     private static boolean prevJump = false;
+    private static boolean prevSneak = false;
     private static int zPressTick = -1;
     private static boolean vDown = false;
     private static int vPressTick = 0;
@@ -127,12 +128,15 @@ public class ClientSkillInput {
         }
         prevR = r;
 
-        // winged flight input: tell the server when SPACE is held with the wings out
+        // winged flight input: tell the server when SPACE (rise) or SHIFT
+        // (sink) changes while the wings are out
         boolean wingsOut = ClientWingsData.isActive(mc.player.getUUID());
         boolean jump = wingsOut && mc.options.keyJump.isDown();
-        if (jump != prevJump) {
+        boolean sneak = wingsOut && mc.options.keyShift.isDown();
+        if (jump != prevJump || sneak != prevSneak) {
             prevJump = jump;
-            net.neoforged.neoforge.network.PacketDistributor.sendToServer(new WingsInputPacket(jump));
+            prevSneak = sneak;
+            net.neoforged.neoforge.network.PacketDistributor.sendToServer(new WingsInputPacket(jump, sneak));
         }
 
         // V: hold to charge, release to fire

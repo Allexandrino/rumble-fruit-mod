@@ -38,10 +38,19 @@ public class CrackedSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
         }
         ResourceLocation texture = TEXTURES[com.rumblefruit.core.ElementCatalog
                 .byId(ClientPowerData.element()).id()];
-        // the crack map lies directly on the skin layout: every crack sits in
-        // its place, the void stares out of it in the fruit's color
-        VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.entityTranslucent(texture));
-        this.getParentModel().renderToBuffer(poseStack, vertexConsumer,
+        var element = com.rumblefruit.core.ElementCatalog.byId(ClientPowerData.element());
+        // pass 1: the abyss — the crack cores sunk INTO the flesh, near-black
+        // with a breath of the element color (reads as bottomless holes)
+        int abyss = 0xFF000000 | ((element.color() >> 3) & 0x1F1F1F);
+        VertexConsumer deep = buffer.getBuffer(RenderType.entityTranslucent(texture));
+        poseStack.pushPose();
+        poseStack.scale(0.97F, 0.975F, 0.97F); // recessed beneath the skin
+        this.getParentModel().renderToBuffer(poseStack, deep,
+                0xF000F0, OverlayTexture.NO_OVERLAY, abyss);
+        poseStack.popPose();
+        // pass 2: the glowing rims of every crack on the surface
+        VertexConsumer rim = buffer.getBuffer(RenderType.entityTranslucent(texture));
+        this.getParentModel().renderToBuffer(poseStack, rim,
                 0xF000F0, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
     }
 }

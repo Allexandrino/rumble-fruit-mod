@@ -186,22 +186,21 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
             return;
         }
 
-        // prone flight: streamlined superman pose with slightly bent knees
+        // winged hover: upright in the air, legs dangling slightly bent, arms
+        // half-raised like a marionette of the sky — the wings do the work
         if (ClientWingsData.isActive(player.getUUID()) && !player.onGround() && !player.isInWater()) {
-            rightLeg.xRot = 0.1F;
-            rightLeg.zRot = 0.03F;
-            leftLeg.xRot = 0.1F;
-            leftLeg.zRot = -0.03F;
-            rightShin.xRot = 0.15F;
-            leftShin.xRot = 0.15F;
-            rightArm.xRot = 0.45F;
-            rightArm.yRot = 0.0F;
-            rightArm.zRot = 0.45F;
-            rightForearm.xRot = -0.2F;
-            leftArm.xRot = 0.45F;
-            leftArm.yRot = 0.0F;
-            leftArm.zRot = -0.45F;
-            leftForearm.xRot = -0.2F;
+            float hover = Mth.sin(ageInTicks * 0.15F) * 0.04F; // breathing bob
+            body.xRot = hover * 0.5F;
+            rightLeg.xRot = 0.18F + hover;
+            rightShin.xRot = 0.35F;
+            leftLeg.xRot = -0.08F + hover;
+            leftShin.xRot = 0.45F;
+            rightArm.xRot = -0.35F + hover;
+            rightArm.zRot = 0.5F;
+            rightForearm.xRot = -0.35F;
+            leftArm.xRot = -0.35F - hover;
+            leftArm.zRot = -0.5F;
+            leftForearm.xRot = -0.35F;
             syncOverlays();
             return;
         }

@@ -168,7 +168,8 @@ public class WingsModel extends Model {
         }
     }
 
-    // crystal shards: slim icy prisms fanned upward (ice seraphim)
+    // crystal shards: slim icy prisms fanned upward, every shard crowned with
+    // a watching eye (ice seraphim — many-eyed by design)
     private static void buildCrystalWing(PartDefinition wing, boolean mirrored) {
         float[][] shards = {
                 {0.7F, -0.6F, 0.70F, 5.5F},
@@ -183,6 +184,13 @@ public class WingsModel extends Model {
             float len = shards[i][3];
             wing.addOrReplaceChild("cr" + i,
                     CubeListBuilder.create().texOffs(0, 4).addBox(-0.5F, -len, -0.4F, 1.0F, len, 0.8F),
+                    PartPose.offsetAndRotation(px, shards[i][1], 0.0F, 0.0F, 0.0F, zRot));
+            // an eye at the shard's tip: white sclera + dark pupil staring out
+            wing.addOrReplaceChild("eye_w" + i,
+                    CubeListBuilder.create().texOffs(40, 0).addBox(-0.7F, -len - 0.7F, -0.5F, 1.4F, 1.4F, 0.9F),
+                    PartPose.offsetAndRotation(px, shards[i][1], 0.0F, 0.0F, 0.0F, zRot));
+            wing.addOrReplaceChild("eye_p" + i,
+                    CubeListBuilder.create().texOffs(40, 8).addBox(-0.35F, -len - 0.35F, -0.65F, 0.7F, 0.7F, 0.35F),
                     PartPose.offsetAndRotation(px, shards[i][1], 0.0F, 0.0F, 0.0F, zRot));
         }
     }
@@ -248,6 +256,14 @@ public class WingsModel extends Model {
         buildStylePair(root, 2, false);
         buildStylePair(root, 3, false);
         buildStylePair(root, 4, false);
+        // the seraphim is many-winged: a second crystal fan rides behind the first
+        PartDefinition wings3 = root.getChild("wings3");
+        PartDefinition rw2 = wings3.addOrReplaceChild("rw2",
+                CubeListBuilder.create(), PartPose.offset(1.0F, 1.8F, 3.4F));
+        buildCrystalWing(rw2, false);
+        PartDefinition lw2 = wings3.addOrReplaceChild("lw2",
+                CubeListBuilder.create(), PartPose.offset(-1.0F, 1.8F, 3.4F));
+        buildCrystalWing(lw2, true);
 
         // hazbin-hotel exorcist mask: white horned mask over the face (head space)
         PartDefinition mask = root.addOrReplaceChild("mask",
