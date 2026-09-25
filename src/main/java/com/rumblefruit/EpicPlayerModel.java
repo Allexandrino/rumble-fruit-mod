@@ -550,7 +550,7 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
         rightShin.xRot = 0.15F * k;
         leftShin.xRot = 0.15F * k;
         // slow-motion drift: the limbs sway softly while hanging in the air
-        float drift = Mth.sin(t * 25.0F) * 0.08F * k;
+        float drift = Mth.sin(t * 10.0F) * 0.05F * k;
         rightArm.zRot += drift;
         leftArm.zRot -= drift;
         rightLeg.zRot += drift * 0.5F;

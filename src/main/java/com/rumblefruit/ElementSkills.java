@@ -80,8 +80,8 @@ public final class ElementSkills {
             case INFERNO -> { // Flame Ring: a burning nova around the caster
                 areaDamage(player, level, 9.0, 16.0F, element);
                 shatterFx(level, player.position(), element, 9.0);
-                level.explode(null, player.getX(), player.getY() + 1.0, player.getZ(), 3.0F,
-                        Level.ExplosionInteraction.NONE);
+                explodeSafe(level, player, player.getX(), player.getY() + 1.0, player.getZ(), 3.0F,
+                        false);
                 sound(level, player, element.castSound(), 2.0F, 0.8F);
             }
             case VOID -> { // Gravity Well: drag everything in to one point and crush it
@@ -131,8 +131,8 @@ public final class ElementSkills {
                     level.sendParticles(element.spark(), target.x, target.y + dy, target.z,
                             8, 0.6, 0.2, 0.6, 0.05);
                 }
-                level.explode(null, target.x, target.y + 1.0, target.z, 3.0F,
-                        Level.ExplosionInteraction.NONE);
+                explodeSafe(level, player, target.x, target.y + 1.0, target.z, 3.0F,
+                        false);
                 sound(level, target, element.castSound(), 3.0F, 0.8F);
             }
             case VOID -> { // Void Drop: the marked ones are flung into the sky of the abyss
@@ -181,8 +181,8 @@ public final class ElementSkills {
                         Blocks.MAGMA_BLOCK.defaultBlockState());
                 meteor.setDeltaMovement(0.0, -1.8, 0.0);
                 areaDamage(player, level, target, 12.0, 45.0F, element);
-                level.explode(null, target.x, target.y + 1.0, target.z, 6.0F,
-                        Level.ExplosionInteraction.BLOCK);
+                explodeSafe(level, player, target.x, target.y + 1.0, target.z, 6.0F,
+                        true);
                 // fire ring on the ground + a pillar of flame, not a sphere
                 shatterFx(level, target, element, 10.0);
                 for (double dy = 0.0; dy < 25.0; dy += 1.2) {
@@ -375,6 +375,15 @@ public final class ElementSkills {
             Vec3 p = eye.add(view.scale(d));
             level.sendParticles(element.spark(), p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
         }
+    }
+
+    // our own blasts never hurt the caster: one instant of full resistance
+    // covers the detonation frame
+    private static void explodeSafe(ServerLevel level, ServerPlayer player, double x, double y, double z,
+                                    float power, boolean breaksBlocks) {
+        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 4, 4, false, false));
+        level.explode(null, x, y, z, power,
+                breaksBlocks ? Level.ExplosionInteraction.BLOCK : Level.ExplosionInteraction.NONE);
     }
 
     // hard angular shatter: four straight diagonal beams crossing the point

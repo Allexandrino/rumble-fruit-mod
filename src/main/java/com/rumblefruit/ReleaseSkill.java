@@ -275,7 +275,6 @@ public class ReleaseSkill {
             }
             float damage = (float) (1000.0 * (1.0 - dist / (radius * 1.5)));
             entity.hurt(level.damageSources().indirectMagic(player, player), damage);
-            Element.byId(RumblePowerData.elementOf(player)).applyRider(entity, player);
             Vec3 away = entity.position().subtract(center).normalize()
                     .scale((1.0 - dist / radius) * 12.0);
             entity.push(away.x, 2.5, away.z);

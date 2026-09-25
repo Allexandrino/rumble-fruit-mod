@@ -33,12 +33,26 @@ public class CrackedSkinLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight,
                        AbstractClientPlayer player, float limbSwing, float limbSwingAmount,
                        float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (!ClientWingsData.isActive(player.getUUID())) {
+        boolean transformed = ClientWingsData.isActive(player.getUUID());
+        int combo = ClientCombatAnim.comboOf(player.getUUID());
+        boolean releasing = combo == 9 || combo == 20 || combo == 21; // the J ultimate
+        if (!transformed && !releasing) {
             return;
         }
-        ResourceLocation texture = TEXTURES[com.rumblefruit.core.ElementCatalog
-                .byId(ClientPowerData.element()).id()];
         var element = com.rumblefruit.core.ElementCatalog.byId(ClientPowerData.element());
+        // during J the skin cracks open on its own — the ultimate's energy
+        // leaks straight out of the fissures
+        if (releasing && player.tickCount % 2 == 0) {
+            net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+            if (mc.level != null) {
+                mc.level.addParticle(Element.byId(ClientPowerData.element()).spark(),
+                        player.getX() + (Math.random() - 0.5) * 0.7,
+                        player.getY() + Math.random() * 1.8,
+                        player.getZ() + (Math.random() - 0.5) * 0.7,
+                        0.0, 0.10, 0.0);
+            }
+        }
+        ResourceLocation texture = TEXTURES[element.id()];
         // pass 1: the abyss — the crack cores sunk INTO the flesh, near-black
         // with a breath of the element color (reads as bottomless holes)
         int abyss = 0xFF000000 | ((element.color() >> 3) & 0x1F1F1F);

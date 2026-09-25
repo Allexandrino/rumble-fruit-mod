@@ -387,6 +387,8 @@ public class SkillExecutor {
     public static void lightningPillarAt(ServerLevel level, Vec3 target, net.minecraft.world.entity.player.Player player) {
         boolean holy = WingsData.isActive(player.getUUID());
         RumblePillarEntity.summon(level, target.x, target.y, target.z, holy);
+        // the caster never takes his own pillar blast
+        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 4, 4, false, false));
         level.explode(null, target.x, target.y, target.z, 4.0F, Level.ExplosionInteraction.NONE);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class,
                 new AABB(target.x - 8, target.y - 8, target.z - 8, target.x + 8, target.y + 8, target.z + 8),
