@@ -55,9 +55,11 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         poseStack.pushPose();
         this.getParentModel().body.translateAndRotate(poseStack);
         // adam-scale angel wings: scale the whole wing model up around the shoulder attach point
+        // wings sweep out from the back like a real bird's at rest — not
+        // sticking straight up; wider than tall, they drape the shoulders
         poseStack.translate(0.0, 0.05, 0.14);
         float scale = WING_SCALE * eased;
-        poseStack.scale(scale, scale, scale);
+        poseStack.scale(scale * 1.3F, scale, scale); // wingspan over height
         poseStack.translate(0.0, -0.05, -0.14);
         // elemental transformation: own wing shape AND color per element —
         // angel feathers, flame tongues, bat membrane, ice shards, leaf fan
@@ -102,6 +104,41 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
             }
         }
         poseStack.popPose();
+
+        // the form itself lives: the fire demon BURNS, the void king leaks
+        // darkness, snowflakes drift off the seraphim, life motes off nature
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level != null && player.tickCount % 3 == 0) {
+            double px = player.getX();
+            double py = player.getY();
+            double pz = player.getZ();
+            switch (element.id()) {
+                case 1 -> {
+                    mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.FLAME,
+                            px + (Math.random() - 0.5) * 0.7, py + Math.random() * 1.6,
+                            pz + (Math.random() - 0.5) * 0.7, 0.0, 0.06, 0.0);
+                    mc.level.addParticle(Element.INFERNO.spark(),
+                            px + (Math.random() - 0.5) * 0.6, py + 0.5 + Math.random(),
+                            pz + (Math.random() - 0.5) * 0.6, 0.0, 0.08, 0.0);
+                }
+                case 2 -> {
+                    mc.level.addParticle(Element.VOID.spark(),
+                            px + (Math.random() - 0.5) * 0.8, py + Math.random() * 1.7,
+                            pz + (Math.random() - 0.5) * 0.8, 0.0, 0.02, 0.0);
+                    mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE,
+                            px + (Math.random() - 0.5) * 0.6, py + Math.random() * 1.5,
+                            pz + (Math.random() - 0.5) * 0.6, 0.0, 0.02, 0.0);
+                }
+                case 3 -> mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE,
+                        px + (Math.random() - 0.5) * 0.8, py + 0.4 + Math.random() * 1.4,
+                        pz + (Math.random() - 0.5) * 0.8, 0.0, -0.02, 0.0);
+                case 4 -> mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER,
+                        px + (Math.random() - 0.5) * 0.8, py + Math.random() * 1.6,
+                        pz + (Math.random() - 0.5) * 0.8, 0.0, 0.03, 0.0);
+                default -> {
+                }
+            }
+        }
     }
 
     // jagged golden arcs along each wing, attached in wing space (post-scale),

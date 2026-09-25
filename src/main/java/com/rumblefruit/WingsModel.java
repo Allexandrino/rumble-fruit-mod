@@ -364,18 +364,18 @@ public class WingsModel extends Model {
         float lift = Mth.cos(ageInTicks * speed) * amp * 0.6F;
         ModelPart[][] pairs = {{rightWing, leftWing}};
         for (ModelPart[] pair : pairs) {
-            pair[0].yRot = -0.15F - fold;
-            pair[1].yRot = 0.15F + fold;
-            pair[0].zRot = -lift;
-            pair[1].zRot = lift;
+            pair[0].yRot = -0.55F - fold;   // swept out to the sides, resting
+            pair[1].yRot = 0.55F + fold;
+            pair[0].zRot = -0.12F - lift;   // gentle downward drape
+            pair[1].zRot = 0.12F + lift;
         }
         for (int s = 1; s <= 4; s++) {
             ModelPart rw = styleRoots[s].getChild("rw");
             ModelPart lw = styleRoots[s].getChild("lw");
-            rw.yRot = -0.15F - fold;
-            lw.yRot = 0.15F + fold;
-            rw.zRot = -lift;
-            lw.zRot = lift;
+            rw.yRot = -0.55F - fold;
+            lw.yRot = 0.55F + fold;
+            rw.zRot = -0.12F - lift;
+            lw.zRot = 0.12F + lift;
         }
     }
 
