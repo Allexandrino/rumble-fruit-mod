@@ -61,7 +61,7 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         // adam-scale angel wings: scale the whole wing model up around the shoulder attach point
         // wings sweep out from the BACK like a real bird's at rest — not
         // sticking out of the shoulders; wider than tall, draping the spine
-        poseStack.translate(0.0, 0.05, 0.12);
+        poseStack.translate(0.0, 0.05, 0.22);
         float scale = WING_SCALE * eased;
         poseStack.scale(scale * 1.3F, scale, scale); // wingspan over height
         poseStack.translate(0.0, -0.05, -0.14);
