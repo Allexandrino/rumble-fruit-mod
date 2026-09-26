@@ -31,6 +31,14 @@ public final class ElementSkills {
             default -> {
             }
         }
+        // while transformed every skill lands empowered: extra shatter burst
+        // in the fruit's color on top of the harder hits (hurt() x1.6)
+        if (WingsData.isActive(player.getUUID())) {
+            Vec3 at = skillId == 0 || skillId == 1 ? player.position()
+                    : rayTrace(player, 40.0);
+            shatterFx(level, at, element, 8.0);
+            level.sendParticles(element.spark(), at.x, at.y + 1.0, at.z, 40, 2.0, 1.2, 2.0, 0.05);
+        }
     }
 
     // ---------------- Z: the signature strike ----------------

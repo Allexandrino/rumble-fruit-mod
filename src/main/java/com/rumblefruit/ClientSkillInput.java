@@ -50,6 +50,7 @@ public class ClientSkillInput {
         ClientRpgCamera.addShake(kick);
         if (skillId == 2 || skillId == 5 || skillId == 9) {
             ClientRpgCamera.impactPulse(); // brief punch-in: the world zooms with the hit
+            ClientRpgCamera.castCine();    // and the camera snaps back for the shot
         }
         int idx = skillId >= 0 && skillId <= 3 ? skillId : skillId == 5 ? 4 : -1;
         if (idx >= 0) {

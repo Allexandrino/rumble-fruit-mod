@@ -22,6 +22,12 @@ public class ClientRpgCamera {
     private static net.minecraft.world.phys.Vec3 cinePos = null;
     private static int lastPanel = -1;
     private static final long PANEL_TICKS = 28; // 1.4s per comic panel
+    private static long castCineUntil = 0L; // brief pull-back on big casts
+
+    // skill cinematic: a snappy pull-back for heavy casts (C/V)
+    public static void castCine() {
+        castCineUntil = System.currentTimeMillis() + 550;
+    }
 
     // impact feedback: every cast kicks the camera (recoil shake + fov punch)
     public static void addShake(float amount) {
@@ -99,6 +105,25 @@ public class ClientRpgCamera {
             System.out.println("[rumblefruit] cinematic active, combo=" + combo);
         }
         if (combo != 9 && combo != 20) {
+            // skill micro-cinematic: a snappy pull-back while a heavy cast fires
+            if (mc.options.getCameraType() != CameraType.FIRST_PERSON
+                    && System.currentTimeMillis() < castCineUntil) {
+                net.minecraft.world.phys.Vec3 eye0 = mc.player.getEyePosition();
+                net.minecraft.world.phys.Vec3 look0 = mc.player.getLookAngle();
+                net.minecraft.world.phys.Vec3 back = eye0.add(-look0.x * 3.2, 1.0, -look0.z * 3.2);
+                if (cinePos == null) {
+                    cinePos = back;
+                }
+                cinePos = cinePos.lerp(back, 0.35);
+                com.rumblefruit.mixin.CameraAccessor acc0 = (com.rumblefruit.mixin.CameraAccessor) camera;
+                acc0.rumblefruit$setPosition(cinePos);
+                acc0.rumblefruit$setDetached(true);
+                com.rumblefruit.core.Vec dir = new com.rumblefruit.core.Vec(
+                        eye0.x - cinePos.x, eye0.y - cinePos.y, eye0.z - cinePos.z);
+                acc0.rumblefruit$setRotation(com.rumblefruit.core.CameraMath.lookYaw(dir),
+                        com.rumblefruit.core.CameraMath.lookPitch(dir), roll * 0.3F);
+                return;
+            }
             // the comic is over — the strip is redrawn into real minecraft
             cinePos = null;
             lastPanel = -1;
