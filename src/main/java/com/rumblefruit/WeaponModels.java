@@ -46,46 +46,45 @@ public class WeaponModels extends Model {
         return new WeaponModels(root, true);
     }
 
-    // electro sword: tapered cyan blade + glowing core + winged gold guard + wrapped grip
-    // (handle at the origin, blade points +Y)
+    // electro SPEAR: a long wrapped shaft with a leaf-bladed head, side lugs
+    // and a glowing core running the full length (grip at the origin, +Y up)
     public static LayerDefinition createSwordLayer() {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
-        root.addOrReplaceChild("handle",
-                CubeListBuilder.create().texOffs(0, 0).addBox(-0.7F, -2.6F, -0.45F, 1.4F, 2.8F, 0.9F),
+        // shaft: long and slim, wrapped in two bands
+        root.addOrReplaceChild("shaft",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-0.45F, -3.0F, -0.45F, 0.9F, 20.0F, 0.9F),
                 PartPose.ZERO);
-        root.addOrReplaceChild("wrap_top",
-                CubeListBuilder.create().texOffs(6, 0).addBox(-0.8F, -0.9F, -0.55F, 1.6F, 0.4F, 1.1F),
+        root.addOrReplaceChild("wrap_low",
+                CubeListBuilder.create().texOffs(6, 0).addBox(-0.55F, -0.6F, -0.55F, 1.1F, 0.5F, 1.1F),
                 PartPose.ZERO);
-        root.addOrReplaceChild("wrap_bot",
-                CubeListBuilder.create().texOffs(12, 0).addBox(-0.8F, -1.9F, -0.55F, 1.6F, 0.4F, 1.1F),
+        root.addOrReplaceChild("wrap_mid",
+                CubeListBuilder.create().texOffs(12, 0).addBox(-0.55F, 7.5F, -0.55F, 1.1F, 0.5F, 1.1F),
                 PartPose.ZERO);
-        root.addOrReplaceChild("pommel",
-                CubeListBuilder.create().texOffs(18, 0).addBox(-0.95F, -3.4F, -0.65F, 1.9F, 0.9F, 1.3F),
+        // butt spike at the bottom of the shaft
+        root.addOrReplaceChild("butt",
+                CubeListBuilder.create().texOffs(18, 0).addBox(-0.3F, -3.9F, -0.3F, 0.6F, 1.0F, 0.6F),
                 PartPose.ZERO);
-        root.addOrReplaceChild("gem",
-                CubeListBuilder.create().texOffs(24, 0).addBox(-0.4F, -3.7F, -0.3F, 0.8F, 0.6F, 0.6F),
+        // side lugs where the head meets the shaft
+        root.addOrReplaceChild("lug_l",
+                CubeListBuilder.create().texOffs(0, 6).addBox(-2.0F, 16.6F, -0.5F, 1.6F, 0.7F, 1.0F),
                 PartPose.ZERO);
-        root.addOrReplaceChild("guard",
-                CubeListBuilder.create().texOffs(0, 6).addBox(-2.7F, 0.2F, -0.7F, 5.4F, 0.9F, 1.4F),
+        root.addOrReplaceChild("lug_r",
+                CubeListBuilder.create().texOffs(18, 6).addBox(0.4F, 16.6F, -0.5F, 1.6F, 0.7F, 1.0F),
                 PartPose.ZERO);
-        root.addOrReplaceChild("guard_tip_l",
-                CubeListBuilder.create().texOffs(12, 6).addBox(-3.6F, 0.35F, -0.45F, 1.0F, 0.6F, 0.9F),
+        // the leaf blade: wide at the base, tapering to a long point
+        root.addOrReplaceChild("blade_base",
+                CubeListBuilder.create().texOffs(0, 12).addBox(-1.1F, 17.0F, -0.35F, 2.2F, 3.6F, 0.7F),
                 PartPose.ZERO);
-        root.addOrReplaceChild("guard_tip_r",
-                CubeListBuilder.create().texOffs(18, 6).addBox(2.6F, 0.35F, -0.45F, 1.0F, 0.6F, 0.9F),
-                PartPose.ZERO);
-        root.addOrReplaceChild("blade_low",
-                CubeListBuilder.create().texOffs(0, 12).addBox(-1.4F, 1.1F, -0.35F, 2.8F, 6.0F, 0.7F),
-                PartPose.ZERO);
-        root.addOrReplaceChild("blade_up",
-                CubeListBuilder.create().texOffs(12, 12).addBox(-1.1F, 7.1F, -0.3F, 2.2F, 4.5F, 0.6F),
+        root.addOrReplaceChild("blade_mid",
+                CubeListBuilder.create().texOffs(12, 12).addBox(-0.75F, 20.6F, -0.3F, 1.5F, 2.6F, 0.6F),
                 PartPose.ZERO);
         root.addOrReplaceChild("blade_tip",
-                CubeListBuilder.create().texOffs(24, 12).addBox(-0.7F, 11.6F, -0.25F, 1.4F, 1.7F, 0.5F),
+                CubeListBuilder.create().texOffs(24, 12).addBox(-0.4F, 23.2F, -0.25F, 0.8F, 2.2F, 0.5F),
                 PartPose.ZERO);
+        // the glowing core along the whole spear
         root.addOrReplaceChild("core",
-                CubeListBuilder.create().texOffs(32, 12).addBox(-0.3F, 1.3F, -0.42F, 0.6F, 11.0F, 0.84F),
+                CubeListBuilder.create().texOffs(32, 12).addBox(-0.28F, 0.2F, -0.4F, 0.56F, 25.0F, 0.8F),
                 PartPose.ZERO);
         return LayerDefinition.create(mesh, 64, 64);
     }

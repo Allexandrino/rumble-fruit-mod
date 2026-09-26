@@ -62,7 +62,7 @@ public class SkillHudOverlay {
             // current combat stance above the skill list (gold while transformed)
             int stance = ClientStanceData.get(mc.player.getUUID());
             String stanceName = switch (stance) {
-                case 1 -> "МЕЧ";
+                case 1 -> "КОПЬЁ";
                 case 2 -> "ЛУК";
                 default -> "КУЛАКИ";
             };

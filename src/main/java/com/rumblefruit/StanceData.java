@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 // combat stance for the lightning fruit: 0 = fists (force lightning),
-// 1 = electro sword, 2 = electro bow. cycled with H, synced to all clients.
+// 1 = electro spear. cycled with H, synced to all clients.
 @net.neoforged.fml.common.EventBusSubscriber(modid = RumbleFruitMod.MOD_ID)
 public class StanceData {
     public static final int FISTS = 0;
@@ -29,9 +29,9 @@ public class StanceData {
     }
 
     public static void cycle(ServerPlayer player) {
-        int next = (get(player.getUUID()) + 1) % 3;
+        int next = (get(player.getUUID()) + 1) % 2; // fists <-> spear (no bow)
         STANCE.put(player.getUUID(), next);
-        float pitch = next == SWORD ? 1.4F : next == BOW ? 1.0F : 1.8F;
+        float pitch = next == SWORD ? 1.4F : 1.8F;
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 0.6F, pitch);
         player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);

@@ -108,12 +108,13 @@ public class ClientSkillInput {
             zPressTick = -1;
         }
 
-        // X/C: fire on press
+        // X/C: fire on press, and keep re-casting while the key is HELD once
+        // the cooldown rolls over (hold-to-spam)
         net.minecraft.client.KeyMapping[] keys = {null, ModKeyBindings.SKILL_X,
                 ModKeyBindings.SKILL_C};
         for (int i = 1; i < keys.length; i++) {
             boolean down = keys[i].isDown();
-            if (down && !prevDown[i] && hasItem) {
+            if (down && hasItem && tick - lastSkillUseTick[i] >= SKILL_COOLDOWN_TICKS[i]) {
                 net.neoforged.neoforge.network.PacketDistributor.sendToServer(new SkillPacket(i, 0));
                 notifyCast(i);
             }
