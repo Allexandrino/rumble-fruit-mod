@@ -34,4 +34,16 @@ public class MeteorCoreBlock extends Block {
         }
         return InteractionResult.SUCCESS;
     }
+
+    @Override
+    protected net.minecraft.world.ItemInteractionResult useItemOn(net.minecraft.world.item.ItemStack stack,
+                                          BlockState state,
+                                          Level level, BlockPos pos, Player player,
+                                          net.minecraft.world.InteractionHand hand, BlockHitResult hit) {
+        // works with an item in hand too — the core always drags you in
+        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
+            MeteorDungeon.enter((ServerLevel) level, serverPlayer);
+        }
+        return net.minecraft.world.ItemInteractionResult.SUCCESS;
+    }
 }
