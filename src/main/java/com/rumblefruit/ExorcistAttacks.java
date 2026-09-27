@@ -24,6 +24,20 @@ public final class ExorcistAttacks {
     public static final int COUNT = 25;
     static Random RANDOM = new Random();
 
+    // the seven stages of the Fallen Exorcist: stage 1 opens with a couple of
+    // attacks, every stage unlocks more of the arsenal, stage 7 is everything
+    public static int phaseFor(float health, float maxHealth) {
+        if (maxHealth <= 0.0F) {
+            return 7;
+        }
+        float lost = 1.0F - health / maxHealth;
+        return Math.max(1, Math.min(7, 1 + (int) (lost * 7.0F)));
+    }
+
+    public static int maxAttackForPhase(int phase) {
+        return Math.max(2, Math.min(COUNT, phase * COUNT / 7));
+    }
+
     public static void perform(int index, ServerLevel level, LivingEntity boss, LivingEntity target) {
         Vec3 b = boss.position();
         Vec3 t = target.position();

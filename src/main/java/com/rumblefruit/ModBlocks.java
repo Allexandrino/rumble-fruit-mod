@@ -9,9 +9,6 @@ public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.BLOCK, RumbleFruitMod.MOD_ID);
 
-    public static final DeferredHolder<Block, ?> BOSS_PEDESTAL =
-            BLOCKS.register("boss_pedestal", BossPedestalBlock::new);
-
     public static final DeferredHolder<Block, ?> METEOR_CORE =
             BLOCKS.register("meteor_core", MeteorCoreBlock::new);
 }

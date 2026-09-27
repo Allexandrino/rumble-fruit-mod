@@ -96,4 +96,19 @@ class ExorcistAttacksTest {
         assertEquals(79.0, mini.getY(), 1.0E-9);
         assertEquals(-1.8, mini.getDeltaMovement().y, 1.0E-9);
     }
+
+    @Test
+    void sevenStagesUnlockTheArsenal() {
+        // given the exorcist at various health levels
+        // then the stage rises as it bleeds and the arsenal unlocks
+        assertEquals(1, ExorcistAttacks.phaseFor(800.0F, 800.0F)); // full health
+        assertEquals(4, ExorcistAttacks.phaseFor(400.0F, 800.0F)); // half
+        assertEquals(7, ExorcistAttacks.phaseFor(10.0F, 800.0F));  // nearly dead
+        // the arsenal grows with the stage
+        assertTrue(ExorcistAttacks.maxAttackForPhase(1) < ExorcistAttacks.maxAttackForPhase(4));
+        assertEquals(ExorcistAttacks.COUNT, ExorcistAttacks.maxAttackForPhase(7));
+        // stage math never escapes the range
+        assertEquals(1, ExorcistAttacks.phaseFor(900.0F, 800.0F)); // overheal clamps
+        assertEquals(7, ExorcistAttacks.phaseFor(0.0F, 0.0F));     // dead boss is stage 7
+    }
 }

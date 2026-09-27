@@ -23,6 +23,7 @@ public class FallenExorcistEntity extends Monster {
 
     private int attackCooldown = 70;
     private int attackIndex = 0;
+    private int lastPhase = 1;
 
     public FallenExorcistEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
@@ -63,13 +64,25 @@ public class FallenExorcistEntity extends Monster {
         if (target == null || !target.isAlive()) {
             return;
         }
-        // the colossus bleeds fury: below half health it attacks twice as fast
-        int period = this.getHealth() < this.getMaxHealth() * 0.5F ? 40 : 70;
+        // seven stages: every stage unlocks more of the arsenal and the
+        // colossus speeds up; stage changes roar and flash across the cave
+        int phase = ExorcistAttacks.phaseFor(this.getHealth(), this.getMaxHealth());
+        if (phase > lastPhase) {
+            lastPhase = phase;
+            this.playSound(SoundEvents.ENDER_DRAGON_GROWL, 3.0F, 0.5F);
+            serverLevel.sendParticles(ModParticles.ELECTRO_GLOW.get(),
+                    this.getX(), this.getY() + 20.0, this.getZ(), 150, 6.0, 8.0, 6.0, 0.15);
+            for (var p : serverLevel.players()) {
+                p.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                        "rumblefruit.exorcist_phase", phase).withStyle(net.minecraft.ChatFormatting.DARK_RED), false);
+            }
+        }
+        int period = Math.max(18, 75 - phase * 8);
         if (--attackCooldown > 0) {
             return;
         }
         attackCooldown = period;
-        ExorcistAttacks.perform(attackIndex++, serverLevel, this, target);
+        ExorcistAttacks.perform(attackIndex++ % ExorcistAttacks.maxAttackForPhase(phase), serverLevel, this, target);
         if (attackIndex % 5 == 0) {
             this.playSound(SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.6F);
         }

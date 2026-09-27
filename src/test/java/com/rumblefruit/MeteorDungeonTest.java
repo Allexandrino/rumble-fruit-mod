@@ -57,11 +57,11 @@ class MeteorDungeonTest {
     void chambersAreBuiltOnceInTheVoidRealm() {
         // when the chambers are located
         BlockPos c = MeteorDungeon.getOrCreate(realm);
-        // then they sit at the heart of the void, colossal (walls at ±40, 60 high)
+        // then they sit at the heart of the void, a colossal 200x200 cavern
         assertArrayEquals(new int[]{0, 10, 0}, new int[]{c.getX(), c.getY(), c.getZ()});
         assertEquals(Blocks.GLOWSTONE, realm.getBlockState(c).getBlock()); // the glowing heart
         assertEquals(Blocks.GOLD_BLOCK, realm.getBlockState(c.offset(2, 0, 0)).getBlock()); // arena cross
-        assertEquals(Blocks.BLACKSTONE, realm.getBlockState(c.offset(40, 1, 5)).getBlock());
+        assertEquals(Blocks.BLACKSTONE, realm.getBlockState(c.offset(100, 1, 5)).getBlock()); // far wall
         assertEquals(Blocks.BLACKSTONE, realm.getBlockState(c.offset(0, 60, 0)).getBlock()); // ceiling
         assertTrue(realm.getBlockState(c.offset(0, 3, 0)).isAir());
         // and they are never rebuilt

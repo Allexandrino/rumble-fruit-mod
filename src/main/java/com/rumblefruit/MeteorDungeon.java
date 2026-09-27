@@ -19,7 +19,7 @@ public class MeteorDungeon {
     private MeteorDungeon() {
     }
 
-    private static final int ROOM = 40;  // half-size of the square hall
+    private static final int ROOM = 100; // half-size of the cavern (200x200)
     private static final int HEIGHT = 60; // the 50-block colossus must fit
     private static BlockPos center;
     private static boolean bossAwake;
@@ -131,41 +131,65 @@ public class MeteorDungeon {
     }
 
     private static void build(ServerLevel realm, BlockPos c) {
+        // the Cavern of the Exorcist: a colossal 200x200 cave — rough floor,
+        // stalactites overhead, lava veins and glowing moss patches for light
         for (int dx = -ROOM; dx <= ROOM; dx++) {
             for (int dz = -ROOM; dz <= ROOM; dz++) {
                 for (int dy = 0; dy <= HEIGHT; dy++) {
                     BlockPos p = c.offset(dx, dy, dz);
                     boolean wall = dx == -ROOM || dx == ROOM || dz == -ROOM || dz == ROOM;
+                    int noise = Math.floorMod(dx * 31 + dz * 17 + dy * 13, 97);
                     if (dy == 0) {
-                        // floor: blackstone with a wide gold arena cross
-                        set(realm, p, (Math.abs(dx) <= 2 || Math.abs(dz) <= 2)
-                                ? Blocks.GOLD_BLOCK : Blocks.BLACKSTONE);
+                        // floor: blackstone with bumps and lava veins
+                        if (Math.abs(dx) <= 2 || Math.abs(dz) <= 2) {
+                            set(realm, p, Blocks.GOLD_BLOCK); // the arena cross
+                        } else if (noise % 23 == 0) {
+                            set(realm, p, Blocks.MAGMA_BLOCK); // glowing veins
+                        } else {
+                            set(realm, p, Blocks.BLACKSTONE);
+                        }
                     } else if (dy == HEIGHT) {
                         set(realm, p, Blocks.BLACKSTONE);
                     } else if (wall) {
-                        // walls: blackstone with crying-obsidian ribs and a gold crown
-                        set(realm, p, dy == HEIGHT - 1 ? Blocks.GOLD_BLOCK
-                                : dy % 3 == 0 ? Blocks.CRYING_OBSIDIAN : Blocks.BLACKSTONE);
+                        set(realm, p, dy % 4 == 0 ? Blocks.CRYING_OBSIDIAN : Blocks.BLACKSTONE);
                     } else {
                         set(realm, p, Blocks.AIR);
                     }
                 }
             }
         }
-        // light: a glowstone grid in the floor so the whole hall reads
-        for (int i = -4; i <= 4; i++) {
-            for (int j = -4; j <= 4; j++) {
-                if (i % 2 == 0 && j % 2 == 0) {
-                    set(realm, c.offset(i * 8, 0, j * 8), Blocks.GLOWSTONE);
+        // floor bumps: scattered rubble mounds
+        for (int i = 0; i < 220; i++) {
+            int bx = (i * 37) % (ROOM * 2) - ROOM;
+            int bz = (i * 53) % (ROOM * 2) - ROOM;
+            if (Math.abs(bx) <= 3 || Math.abs(bz) <= 3) {
+                continue; // keep the arena cross walkable
+            }
+            set(realm, c.offset(bx, 1, bz), Blocks.BLACKSTONE);
+        }
+        // stalactites hanging from the ceiling
+        for (int i = 0; i < 160; i++) {
+            int sx = (i * 41) % (ROOM * 2 - 8) - ROOM + 4;
+            int sz = (i * 59) % (ROOM * 2 - 8) - ROOM + 4;
+            int len = 3 + (i * 7) % 9;
+            for (int dy = 0; dy < len; dy++) {
+                set(realm, c.offset(sx, HEIGHT - 1 - dy, sz), Blocks.BLACKSTONE);
+            }
+        }
+        // light: glowstone patches in a loose grid + glowing veins in the floor
+        for (int i = -6; i <= 6; i++) {
+            for (int j = -6; j <= 6; j++) {
+                if ((i + j) % 2 == 0) {
+                    set(realm, c.offset(i * 16, 0, j * 16), Blocks.GLOWSTONE);
                 }
             }
         }
-        // grand pillars with crying ribs and gold capitals
-        int[][] pillars = {{24, 24}, {-24, 24}, {24, -24}, {-24, -24}};
+        // grand pillars holding the cavern roof
+        int[][] pillars = {{50, 50}, {-50, 50}, {50, -50}, {-50, -50}, {70, 0}, {-70, 0}, {0, 70}, {0, -70}};
         for (int[] pillar : pillars) {
             for (int dy = 1; dy < HEIGHT - 1; dy++) {
                 set(realm, c.offset(pillar[0], dy, pillar[1]),
-                        dy % 4 == 0 ? Blocks.CRYING_OBSIDIAN : Blocks.BLACKSTONE);
+                        dy % 5 == 0 ? Blocks.CRYING_OBSIDIAN : Blocks.BLACKSTONE);
             }
             set(realm, c.offset(pillar[0], HEIGHT - 1, pillar[1]), Blocks.GLOWSTONE);
         }
@@ -174,11 +198,6 @@ public class MeteorDungeon {
             double a = i * Math.PI / 12.0;
             set(realm, c.offset((int) Math.round(Math.cos(a) * 6.0), 0,
                     (int) Math.round(Math.sin(a) * 6.0)), Blocks.GOLD_BLOCK);
-        }
-        for (int i = 0; i < 24; i++) {
-            double a = i * Math.PI / 12.0;
-            set(realm, c.offset((int) Math.round(Math.cos(a) * 9.0), 0,
-                    (int) Math.round(Math.sin(a) * 9.0)), Blocks.GLOWSTONE);
         }
     }
 }

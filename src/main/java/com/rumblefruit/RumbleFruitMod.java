@@ -52,9 +52,6 @@ public class RumbleFruitMod {
                     () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.FALLEN_EXORCIST,
                             0x1a0a10, 0xFFD24A, new Item.Properties()));
 
-    public static final DeferredHolder<Item, ?> BOSS_MAP =
-            ITEMS.register("boss_map", BossMapItem::new);
-
     public static final DeferredHolder<Item, ?> METEOR_CORE_ITEM =
             ITEMS.register("meteor_core", () -> new net.minecraft.world.item.BlockItem(
                     ModBlocks.METEOR_CORE.get(), new Item.Properties()));
@@ -82,7 +79,6 @@ public class RumbleFruitMod {
                         output.accept(FROST_FRUIT.get());
                         output.accept(NATURE_FRUIT.get());
                         output.accept(FALLEN_EXORCIST_SPAWN_EGG.get());
-                        output.accept(BOSS_MAP.get());
                         output.accept(METEOR_CORE_ITEM.get());
                     })
                     .build());
