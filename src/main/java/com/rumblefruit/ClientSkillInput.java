@@ -35,8 +35,8 @@ public class ClientSkillInput {
         Minecraft mc = Minecraft.getInstance();
         lastCastTick = mc.player != null ? mc.player.tickCount : 0;
         lastCastSkill = skillId;
-        if (skillId == 5) {
-            ImpactShaders.spaceTear(); // the V cast rips the screen open
+        if (skillId == 5 || skillId == 2) {
+            ImpactShaders.impact(); // heavy casts burn the screen in the fruit's color
         }
         // recoil on every cast: heavier skills kick the camera harder
         float kick = switch (skillId) {

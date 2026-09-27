@@ -1,0 +1,10 @@
+{
+    "targets": ["swap"],
+    "passes": [
+        {
+            "name": "rumblefruit:glitch",
+            "intarget": "minecraft:main",
+            "outtarget": "swap"
+        }
+    ]
+}

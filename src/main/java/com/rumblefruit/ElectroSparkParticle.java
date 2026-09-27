@@ -64,7 +64,30 @@ public class ElectroSparkParticle extends TextureSheetParticle {
     @Override
     public void tick() {
         super.tick();
-        this.alpha = Math.max(0.0F, 1.0F - (float) this.age / (float) this.lifetime);
+    }
+
+    // the particle burns on a timeline: fast attack -> hot peak -> slow decay,
+    // rendered in two layers (soft halo + searing core), both additive
+    @Override
+    public void render(com.mojang.blaze3d.vertex.VertexConsumer buffer,
+                       net.minecraft.client.Camera camera, float partialTicks) {
+        float t = Math.min(1.0F, (this.age + partialTicks) / (float) this.lifetime);
+        // alpha timeline: snap in, blaze, fade
+        float alphaMul = t < 0.15F ? t / 0.15F : Math.max(0.0F, 1.0F - (t - 0.15F) / 0.85F);
+        // scale timeline: punch out, then settle
+        float scaleMul = t < 0.2F ? 0.6F + t * 2.5F : 1.1F - t * 0.4F;
+        float baseSize = this.quadSize;
+        float baseAlpha = this.alpha;
+        // halo layer: wide and soft
+        this.quadSize = baseSize * 2.1F * scaleMul;
+        this.alpha = baseAlpha * 0.35F * alphaMul;
+        super.render(buffer, camera, partialTicks);
+        // core layer: hot and tight
+        this.quadSize = baseSize * scaleMul;
+        this.alpha = baseAlpha * alphaMul;
+        super.render(buffer, camera, partialTicks);
+        this.quadSize = baseSize;
+        this.alpha = baseAlpha;
     }
 
     @Override
