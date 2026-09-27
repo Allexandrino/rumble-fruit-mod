@@ -14,6 +14,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 // the Fallen Exorcist: a 50-block colossus assembled from hundreds of cubes,
 // the corrupted angel hunter reigning over the vault of the exorcist realm.
@@ -24,6 +25,10 @@ public class FallenExorcistEntity extends Monster {
     private int attackCooldown = 70;
     private int attackIndex = 0;
     private int lastPhase = 1;
+    // telegraph state: the marked strike zone and when the blow lands
+    private int pendingAttack = -1;
+    private Vec3 pendingPos;
+    private long fireAt;
 
     public FallenExorcistEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
@@ -78,11 +83,37 @@ public class FallenExorcistEntity extends Monster {
             }
         }
         int period = Math.max(18, 75 - phase * 8);
+        long now = level().getGameTime();
+        // telegraphed attacks: the exorcist winds up, marks the strike zone,
+        // and only then the blow lands — dodge the mark and you dodge the hit
+        if (pendingAttack >= 0) {
+            if (pendingPos != null && now < fireAt) {
+                // the strike zone burns while the exorcist winds up
+                for (int i = 0; i < 8; i++) {
+                    double a = i * Math.PI / 4.0 + now * 0.2;
+                    serverLevel.sendParticles(ModParticles.ELECTRO_SPARK.get(),
+                            pendingPos.x + Math.cos(a) * 2.2, pendingPos.y + 0.3,
+                            pendingPos.z + Math.sin(a) * 2.2, 1, 0.0, 0.1, 0.0, 0.0);
+                }
+                serverLevel.sendParticles(ModParticles.ELECTRO_GLOW.get(),
+                        pendingPos.x, pendingPos.y + 0.4, pendingPos.z, 3, 0.8, 0.2, 0.8, 0.0);
+                return;
+            }
+            this.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true); // the strike pose
+            ExorcistAttacks.perform(pendingAttack, serverLevel, this, pendingPos);
+            pendingAttack = -1;
+            pendingPos = null;
+            attackCooldown = period;
+            return;
+        }
         if (--attackCooldown > 0) {
             return;
         }
-        attackCooldown = period;
-        ExorcistAttacks.perform(attackIndex++ % ExorcistAttacks.maxAttackForPhase(phase), serverLevel, this, target);
+        // wind up: the pose starts, the zone gets marked, the hit lands later
+        this.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
+        pendingAttack = attackIndex++ % ExorcistAttacks.maxAttackForPhase(phase);
+        pendingPos = target.position();
+        fireAt = now + 24;
         if (attackIndex % 5 == 0) {
             this.playSound(SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.6F);
         }

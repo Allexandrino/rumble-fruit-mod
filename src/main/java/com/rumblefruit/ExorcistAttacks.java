@@ -38,13 +38,13 @@ public final class ExorcistAttacks {
         return Math.max(2, Math.min(COUNT, phase * COUNT / 7));
     }
 
-    public static void perform(int index, ServerLevel level, LivingEntity boss, LivingEntity target) {
+    public static void perform(int index, ServerLevel level, LivingEntity boss, net.minecraft.world.phys.Vec3 targetPos) {
         Vec3 b = boss.position();
-        Vec3 t = target.position();
+        Vec3 t = targetPos;
         switch (Math.floorMod(index, COUNT)) {
             case 0 -> { // 1. Skull Crusher: a single crushing bolt on the head
                 ElectroBolts.strike(level, t.x, t.y, t.z, null);
-                hurt(level, boss, target, 15.0F);
+                hurtAt(level, boss, t, 15.0F);
             }
             case 1 -> { // 2. Ring of Judgment: 8 bolts encircle the prey
                 for (int i = 0; i < 8; i++) {
@@ -72,7 +72,7 @@ public final class ExorcistAttacks {
                 }
             }
             case 5 -> { // 6. Homing Lance: reads the prey's movement and strikes ahead
-                Vec3 v = target.getDeltaMovement();
+                Vec3 v = Vec3.ZERO;
                 ElectroBolts.strike(level, t.x + v.x * 12.0, t.y, t.z + v.z * 12.0, null);
                 ElectroBolts.strike(level, t.x, t.y, t.z, null);
             }
@@ -97,8 +97,8 @@ public final class ExorcistAttacks {
                 level.explode(null, b.x, b.y, b.z, 3.0F, Level.ExplosionInteraction.BLOCK);
                 if (b.distanceTo(t) < 7.0) {
                     Vec3 away = t.subtract(b).normalize().scale(1.8);
-                    target.push(away.x, 0.9, away.z);
-                    hurt(level, boss, target, 20.0F);
+                    pushAt(level, boss, t, away.x, 0.9, away.z);
+                    hurtAt(level, boss, t, 20.0F);
                 }
             }
             case 10 -> { // 11. Nova: raw discharge in every direction
@@ -108,7 +108,7 @@ public final class ExorcistAttacks {
             case 11 -> { // 12. Blink Strike: the titan materialises on the prey
                 boss.setPos(t.x + 1.5, t.y, t.z + 1.5);
                 ElectroBolts.strike(level, t.x, t.y, t.z, null);
-                hurt(level, boss, target, 22.0F);
+                hurtAt(level, boss, t, 22.0F);
             }
             case 12 -> { // 13. Spark Summons: six spirit bolts close in
                 for (int i = 0; i < 6; i++) {
@@ -132,8 +132,8 @@ public final class ExorcistAttacks {
                     double a = i * Math.PI / 6.0;
                     ElectroBolts.visual(level, t.x + Math.cos(a) * 3.0, t.y, t.z + Math.sin(a) * 3.0, null);
                 }
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 3));
-                hurt(level, boss, target, 12.0F);
+                effectAt(level, boss, t, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 3));
+                hurtAt(level, boss, t, 12.0F);
             }
             case 16 -> { // 17. Twin Nova: detonations at the titan AND the prey
                 level.explode(null, b.x, b.y, b.z, 4.0F, Level.ExplosionInteraction.NONE);
@@ -154,11 +154,11 @@ public final class ExorcistAttacks {
                     boss.setPos(t.x + Math.cos(a) * 2.0, t.y, t.z + Math.sin(a) * 2.0);
                     ElectroBolts.strike(level, t.x, t.y, t.z, null);
                 }
-                hurt(level, boss, target, 18.0F);
+                hurtAt(level, boss, t, 18.0F);
             }
             case 19 -> { // 20. Gravity Slam: the sky itself hurls the prey up
-                target.push(0.0, 1.4, 0.0);
-                target.hurtMarked = true;
+                pushAt(level, boss, t, 0.0, 1.4, 0.0);
+                
                 ElectroBolts.strike(level, t.x, t.y, t.z, null);
             }
             case 20 -> { // 21. Ray Fan: a fan of jagged rays out of the titan
@@ -193,15 +193,35 @@ public final class ExorcistAttacks {
                 level.explode(null, t.x, t.y, t.z, 5.0F, Level.ExplosionInteraction.NONE);
                 ElectroBolts.strike(level, t.x, t.y, t.z, null);
                 ElectroBolts.strike(level, t.x, t.y + 3.0, t.z, null);
-                hurt(level, boss, target, 40.0F);
+                hurtAt(level, boss, t, 40.0F);
                 burst(level, t, 200, 4.0);
             }
         }
     }
 
-    private static void hurt(ServerLevel level, LivingEntity boss, LivingEntity target, float amount) {
-        target.hurt(level.damageSources().indirectMagic(boss, boss), amount);
-        target.hurtMarked = true;
+    // strikes land where the MARK was, not where the prey is now — every
+    // attack is dodgeable by moving out of the marked zone
+    private static void hurtAt(ServerLevel level, LivingEntity boss, Vec3 at, float amount) {
+        hurtNearby(level, boss, at, 2.5, amount);
+    }
+
+    private static void pushAt(ServerLevel level, LivingEntity boss, Vec3 at, double dx, double dy, double dz) {
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class,
+                new net.minecraft.world.phys.AABB(at.x - 2.5, at.y - 1.0, at.z - 2.5,
+                        at.x + 2.5, at.y + 2.5, at.z + 2.5),
+                e -> e != boss && e.isAlive())) {
+            entity.push(dx, dy, dz);
+            entity.hurtMarked = true;
+        }
+    }
+
+    private static void effectAt(ServerLevel level, LivingEntity boss, Vec3 at, MobEffectInstance effect) {
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class,
+                new net.minecraft.world.phys.AABB(at.x - 2.5, at.y - 1.0, at.z - 2.5,
+                        at.x + 2.5, at.y + 2.5, at.z + 2.5),
+                e -> e != boss && e.isAlive())) {
+            entity.addEffect(effect);
+        }
     }
 
     private static void hurtNearby(ServerLevel level, LivingEntity boss, Vec3 at, double radius, float amount) {

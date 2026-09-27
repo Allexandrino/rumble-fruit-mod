@@ -26,6 +26,7 @@ class ExorcistAttacksTest {
         boss.setPos(0.0, 64.0, 0.0);
         target = new LivingEntity();
         target.setPos(3.0, 64.0, 3.0);
+        level.setQueryResult(java.util.List.of(target)); // strikes hit via area queries
     }
 
     private boolean somethingHappened() {
@@ -40,7 +41,7 @@ class ExorcistAttacksTest {
         for (int i = 0; i < ExorcistAttacks.COUNT; i++) {
             setUp();
             // when attack i fires
-            ExorcistAttacks.perform(i, level, boss, target);
+            ExorcistAttacks.perform(i, level, boss, target.position());
             // then the world noticed
             assertTrue(somethingHappened(), "attack " + i + " was a dud");
         }
@@ -49,7 +50,7 @@ class ExorcistAttacksTest {
     @Test
     void attackIndexWrapsAroundTheArsenal() {
         // when attack 25 fires (one past the end)
-        ExorcistAttacks.perform(25, level, boss, target);
+        ExorcistAttacks.perform(25, level, boss, target.position());
         // then it is attack 0 again: a single crushing bolt plus 15 damage
         assertEquals(1, ElectroBolts.STRIKES.size());
         assertEquals(1, target.damageLog.size());
@@ -59,7 +60,7 @@ class ExorcistAttacksTest {
     @Test
     void groundSlamKnocksTheCloseTargetAway() {
         // when the floor detonates next to the prey
-        ExorcistAttacks.perform(9, level, boss, target);
+        ExorcistAttacks.perform(9, level, boss, target.position());
         // then it takes 20 damage and is hurled away and up
         assertEquals(1, target.damageLog.size());
         assertEquals(20.0F, target.damageLog.get(0), 1.0E-9);
@@ -70,7 +71,7 @@ class ExorcistAttacksTest {
     @Test
     void blinkStrikeMaterialisesTheTitanOnThePrey() {
         // when the titan blinks
-        ExorcistAttacks.perform(11, level, boss, target);
+        ExorcistAttacks.perform(11, level, boss, target.position());
         // then it stands on top of the prey
         assertEquals(4.5, boss.getX(), 1.0E-9);
         assertEquals(4.5, boss.getZ(), 1.0E-9);
@@ -79,7 +80,7 @@ class ExorcistAttacksTest {
     @Test
     void theCageSlowsThePrey() {
         // when the lightning cage closes
-        ExorcistAttacks.perform(15, level, boss, target);
+        ExorcistAttacks.perform(15, level, boss, target.position());
         // then the prey is slowed and zapped
         assertEquals(1, target.effectLog.size());
         assertEquals(1, target.damageLog.size());
@@ -89,7 +90,7 @@ class ExorcistAttacksTest {
     @Test
     void miniMeteorDropsABurningCube() {
         // when the mini meteor fires
-        ExorcistAttacks.perform(14, level, boss, target);
+        ExorcistAttacks.perform(14, level, boss, target.position());
         // then a falling magma block dives at the prey from above
         assertEquals(1, level.freshEntities.size());
         var mini = (net.minecraft.world.entity.item.FallingBlockEntity) level.freshEntities.get(0);
