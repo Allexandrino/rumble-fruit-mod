@@ -24,6 +24,13 @@ public class MeteorDungeon {
     private static BlockPos center;
     private static boolean bossAwake;
 
+    // the eight guardian crystals burn on the cavern walls at these offsets
+    // from the dungeon heart; while any stands, the throne takes no damage
+    public static final int[][] CRYSTAL_OFFSETS = {
+            {ROOM - 1, 8, 30}, {ROOM - 1, 12, -45}, {-ROOM + 1, 10, 55}, {-ROOM + 1, 6, -25},
+            {35, 9, ROOM - 1}, {-50, 13, ROOM - 1}, {25, 7, -ROOM + 1}, {-40, 11, -ROOM + 1}
+    };
+
     private record ReturnPoint(ServerLevel level, Vec3 pos) {
     }
 
@@ -36,6 +43,12 @@ public class MeteorDungeon {
 
     interface BossSpawner {
         void spawn(ServerLevel level, BlockPos at);
+    }
+
+    // test seam: is a living exorcist already reigning in the realm?
+    // (survives JVM restarts, unlike the static bossAwake flag)
+    interface BossProbe {
+        boolean alive(ServerLevel realm, BlockPos center);
     }
 
     interface RealmOpener {
@@ -56,9 +69,13 @@ public class MeteorDungeon {
     };
     static BossSpawner BOSS_SPAWNER = (level, at) -> {
         FallenExorcistEntity boss = new FallenExorcistEntity(ModEntities.FALLEN_EXORCIST.get(), level);
-        boss.setPos(at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5);
+        // the throne is a pit: the exorcist rises from the abyss shaft
+        boss.setPos(at.getX() + 0.5, at.getY() - 13.0, at.getZ() + 0.5);
+        boss.setHome(at); // the pit remembers its hall — crystal wards survive restarts
         level.addFreshEntity(boss);
     };
+    static BossProbe BOSS_PROBE = (realm, c) -> !realm.getEntitiesOfClass(FallenExorcistEntity.class,
+            new net.minecraft.world.phys.AABB(c).inflate(ROOM * 2.0 + 10.0), e -> true).isEmpty();
     static RealmOpener REALM_OPENER = from -> {
         ServerLevel realm = from.getServer().getLevel(MeteorRealm.KEY);
         getOrCreate(realm);
@@ -84,8 +101,11 @@ public class MeteorDungeon {
         FRUIT_GRANT.give(player);
         TELEPORTER.teleport(player, realm,
                 c.getX() + 0.5, c.getY() + 1.0, c.getZ() - (ROOM - 6) + 0.5);
-        if (!bossAwake) {
+        if (!bossAwake && !BOSS_PROBE.alive(realm, c)) {
             BOSS_SPAWNER.spawn(realm, c);
+            bossAwake = true;
+        } else if (!bossAwake) {
+            // the old exorcist survived a restart — re-adopt its reign
             bossAwake = true;
         }
         realm.playSound(null, c, net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_THUNDER,
@@ -119,6 +139,11 @@ public class MeteorDungeon {
         center = null;
         bossAwake = false;
         RETURN.clear();
+    }
+
+    // test hook: simulates a JVM restart — the world persists, statics do not
+    static void forgetBoss() {
+        bossAwake = false;
     }
 
     static Vec3 returnPos(UUID playerId) {
@@ -158,12 +183,12 @@ public class MeteorDungeon {
                 }
             }
         }
-        // floor bumps: scattered rubble mounds
+        // floor bumps: scattered rubble mounds (never over the pit)
         for (int i = 0; i < 220; i++) {
             int bx = (i * 37) % (ROOM * 2) - ROOM;
             int bz = (i * 53) % (ROOM * 2) - ROOM;
-            if (Math.abs(bx) <= 3 || Math.abs(bz) <= 3) {
-                continue; // keep the arena cross walkable
+            if (Math.abs(bx) <= 3 || Math.abs(bz) <= 3 || bx * bx + bz * bz <= 16 * 16) {
+                continue; // keep the arena cross walkable and the pit clear
             }
             set(realm, c.offset(bx, 1, bz), Blocks.BLACKSTONE);
         }
@@ -193,11 +218,38 @@ public class MeteorDungeon {
             }
             set(realm, c.offset(pillar[0], HEIGHT - 1, pillar[1]), Blocks.GLOWSTONE);
         }
-        // the exorcist's dais: a gold ring around a glowstone heart
-        for (int i = 0; i < 24; i++) {
-            double a = i * Math.PI / 12.0;
-            set(realm, c.offset((int) Math.round(Math.cos(a) * 6.0), 0,
-                    (int) Math.round(Math.sin(a) * 6.0)), Blocks.GOLD_BLOCK);
+        // the abyss pit at the heart: a shaft into darkness, bedrock at the
+        // bottom, crying-obsidian veins in the walls — the exorcist looms
+        // out of it like the Icon of Sin. radius 15: the colossus's hitbox
+        // (20 wide) must not brush the walls
+        for (int dx = -15; dx <= 15; dx++) {
+            for (int dz = -15; dz <= 15; dz++) {
+                int r2 = dx * dx + dz * dz;
+                if (r2 > 15 * 15) {
+                    continue;
+                }
+                for (int dy = 0; dy <= 14; dy++) {
+                    set(realm, c.offset(dx, -dy, dz), Blocks.AIR);
+                }
+                set(realm, c.offset(dx, -15, dz), Blocks.BEDROCK);
+                if (r2 > 13 * 13) {
+                    for (int dy = 2; dy <= 14; dy += 4) {
+                        set(realm, c.offset(dx, -dy, dz), Blocks.CRYING_OBSIDIAN);
+                    }
+                }
+            }
         }
+        // the ritual ring around the pit rim
+        for (int i = 0; i < 36; i++) {
+            double a = i * Math.PI / 18.0;
+            set(realm, c.offset((int) Math.round(Math.cos(a) * 17.0), 0,
+                    (int) Math.round(Math.sin(a) * 17.0)), Blocks.GOLD_BLOCK);
+        }
+        // guardian crystals burn on the walls: while any stands, the throne
+        // takes no damage. break all eight.
+        for (int[] crystal : CRYSTAL_OFFSETS) {
+            set(realm, c.offset(crystal[0], crystal[1], crystal[2]), ModBlocks.GUARDIAN_CRYSTAL.get());
+        }
+        GuardianCrystals.arm(CRYSTAL_OFFSETS.length);
     }
 }

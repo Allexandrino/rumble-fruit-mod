@@ -11,4 +11,6 @@ public class ModBlocks {
 
     public static final DeferredHolder<Block, ?> METEOR_CORE =
             BLOCKS.register("meteor_core", MeteorCoreBlock::new);
+    public static final DeferredHolder<Block, ?> GUARDIAN_CRYSTAL =
+            BLOCKS.register("guardian_crystal", GuardianCrystalBlock::new);
 }

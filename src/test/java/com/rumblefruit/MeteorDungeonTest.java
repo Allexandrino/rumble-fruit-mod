@@ -38,6 +38,7 @@ class MeteorDungeonTest {
         teleports = new ArrayList<>();
         MeteorDungeon.FRUIT_GRANT = p -> fruitGranted++;
         MeteorDungeon.BOSS_SPAWNER = (lvl, at) -> bossSpawns.add(at);
+        MeteorDungeon.BOSS_PROBE = (r, c) -> false;
         level = new ServerLevel();
         realm = new ServerLevel();
         MeteorDungeon.REALM_OPENER = from -> {
@@ -59,11 +60,12 @@ class MeteorDungeonTest {
         BlockPos c = MeteorDungeon.getOrCreate(realm);
         // then they sit at the heart of the void, a colossal 200x200 cavern
         assertArrayEquals(new int[]{0, 10, 0}, new int[]{c.getX(), c.getY(), c.getZ()});
-        assertEquals(Blocks.GLOWSTONE, realm.getBlockState(c).getBlock()); // the glowing heart
-        assertEquals(Blocks.GOLD_BLOCK, realm.getBlockState(c.offset(2, 0, 0)).getBlock()); // arena cross
+        assertTrue(realm.getBlockState(c).isAir()); // the abyss pit gapes at the heart
+        assertEquals(Blocks.BEDROCK, realm.getBlockState(c.offset(0, -15, 0)).getBlock()); // its floor
+        assertEquals(Blocks.GOLD_BLOCK, realm.getBlockState(c.offset(18, 0, 0)).getBlock()); // arena cross
         assertEquals(Blocks.BLACKSTONE, realm.getBlockState(c.offset(100, 1, 5)).getBlock()); // far wall
         assertEquals(Blocks.BLACKSTONE, realm.getBlockState(c.offset(0, 60, 0)).getBlock()); // ceiling
-        assertTrue(realm.getBlockState(c.offset(0, 3, 0)).isAir());
+        assertTrue(realm.getBlockState(c.offset(30, 3, 0)).isAir());
         // and they are never rebuilt
         assertEquals(c, MeteorDungeon.getOrCreate(realm));
     }
@@ -96,6 +98,31 @@ class MeteorDungeonTest {
         MeteorDungeon.enter(level, player);
         // then no second exorcist wakes
         assertEquals(1, bossSpawns.size());
+    }
+
+    @Test
+    void exorcistIsNotDuplicatedAfterARestart() {
+        // given the exorcist reigns, summoned before a "JVM restart"
+        MeteorDungeon.enter(level, player);
+        assertEquals(1, bossSpawns.size());
+        // when the static memory is gone but the old boss still lives in the world
+        MeteorDungeon.forgetBoss();
+        MeteorDungeon.BOSS_PROBE = (r, c) -> true;
+        MeteorDungeon.enter(level, player);
+        // then the reigning exorcist is re-adopted, not twinned
+        assertEquals(1, bossSpawns.size());
+    }
+
+    @Test
+    void exorcistIsRebornWhenTheThroneStandsEmpty() {
+        // given the exorcist has fallen and the "JVM restarted"
+        MeteorDungeon.enter(level, player);
+        MeteorDungeon.forgetBoss();
+        MeteorDungeon.BOSS_PROBE = (r, c) -> false;
+        // when a new challenger enters
+        MeteorDungeon.enter(level, player);
+        // then a new exorcist takes the throne
+        assertEquals(2, bossSpawns.size());
     }
 
     @Test

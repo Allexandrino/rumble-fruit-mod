@@ -29,15 +29,97 @@ public class FallenExorcistEntity extends Monster {
     private int pendingAttack = -1;
     private Vec3 pendingPos;
     private long fireAt;
+    // the hall this throne reigns over — used to re-count crystal wards
+    private net.minecraft.core.BlockPos home;
+    private boolean homeScanned;
 
     public FallenExorcistEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
         this.xpReward = 300;
     }
 
+    public void setHome(net.minecraft.core.BlockPos home) {
+        this.home = home;
+    }
+
+    // the exorcist never despawns — it reigns until slain
+    @Override
+    public boolean removeWhenFarAway(double distanceToClosestPlayer) {
+        return false;
+    }
+
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        if (home != null) {
+            tag.putLong("rumblefruit_home", home.asLong());
+        }
+    }
+
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("rumblefruit_home")) {
+            home = net.minecraft.core.BlockPos.of(tag.getLong("rumblefruit_home"));
+        }
+    }
+
+    // the boss bar: a dark-red notched bar while anyone fights in the cavern
+    private final net.minecraft.server.level.ServerBossEvent bossBar = new net.minecraft.server.level.ServerBossEvent(
+            net.minecraft.network.chat.Component.translatable("entity.rumblefruit.fallen_exorcist"),
+            net.minecraft.world.BossEvent.BossBarColor.RED,
+            net.minecraft.world.BossEvent.BossBarOverlay.NOTCHED_10);
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        // the exorcist yields only to a hero's own hand: no lava, no walls,
+        // no stray bolts (its own arsenal included) — /kill and the void excepted
+        if (source.is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)
+                || source.is(net.minecraft.world.damagesource.DamageTypes.FELL_OUT_OF_WORLD)) {
+            return super.hurt(source, amount);
+        }
+        if (!(source.getEntity() instanceof net.minecraft.world.entity.player.Player p)) {
+            return false;
+        }
+        // the guardian crystals shield the throne: no damage while any burn
+        if (GuardianCrystals.alive() > 0) {
+            p.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                    "rumblefruit.exorcist_shielded").withStyle(net.minecraft.ChatFormatting.DARK_PURPLE), true);
+            return false;
+        }
+        return super.hurt(source, amount * 0.67F);
+    }
+
+    @Override
+    public void die(DamageSource source) {
+        bossBar.removeAllPlayers();
+        super.die(source);
+    }
+
+    // the bar follows the entity tracker: shown when the boss is tracked,
+    // dropped on dimension change, chunk unload, death — no lingering ghosts
+    @Override
+    public void startSeenByPlayer(net.minecraft.server.level.ServerPlayer player) {
+        super.startSeenByPlayer(player);
+        bossBar.addPlayer(player);
+    }
+
+    @Override
+    public void stopSeenByPlayer(net.minecraft.server.level.ServerPlayer player) {
+        super.stopSeenByPlayer(player);
+        bossBar.removePlayer(player);
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        // death, /kill, chunk unload — the bar must never linger
+        bossBar.removeAllPlayers();
+        super.remove(reason);
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, 1500.0)
+                .add(Attributes.MAX_HEALTH, 1024.0) // vanilla clamps max health at 1024
                 .add(Attributes.ATTACK_DAMAGE, 30.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.0) // it does not chase — it reigns
                 .add(Attributes.ARMOR, 20.0)
@@ -65,7 +147,43 @@ public class FallenExorcistEntity extends Monster {
         if (this.level().isClientSide || !(this.level() instanceof ServerLevel serverLevel)) {
             return;
         }
+        // first tick in a fresh JVM: the crystal counter is static memory,
+        // the crystal BLOCKS are the world — recount the wards still standing
+        if (!homeScanned) {
+            homeScanned = true;
+            if (home != null && GuardianCrystals.alive() == 0) {
+                int standing = 0;
+                for (int[] off : MeteorDungeon.CRYSTAL_OFFSETS) {
+                    if (serverLevel.getBlockState(home.offset(off[0], off[1], off[2]))
+                            .is(ModBlocks.GUARDIAN_CRYSTAL.get())) {
+                        standing++;
+                    }
+                }
+                if (standing > 0) {
+                    GuardianCrystals.arm(standing);
+                }
+            }
+        }
         LivingEntity target = this.getTarget();
+        bossBar.setProgress(this.getHealth() / this.getMaxHealth());
+        // drop watchers who left this dimension (tracker misses some edge cases)
+        for (var p : java.util.List.copyOf(bossBar.getPlayers())) {
+            if (p.level() != this.level()) {
+                bossBar.removePlayer(p);
+            }
+        }
+        // the abyss breathes: violet light and black smoke seep out of the pit
+        long breath = level().getGameTime();
+        if (breath % 6 == 0) {
+            double a = this.random.nextDouble() * Math.PI * 2.0;
+            double r = 3.0 + this.random.nextDouble() * 7.0;
+            serverLevel.sendParticles(ModParticles.ELECTRO_GLOW.get(),
+                    this.getX() + Math.cos(a) * r, this.getY() + 2.0 + this.random.nextDouble() * 10.0,
+                    this.getZ() + Math.sin(a) * r, 1, 0.0, 0.35, 0.0, 0.0);
+            serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE,
+                    this.getX() + Math.cos(a + 2.0) * r, this.getY() + 1.0,
+                    this.getZ() + Math.sin(a + 2.0) * r, 1, 0.0, 0.3, 0.0, 0.01);
+        }
         if (target == null || !target.isAlive()) {
             return;
         }
@@ -117,12 +235,6 @@ public class FallenExorcistEntity extends Monster {
         if (attackIndex % 5 == 0) {
             this.playSound(SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.6F);
         }
-    }
-
-    @Override
-    public boolean hurt(DamageSource source, float amount) {
-        // the cube shell shrugs off a third of everything
-        return super.hurt(source, amount * 0.67F);
     }
 
     @Override

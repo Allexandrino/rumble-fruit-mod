@@ -56,6 +56,10 @@ public class RumbleFruitMod {
             ITEMS.register("meteor_core", () -> new net.minecraft.world.item.BlockItem(
                     ModBlocks.METEOR_CORE.get(), new Item.Properties()));
 
+    public static final DeferredHolder<Item, ?> GUARDIAN_CRYSTAL_ITEM =
+            ITEMS.register("guardian_crystal", () -> new net.minecraft.world.item.BlockItem(
+                    ModBlocks.GUARDIAN_CRYSTAL.get(), new Item.Properties()));
+
     public RumbleFruitMod(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);

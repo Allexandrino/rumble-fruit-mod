@@ -39,7 +39,9 @@ public final class ExorcistAttacks {
     }
 
     public static void perform(int index, ServerLevel level, LivingEntity boss, net.minecraft.world.phys.Vec3 targetPos) {
-        Vec3 b = boss.position();
+        // the exorcist reigns from the abyss pit: its own strikes ride at the
+        // floor level of the arena, not at the pit bottom
+        Vec3 b = new Vec3(boss.getX(), Math.max(boss.getY(), targetPos.y), boss.getZ());
         Vec3 t = targetPos;
         switch (Math.floorMod(index, COUNT)) {
             case 0 -> { // 1. Skull Crusher: a single crushing bolt on the head
@@ -234,9 +236,17 @@ public final class ExorcistAttacks {
         }
     }
 
+    // strict shapes only: the burst is a web of jagged cracks crawling outward,
+    // never a sphere — power shows as fissures and curved rays
     private static void burst(ServerLevel level, Vec3 at, int count, double spread) {
-        level.sendParticles(ModParticles.ELECTRO_SPARK.get(), at.x, at.y, at.z, count,
-                spread, spread * 0.7, spread, 0.15);
+        int arms = Math.max(4, count / 20);
+        for (int i = 0; i < arms; i++) {
+            double yaw = i * Math.PI * 2.0 / arms;
+            ray(level, at.add(0.0, 0.3, 0.0), yaw, -0.05, spread * 1.4);
+        }
+        // one curved slash arc over the point
+        level.sendParticles(ModParticles.ELECTRO_SLASH.get(), at.x, at.y + 1.2, at.z,
+                0, (float) (spread), 0.0F, 0.0F, 0.0);
     }
 
     private static void ray(ServerLevel level, Vec3 from, double yaw, double pitch, double length) {

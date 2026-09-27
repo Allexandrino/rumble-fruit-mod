@@ -7,4 +7,6 @@ import net.minecraft.world.level.block.Blocks;
 public class ModBlocks {
     public static final net.neoforged.neoforge.registries.DeferredHolder<Block, ?> METEOR_CORE =
             new net.neoforged.neoforge.registries.DeferredHolder<>(Blocks.GLOWSTONE);
+    public static final net.neoforged.neoforge.registries.DeferredHolder<Block, ?> GUARDIAN_CRYSTAL =
+            new net.neoforged.neoforge.registries.DeferredHolder<>(Blocks.CRYING_OBSIDIAN);
 }

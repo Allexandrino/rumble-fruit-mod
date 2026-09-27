@@ -32,6 +32,15 @@ public class ElementWeaponAura {
             active = true;
         }
         if (!active) {
+            // idle: the power still breathes — a single tiny spark every 2s
+            if (mc.player.tickCount % 40 == 0) {
+                float yawIdle = mc.player.getYRot() * 0.0174533F;
+                mc.level.addParticle(Element.byId(ClientPowerData.element()).spark(),
+                        mc.player.getX() + Math.cos(yawIdle) * 0.45,
+                        mc.player.getY() + 1.25,
+                        mc.player.getZ() - Math.sin(yawIdle) * 0.45,
+                        0.0, 0.01, 0.0);
+            }
             return;
         }
         if (mc.player.tickCount % 2 != 0) {

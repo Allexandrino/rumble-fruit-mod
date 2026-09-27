@@ -37,7 +37,7 @@ public final class ElementSkills {
             Vec3 at = skillId == 0 || skillId == 1 ? player.position()
                     : rayTrace(player, 40.0);
             shatterFx(level, at, element, 8.0);
-            level.sendParticles(element.spark(), at.x, at.y + 1.0, at.z, 40, 2.0, 1.2, 2.0, 0.05);
+            crackWebFx(level, at, element, 8, 10.0); // the empowered burst crawls as cracks
         }
     }
 
@@ -101,7 +101,7 @@ public final class ElementSkills {
                     e.hurtMarked = true;
                     hurt(level, player, e, 15.0F, element);
                 }
-                level.sendParticles(element.spark(), well.x, well.y, well.z, 120, 1.5, 1.5, 1.5, 0.1);
+                crackWebFx(level, well, element, 8, 12.0); // the well tears open in cracks
                 sound(level, player, element.castSound(), 2.0F, 0.6F);
             }
             case FROST -> { // Blizzard: a lattice of razor ice shards, everything freezes stiff
@@ -217,8 +217,9 @@ public final class ElementSkills {
                                 target.z + Math.sin(a) * d, 2, 0.0, 0.0, 0.0, 0.0);
                     }
                 }
-                level.sendParticles(element.spark(), target.x, target.y + 0.6, target.z,
-                        30, 0.6, 0.3, 0.6, 0.02); // the dark core
+                // the core is a jagged slash, not a sphere
+                level.sendParticles(ModParticles.ELECTRO_SLASH.get(), target.x, target.y + 1.0, target.z,
+                        0, 0.6F, 0.3F, 0.0F, 0.0);
                 FarFx.column(level, element.spark(), target.x, target.y, target.z, 100.0, 2.0, 3, 0.7);
                 sound(level, target, element.castSound(), 4.0F, 0.5F);
             }
@@ -421,5 +422,18 @@ public final class ElementSkills {
     private static void sound(ServerLevel level, Vec3 at,
                               net.minecraft.sounds.SoundEvent sound, float volume, float pitch) {
         level.playSound(null, at.x, at.y, at.z, sound, SoundSource.WEATHER, volume, pitch);
+    }
+
+    // strict visuals only: jagged crack webs and curved rays, never spheres
+    private static void crackWebFx(ServerLevel level, Vec3 at, Element element, int arms, double len) {
+        for (int i = 0; i < arms; i++) {
+            double yaw = i * Math.PI * 2.0 / arms;
+            java.util.List<com.rumblefruit.core.Vec> points = com.rumblefruit.core.RayPolyline.generate(
+                    new com.rumblefruit.core.Vec(at.x, at.y + 0.3, at.z), yaw, -0.05, len,
+                    new java.util.Random());
+            for (com.rumblefruit.core.Vec p : points) {
+                level.sendParticles(element.spark(), p.x(), p.y(), p.z(), 1, 0.0, 0.0, 0.0, 0.0);
+            }
+        }
     }
 }
