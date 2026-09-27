@@ -29,6 +29,8 @@ public class WingsModel extends Model {
     private final ModelPart horns;
     private final ModelPart crown;
     private final ModelPart circlet;
+    private final ModelPart tail;
+    private final ModelPart orbs;
     private final ModelPart costume;
 
     public WingsModel(ModelPart root) {
@@ -45,6 +47,8 @@ public class WingsModel extends Model {
         this.horns = root.getChild("horns");
         this.crown = root.getChild("crown");
         this.circlet = root.getChild("circlet");
+        this.tail = root.getChild("tail");
+        this.orbs = root.getChild("orbs");
         this.costume = root.getChild("costume");
     }
 
@@ -353,6 +357,27 @@ public class WingsModel extends Model {
                     PartPose.offset((float) (Math.cos(a) * 4.4), -7.6F, (float) (Math.sin(a) * 4.4)));
         }
 
+        // DEMON TAIL (inferno): a segmented spaded tail curling behind
+        PartDefinition tail = root.addOrReplaceChild("tail", CubeListBuilder.create(), PartPose.ZERO);
+        tail.addOrReplaceChild("tail_base",
+                CubeListBuilder.create().texOffs(32, 24).addBox(-0.7F, -0.7F, 0.0F, 1.4F, 1.4F, 7.0F),
+                PartPose.offsetAndRotation(0.0F, 11.0F, 2.2F, 0.5F, 0.0F, 0.0F));
+        tail.addOrReplaceChild("tail_mid",
+                CubeListBuilder.create().texOffs(32, 24).addBox(-0.55F, -0.55F, 0.0F, 1.1F, 1.1F, 5.0F),
+                PartPose.offsetAndRotation(0.0F, 14.2F, 7.5F, -0.25F, 0.0F, 0.0F));
+        tail.addOrReplaceChild("tail_spade",
+                CubeListBuilder.create().texOffs(40, 0).addBox(-1.1F, -1.3F, -0.3F, 2.2F, 2.6F, 0.6F),
+                PartPose.offsetAndRotation(0.0F, 13.6F, 12.6F, -0.1F, 0.0F, 0.0F));
+
+        // VOID ORBS (king of darkness): two dark spheres floating at the shoulders
+        PartDefinition orbs = root.addOrReplaceChild("orbs", CubeListBuilder.create(), PartPose.ZERO);
+        orbs.addOrReplaceChild("orb_r",
+                CubeListBuilder.create().texOffs(32, 0).addBox(-1.1F, -1.1F, -1.1F, 2.2F, 2.2F, 2.2F),
+                PartPose.offset(6.8F, -2.5F, 0.5F));
+        orbs.addOrReplaceChild("orb_l",
+                CubeListBuilder.create().texOffs(32, 0).addBox(-1.1F, -1.1F, -1.1F, 2.2F, 2.2F, 2.2F),
+                PartPose.offset(-6.8F, -2.5F, 0.5F));
+
         return LayerDefinition.create(mesh, 64, 64);
     }
 
@@ -427,6 +452,18 @@ public class WingsModel extends Model {
     public void renderCirclet(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
                               int color) {
         circlet.render(poseStack, buffer, packedLight, packedOverlay, color);
+    }
+
+    // the demon's spaded tail, swaying with the body
+    public void renderTail(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
+                           int color) {
+        tail.render(poseStack, buffer, packedLight, packedOverlay, color);
+    }
+
+    // the king's floating void spheres
+    public void renderOrbs(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
+                           int color) {
+        orbs.render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 
     public void renderCostume(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,

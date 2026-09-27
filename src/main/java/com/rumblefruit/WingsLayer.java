@@ -85,6 +85,14 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
         this.getParentModel().body.translateAndRotate(poseStack);
         VertexConsumer robeConsumer = buffer.getBuffer(RenderType.entityCutoutNoCull(ROBE));
         model.renderCostume(poseStack, robeConsumer, packedLight, OverlayTexture.NO_OVERLAY, tint);
+        // body-space extras: the demon's tail sways, the king's void orbs float
+        if (element.id() == 1) {
+            model.renderTail(poseStack, robeConsumer, packedLight, OverlayTexture.NO_OVERLAY,
+                    0xFF2A0E08);
+        } else if (element.id() == 2) {
+            model.renderOrbs(poseStack, robeConsumer, packedLight, OverlayTexture.NO_OVERLAY,
+                    0xFF12071E);
+        }
         poseStack.popPose();
 
         poseStack.pushPose();
@@ -98,8 +106,10 @@ public class WingsLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
                 model.renderMask(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY);
                 model.renderHalo(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY, tint);
             }
-            case 1 -> model.renderHorns(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY,
-                    0xFF3A1A10); // charcoal demon horns
+            case 1 -> {
+                model.renderHorns(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY,
+                        0xFF3A1A10); // charcoal demon horns
+            }
             case 2 -> model.renderCrown(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY,
                     0xFFFFD24A); // royal gold on the king of darkness
             case 3 -> model.renderHalo(poseStack, emissive, packedLight, OverlayTexture.NO_OVERLAY, tint);
