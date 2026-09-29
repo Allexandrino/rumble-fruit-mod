@@ -24,13 +24,6 @@ public class MeteorDungeon {
     private static BlockPos center;
     private static boolean bossAwake;
 
-    // the eight guardian crystals burn on the cavern walls at these offsets
-    // from the dungeon heart; while any stands, the throne takes no damage
-    public static final int[][] CRYSTAL_OFFSETS = {
-            {ROOM - 1, 8, 30}, {ROOM - 1, 12, -45}, {-ROOM + 1, 10, 55}, {-ROOM + 1, 6, -25},
-            {35, 9, ROOM - 1}, {-50, 13, ROOM - 1}, {25, 7, -ROOM + 1}, {-40, 11, -ROOM + 1}
-    };
-
     private record ReturnPoint(ServerLevel level, Vec3 pos) {
     }
 
@@ -71,11 +64,20 @@ public class MeteorDungeon {
         FallenExorcistEntity boss = new FallenExorcistEntity(ModEntities.FALLEN_EXORCIST.get(), level);
         // the throne is a pit: the exorcist rises from the abyss shaft
         boss.setPos(at.getX() + 0.5, at.getY() - 13.0, at.getZ() + 0.5);
-        boss.setHome(at); // the pit remembers its hall — crystal wards survive restarts
         level.addFreshEntity(boss);
+        // four guardian swirls take their orbits around the core
+        for (int i = 0; i < 4; i++) {
+            GuardianSwirlEntity swirl = new GuardianSwirlEntity(ModEntities.GUARDIAN_SWIRL.get(), level);
+            swirl.setOrbitIndex(i);
+            swirl.setPos(at.getX() + 0.5, at.getY() + 12.0, at.getZ() + 0.5);
+            level.addFreshEntity(swirl);
+        }
     };
-    static BossProbe BOSS_PROBE = (realm, c) -> !realm.getEntitiesOfClass(FallenExorcistEntity.class,
-            new net.minecraft.world.phys.AABB(c).inflate(ROOM * 2.0 + 10.0), e -> true).isEmpty();
+    static BossProbe BOSS_PROBE = (realm, c) -> {
+        realm.getChunkAt(c); // force-load the heart before counting — teleports load chunks async
+        return !realm.getEntitiesOfClass(FallenExorcistEntity.class,
+                new net.minecraft.world.phys.AABB(c).inflate(ROOM * 2.0 + 10.0), e -> true).isEmpty();
+    };
     static RealmOpener REALM_OPENER = from -> {
         ServerLevel realm = from.getServer().getLevel(MeteorRealm.KEY);
         getOrCreate(realm);
@@ -245,11 +247,5 @@ public class MeteorDungeon {
             set(realm, c.offset((int) Math.round(Math.cos(a) * 17.0), 0,
                     (int) Math.round(Math.sin(a) * 17.0)), Blocks.GOLD_BLOCK);
         }
-        // guardian crystals burn on the walls: while any stands, the throne
-        // takes no damage. break all eight.
-        for (int[] crystal : CRYSTAL_OFFSETS) {
-            set(realm, c.offset(crystal[0], crystal[1], crystal[2]), ModBlocks.GUARDIAN_CRYSTAL.get());
-        }
-        GuardianCrystals.arm(CRYSTAL_OFFSETS.length);
     }
 }

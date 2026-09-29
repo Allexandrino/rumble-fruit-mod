@@ -87,9 +87,13 @@ fill(gx, 32, 0, 37, 3, EYE)
 gx[33, 1] = EYE_CORE
 gx[34, 1] = EYE_CORE
 
-# ---------------- THIRD EYE: texOffs(48,0), box 1.2x1.2x0.5 ----------------
-fill(px, 48, 0, 51, 2, THIRD)
-fill(gx, 48, 0, 51, 2, THIRD_GLOW)
+# ---------------- CORE (ex-third-eye): texOffs(48,0), box 2.2x2.6x0.8 ----------------
+fill(px, 48, 0, 55, 4, THIRD)
+px[49, 1] = (255, 220, 255, 255)  # hot center
+px[50, 1] = (255, 220, 255, 255)
+fill(gx, 48, 0, 55, 4, THIRD_GLOW)
+gx[49, 1] = (255, 240, 255, 255)
+gx[50, 1] = (255, 240, 255, 255)
 
 # ---------------- WINGS: texOffs(0,16), feather box up to 14x3x1 ----------------
 # bounding x0-30, y16-20

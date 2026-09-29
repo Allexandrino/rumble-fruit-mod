@@ -1,1 +1,0 @@
-{ "parent": "minecraft:block/cube_all", "textures": { "all": "rumblefruit:block/guardian_crystal" } }

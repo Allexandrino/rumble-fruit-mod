@@ -44,6 +44,7 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.LIGHTNING_PILLAR.get(), RumblePillarRenderer::new);
         event.registerEntityRenderer(ModEntities.ELECTRO_ARROW.get(), ElectroArrowRenderer::new);
         event.registerEntityRenderer(ModEntities.FALLEN_EXORCIST.get(), FallenExorcistRenderer::new);
+        event.registerEntityRenderer(ModEntities.GUARDIAN_SWIRL.get(), GuardianSwirlRenderer::new);
     }
 
     @SubscribeEvent

@@ -16,10 +16,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-// the Fallen Exorcist: a 50-block colossus assembled from hundreds of cubes,
-// the corrupted angel hunter reigning over the vault of the exorcist realm.
-// stationary, all-seeing, armed with a 25-move arsenal (see ExorcistAttacks);
-// below half health it attacks twice as fast.
+// the Fallen Exorcist: a colossal horned face looming out of the abyss pit of
+// its realm (see ExorcistModel). stationary, all-seeing, armed with a 25-move
+// arsenal (see ExorcistAttacks); below half health it attacks twice as fast.
+// its core is warded by four guardian swirls — break them, then the core
 public class FallenExorcistEntity extends Monster {
 
     private int attackCooldown = 70;
@@ -29,17 +29,13 @@ public class FallenExorcistEntity extends Monster {
     private int pendingAttack = -1;
     private Vec3 pendingPos;
     private long fireAt;
-    // the hall this throne reigns over — used to re-count crystal wards
-    private net.minecraft.core.BlockPos home;
-    private boolean homeScanned;
+    // the ward: guardian swirls circling the core (recounted from the world)
+    private int swirlCount = 4;
+    private boolean vulnerabilityAnnounced;
 
     public FallenExorcistEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
         this.xpReward = 300;
-    }
-
-    public void setHome(net.minecraft.core.BlockPos home) {
-        this.home = home;
     }
 
     // the exorcist never despawns — it reigns until slain
@@ -48,20 +44,8 @@ public class FallenExorcistEntity extends Monster {
         return false;
     }
 
-    @Override
-    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        if (home != null) {
-            tag.putLong("rumblefruit_home", home.asLong());
-        }
-    }
-
-    @Override
-    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("rumblefruit_home")) {
-            home = net.minecraft.core.BlockPos.of(tag.getLong("rumblefruit_home"));
-        }
+    public int getSwirlCount() {
+        return swirlCount;
     }
 
     // the boss bar: a dark-red notched bar while anyone fights in the cavern
@@ -81,8 +65,8 @@ public class FallenExorcistEntity extends Monster {
         if (!(source.getEntity() instanceof net.minecraft.world.entity.player.Player p)) {
             return false;
         }
-        // the guardian crystals shield the throne: no damage while any burn
-        if (GuardianCrystals.alive() > 0) {
+        // the guardian swirls ward the core: no damage while any orbit
+        if (swirlCount > 0) {
             p.displayClientMessage(net.minecraft.network.chat.Component.translatable(
                     "rumblefruit.exorcist_shielded").withStyle(net.minecraft.ChatFormatting.DARK_PURPLE), true);
             return false;
@@ -147,21 +131,31 @@ public class FallenExorcistEntity extends Monster {
         if (this.level().isClientSide || !(this.level() instanceof ServerLevel serverLevel)) {
             return;
         }
-        // first tick in a fresh JVM: the crystal counter is static memory,
-        // the crystal BLOCKS are the world — recount the wards still standing
-        if (!homeScanned) {
-            homeScanned = true;
-            if (home != null && GuardianCrystals.alive() == 0) {
-                int standing = 0;
-                for (int[] off : MeteorDungeon.CRYSTAL_OFFSETS) {
-                    if (serverLevel.getBlockState(home.offset(off[0], off[1], off[2]))
-                            .is(ModBlocks.GUARDIAN_CRYSTAL.get())) {
-                        standing++;
-                    }
+        // the ward is made of living shards, not memory: recount the swirls
+        // still circling the core — reloads, stray /kills, nothing desyncs
+        if (this.tickCount % 20 == 0) {
+            swirlCount = serverLevel.getEntitiesOfClass(GuardianSwirlEntity.class,
+                    this.getBoundingBox().inflate(60.0)).size();
+            if (swirlCount == 0 && !vulnerabilityAnnounced) {
+                vulnerabilityAnnounced = true;
+                this.playSound(SoundEvents.ENDER_DRAGON_GROWL, 3.0F, 1.2F);
+                serverLevel.sendParticles(ModParticles.ELECTRO_GLOW.get(),
+                        this.getX(), this.getY() + 25.0, this.getZ(), 120, 4.0, 4.0, 4.0, 0.2);
+                for (var p : serverLevel.players()) {
+                    p.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                            "rumblefruit.core_exposed").withStyle(net.minecraft.ChatFormatting.GOLD), false);
                 }
-                if (standing > 0) {
-                    GuardianCrystals.arm(standing);
+            }
+        }
+        // one throne, one exorcist: an older twin from a stale save retires
+        if (this.tickCount % 100 == 7) {
+            for (var twin : serverLevel.getEntitiesOfClass(FallenExorcistEntity.class,
+                    this.getBoundingBox().inflate(80.0), e -> e != this && e.isAlive())) {
+                if (this.tickCount < twin.tickCount) {
+                    this.discard();
+                    return;
                 }
+                twin.discard();
             }
         }
         LivingEntity target = this.getTarget();

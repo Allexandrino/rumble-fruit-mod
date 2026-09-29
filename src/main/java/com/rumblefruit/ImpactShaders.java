@@ -14,7 +14,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 // a timeline (buildup -> peak -> decay). space tear for the J blast, impact
 // (burning vignette + flash + grade, tinted in the fruit's color) for heavy
 // casts and meteor landings, glitch bursts for the transformation, motion blur
-// for the slow-mo fall
+// for the slow-mo fall, and the pencil-sketch impact frame: for a blink the
+// world is redrawn as a hand-drawn sketch (casts, swirl breaks)
 @EventBusSubscriber(modid = RumbleFruitMod.MOD_ID, value = Dist.CLIENT)
 public class ImpactShaders {
     private static final ResourceLocation SPACETEAR =
@@ -23,17 +24,21 @@ public class ImpactShaders {
             ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "shaders/post/impact.json");
     private static final ResourceLocation GLITCH =
             ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "shaders/post/glitch.json");
+    private static final ResourceLocation SKETCH =
+            ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "shaders/post/sketch.json");
     private static final ResourceLocation BLUR =
             ResourceLocation.withDefaultNamespace("shaders/post/blur.json");
 
     private static final long TEAR_MILLIS = 2200;
     private static final long IMPACT_MILLIS = 900;
     private static final long GLITCH_MILLIS = 600;
+    private static final long SKETCH_MILLIS = 450;
 
     private static final int NONE = 0;
     private static final int TEAR = 1;
     private static final int IMPACT_FX = 2;
     private static final int GLITCH_FX = 3;
+    private static final int SKETCH_FX = 4;
 
     private static int mode = NONE;
     private static long start = -1;
@@ -72,11 +77,22 @@ public class ImpactShaders {
         start = System.currentTimeMillis();
     }
 
+    // the pencil-sketch impact frame: a blink of hand-drawn world
+    public static void sketch() {
+        // the lightest beat — never tramples a heavier moment
+        if (mode != NONE && active()) {
+            return;
+        }
+        mode = SKETCH_FX;
+        start = System.currentTimeMillis();
+    }
+
     private static long duration() {
         return switch (mode) {
             case TEAR -> TEAR_MILLIS;
             case IMPACT_FX -> IMPACT_MILLIS;
             case GLITCH_FX -> GLITCH_MILLIS;
+            case SKETCH_FX -> SKETCH_MILLIS;
             default -> 0;
         };
     }
@@ -151,6 +167,7 @@ public class ImpactShaders {
             case TEAR -> mc.gameRenderer.loadEffect(SPACETEAR);
             case IMPACT_FX -> mc.gameRenderer.loadEffect(IMPACT);
             case GLITCH_FX -> mc.gameRenderer.loadEffect(GLITCH);
+            case SKETCH_FX -> mc.gameRenderer.loadEffect(SKETCH);
             default -> {
             }
         }

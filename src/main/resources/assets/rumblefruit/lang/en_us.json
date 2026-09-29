@@ -29,9 +29,7 @@
   "item.rumblefruit.meteor_core": "Meteor Core",
   "rumblefruit.dungeon_cleared": "The Fallen Exorcist is down! The chambers release you...",
   "rumblefruit.exorcist_phase": "The Fallen Exorcist enters stage %s!",
-  "rumblefruit.exorcist_shielded": "The guardian crystals shield the throne! Break them!",
-  "rumblefruit.crystal_down": "Crystal shattered! Left: %s",
-  "block.rumblefruit.guardian_crystal": "Guardian Crystal",
+  "rumblefruit.exorcist_shielded": "The guardian swirls ward the core! Shoot them all down!",
   "item.rumblefruit.inferno_fruit": "Inferno Fruit",
   "item.rumblefruit.void_fruit": "Void Fruit",
   "item.rumblefruit.frost_fruit": "Frost Fruit",
@@ -45,5 +43,8 @@
   "rumblefruit.form.inferno": "Fallen Archangel of Fire",
   "rumblefruit.form.void": "King of Darkness",
   "rumblefruit.form.frost": "Ice Seraphim",
-  "rumblefruit.form.nature": "Mother Nature"
+  "rumblefruit.form.nature": "Mother Nature",
+  "rumblefruit.swirl_down": "A swirl shattered!",
+  "rumblefruit.core_exposed": "The ward is down! The core is exposed — strike it!",
+  "entity.rumblefruit.guardian_swirl": "Guardian Swirl"
 }

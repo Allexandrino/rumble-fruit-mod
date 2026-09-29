@@ -21,12 +21,14 @@ public class ExorcistModel extends EntityModel<FallenExorcistEntity> {
 
     private final ModelPart root;
     private final ModelPart face;
+    private final ModelPart core;
     private final ModelPart[] wings = new ModelPart[4];
     private final ModelPart[] tendrils = new ModelPart[4];
 
     public ExorcistModel(ModelPart root) {
         this.root = root;
         this.face = root.getChild("face");
+        this.core = face.getChild("core");
         for (int i = 0; i < 4; i++) {
             wings[i] = root.getChild("wing" + i);
             tendrils[i] = root.getChild("tendril" + i);
@@ -57,10 +59,11 @@ public class ExorcistModel extends EntityModel<FallenExorcistEntity> {
         face.addOrReplaceChild("eye_l",
                 CubeListBuilder.create().texOffs(32, 0).addBox(-0.9F, -0.9F, -0.3F, 1.8F, 1.8F, 0.6F),
                 PartPose.offset(-1.8F, 1.2F, -1.3F));
-        // the third eye on the forehead
-        face.addOrReplaceChild("eye_third",
-                CubeListBuilder.create().texOffs(48, 0).addBox(-0.6F, -0.6F, -0.25F, 1.2F, 1.2F, 0.5F),
-                PartPose.offset(0.0F, 3.4F, -1.25F));
+        // the core: a big violet crystal heart set between the eyes — break
+        // the four guardian swirls, then this
+        face.addOrReplaceChild("core",
+                CubeListBuilder.create().texOffs(48, 0).addBox(-1.1F, -1.3F, -0.4F, 2.2F, 2.6F, 0.8F),
+                PartPose.offset(0.0F, -0.3F, -1.35F));
         // great horns curving up out of the brow
         face.addOrReplaceChild("horn_r",
                 CubeListBuilder.create().texOffs(24, 0).addBox(-0.75F, 0.0F, -0.75F, 1.5F, 6.0F, 1.5F),
@@ -120,6 +123,13 @@ public class ExorcistModel extends EntityModel<FallenExorcistEntity> {
         } else {
             face.z = -1.0F;
         }
+        // the core burns brighter once the swirls fall: a slow hungry pulse
+        float pulse = entity.getSwirlCount() == 0
+                ? 1.2F + Mth.sin(ageInTicks * 0.35F) * 0.2F
+                : 0.9F + Mth.sin(ageInTicks * 0.12F) * 0.06F;
+        core.xScale = pulse;
+        core.yScale = pulse;
+        core.zScale = pulse;
     }
 
     @Override

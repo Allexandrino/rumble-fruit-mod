@@ -29,9 +29,7 @@
   "item.rumblefruit.meteor_core": "Ядро метеорита",
   "rumblefruit.dungeon_cleared": "Падший экзорцист повержен! Покои отпускают тебя...",
   "rumblefruit.exorcist_phase": "Падший Экзорцист переходит в стадию %s!",
-  "rumblefruit.exorcist_shielded": "Кристаллы-стражи защищают трон! Разбей их!",
-  "rumblefruit.crystal_down": "Кристалл разбит! Осталось: %s",
-  "block.rumblefruit.guardian_crystal": "Кристалл-страж",
+  "rumblefruit.exorcist_shielded": "Завитушки-стражи охраняют ядро! Сбей их все!",
   "item.rumblefruit.inferno_fruit": "Фрукт Инферно",
   "item.rumblefruit.void_fruit": "Фрукт Пустоты",
   "item.rumblefruit.frost_fruit": "Фрукт Холода",
@@ -45,5 +43,8 @@
   "rumblefruit.form.inferno": "Падший Архангел Огня",
   "rumblefruit.form.void": "Король Тьмы",
   "rumblefruit.form.frost": "Ледяной Серафим",
-  "rumblefruit.form.nature": "Природа-Мать"
+  "rumblefruit.form.nature": "Природа-Мать",
+  "rumblefruit.swirl_down": "Завитушка разбита!",
+  "rumblefruit.core_exposed": "Щит пал! Ядро открыто — бей в ядро!",
+  "entity.rumblefruit.guardian_swirl": "Завитушка-страж"
 }

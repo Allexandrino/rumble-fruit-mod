@@ -38,6 +38,9 @@ public class ClientSkillInput {
         if (skillId == 5 || skillId == 2) {
             ImpactShaders.impact(); // heavy casts burn the screen in the fruit's color
         }
+        if (skillId == 0 || skillId == 1) {
+            ImpactShaders.sketch(); // quick strikes flicker into pencil for a blink
+        }
         // recoil on every cast: heavier skills kick the camera harder
         float kick = switch (skillId) {
             case 0 -> 0.3F;
