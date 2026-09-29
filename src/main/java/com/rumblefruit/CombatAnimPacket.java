@@ -21,13 +21,9 @@ public record CombatAnimPacket(UUID playerId, int combo) implements CustomPacket
 
     public static void handle(CombatAnimPacket packet, net.neoforged.neoforge.network.handling.IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
-            // combo 40: a guardian swirl just shattered — pencil impact frame
+            // combo 40: a guardian swirl just shattered — the flipbook answers
             if (packet.combo == 40) {
-                ImpactShaders.sketch();
-            }
-            // combo 41: your blow connected — the ult cut-in band rushes by
-            if (packet.combo == 41) {
-                ImpactShaders.cutin();
+                PencilAnimOverlay.play();
             }
             ClientCombatAnim.slash(packet.playerId, packet.combo);
         });

@@ -33,14 +33,12 @@ public class ImpactShaders {
     private static final long IMPACT_MILLIS = 900;
     private static final long GLITCH_MILLIS = 600;
     private static final long SKETCH_MILLIS = 450;
-    private static final long CUTIN_MILLIS = 550;
 
     private static final int NONE = 0;
     private static final int TEAR = 1;
     private static final int IMPACT_FX = 2;
     private static final int GLITCH_FX = 3;
     private static final int SKETCH_FX = 4;
-    private static final int CUTIN_FX = 5;
 
     private static int mode = NONE;
     private static long start = -1;
@@ -89,29 +87,12 @@ public class ImpactShaders {
         start = System.currentTimeMillis();
     }
 
-    // the ult cut-in: a sketched diagonal band rushes across the frame when
-    // your blow connects with a hitbox. small cooldown so combat stays legible
-    private static long lastCutin;
-    public static void cutin() {
-        long now = System.currentTimeMillis();
-        if (mode != NONE && active()) {
-            return;
-        }
-        if (now - lastCutin < 1200) {
-            return;
-        }
-        lastCutin = now;
-        mode = CUTIN_FX;
-        start = now;
-    }
-
     private static long duration() {
         return switch (mode) {
             case TEAR -> TEAR_MILLIS;
             case IMPACT_FX -> IMPACT_MILLIS;
             case GLITCH_FX -> GLITCH_MILLIS;
             case SKETCH_FX -> SKETCH_MILLIS;
-            case CUTIN_FX -> CUTIN_MILLIS;
             default -> 0;
         };
     }
@@ -186,7 +167,7 @@ public class ImpactShaders {
             case TEAR -> mc.gameRenderer.loadEffect(SPACETEAR);
             case IMPACT_FX -> mc.gameRenderer.loadEffect(IMPACT);
             case GLITCH_FX -> mc.gameRenderer.loadEffect(GLITCH);
-            case SKETCH_FX, CUTIN_FX -> mc.gameRenderer.loadEffect(SKETCH);
+            case SKETCH_FX -> mc.gameRenderer.loadEffect(SKETCH);
             default -> {
             }
         }
@@ -203,10 +184,7 @@ public class ImpactShaders {
         for (PostPass pass : ((com.rumblefruit.mixin.PostChainAccessor) chain).rumblefruit$getPasses()) {
             setFloat(pass, "Time", seconds);
             setFloat(pass, "Intensity", k);
-            // the cut-in sweep rides the timeline: the band rushes 0 -> 1
-            setFloat(pass, "Sweep", mode == CUTIN_FX
-                    ? Math.min(1.0F, (float) elapsed / (float) duration())
-                    : 2.0F);
+            setFloat(pass, "Sweep", 2.0F); // full-frame sketch (no band sweep)
             Uniform center = pass.getEffect().getUniform("Center");
             if (center != null) {
                 center.set(0.5F, 0.45F);
