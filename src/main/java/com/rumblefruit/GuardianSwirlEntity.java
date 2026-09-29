@@ -59,6 +59,9 @@ public class GuardianSwirlEntity extends Entity {
             return false;
         }
         hp -= (int) Math.ceil(amount);
+        if (source.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) {
+            ImpactTrigger.onPlayerLandedHit(sp); // the cut-in answers every landed blow
+        }
         if (hp > 0) {
             return true;
         }

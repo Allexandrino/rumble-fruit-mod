@@ -25,6 +25,10 @@ public record CombatAnimPacket(UUID playerId, int combo) implements CustomPacket
             if (packet.combo == 40) {
                 ImpactShaders.sketch();
             }
+            // combo 41: your blow connected — the ult cut-in band rushes by
+            if (packet.combo == 41) {
+                ImpactShaders.cutin();
+            }
             ClientCombatAnim.slash(packet.playerId, packet.combo);
         });
     }
