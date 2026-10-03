@@ -39,6 +39,7 @@ public class EarthChunkGenerator extends ChunkGenerator {
     private static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
     private static final BlockState SNOW = Blocks.SNOW_BLOCK.defaultBlockState();
     private static final BlockState WATER = Blocks.WATER.defaultBlockState();
+    private static final BlockState AIR = Blocks.AIR.defaultBlockState();
 
     public EarthChunkGenerator(BiomeSource biomeSource) {
         super(biomeSource);
@@ -128,14 +129,20 @@ public class EarthChunkGenerator extends ChunkGenerator {
 
     @Override
     public NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor level, RandomState random) {
+        // every cell must be non-null: vanilla structure placement (e.g.
+        // ruined portals) walks the column calling BlockState#isAir, and a
+        // null above the terrain NPEs the chunk generator
         int h = EarthData.surfaceHeight(x, z);
-        BlockState[] column = new BlockState[level.getHeight()];
         int minY = level.getMinBuildHeight();
-        for (int y = minY; y <= Math.max(h, EarthData.SEA_LEVEL); y++) {
+        BlockState[] column = new BlockState[level.getHeight()];
+        for (int i = 0; i < column.length; i++) {
+            int y = minY + i;
             if (y <= h) {
-                column[y - minY] = y < 0 ? DEEPSLATE : STONE;
+                column[i] = y < 0 ? DEEPSLATE : STONE;
+            } else if (y <= EarthData.SEA_LEVEL) {
+                column[i] = WATER;
             } else {
-                column[y - minY] = WATER;
+                column[i] = AIR;
             }
         }
         return new NoiseColumn(minY, column);
