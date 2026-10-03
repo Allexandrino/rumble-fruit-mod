@@ -1,0 +1,61 @@
+{
+ "name": "sword_slash_2",
+ "author": "rumblefruit",
+ "description": "",
+ "emote": {
+  "beginTick": 0,
+  "endTick": 20,
+  "stopTick": 22,
+  "isLoop": false,
+  "returnTick": 2,
+  "nsfw": false,
+  "degrees": true,
+  "moves": [
+   {
+    "tick": 0,
+    "easing": "INOUTQUAD",
+    "rightArm": {}
+   },
+   {
+    "tick": 4,
+    "easing": "OUTQUAD",
+    "rightArm": {
+     "pitch": -30,
+     "yaw": -25
+    },
+    "body": {
+     "yaw": 18
+    }
+   },
+   {
+    "tick": 9,
+    "easing": "INQUAD",
+    "rightArm": {
+     "pitch": -88
+    },
+    "body": {
+     "x": 0,
+     "y": 0,
+     "z": 1,
+     "yaw": -20
+    }
+   },
+   {
+    "tick": 15,
+    "easing": "INOUTQUAD",
+    "rightArm": {
+     "pitch": -70
+    },
+    "body": {
+     "yaw": -10
+    }
+   },
+   {
+    "tick": 20,
+    "easing": "INOUTQUAD",
+    "rightArm": {},
+    "body": {}
+   }
+  ]
+ }
+}

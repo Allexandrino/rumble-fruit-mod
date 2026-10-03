@@ -41,3 +41,10 @@ mandatory=true
 versionRange="[1.7,)"
 ordering="AFTER"
 side="BOTH"
+
+[[dependencies.rumblefruit]]
+modId="playeranimator"
+mandatory=true
+versionRange="[2.0,)"
+ordering="NONE"
+side="BOTH"

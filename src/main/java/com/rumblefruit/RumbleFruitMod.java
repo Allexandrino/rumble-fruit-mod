@@ -1,5 +1,7 @@
 package com.rumblefruit;
 
+import com.rumblefruit.earth.EarthBiomeSource;
+import com.rumblefruit.earth.EarthChunkGenerator;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -63,6 +65,20 @@ public class RumbleFruitMod {
         ModParticles.PARTICLES.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
         CREATIVE_TABS.register(modEventBus);
+        // the earth dimension: real-heightmap terrain + latitude biome bands
+        registerEarthCodecs();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void registerEarthCodecs() {
+        net.minecraft.core.Registry.register(net.minecraft.core.registries.BuiltInRegistries.CHUNK_GENERATOR,
+                ResourceLocation.fromNamespaceAndPath(MOD_ID, "earth"),
+                (com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.chunk.ChunkGenerator>)
+                        (com.mojang.serialization.MapCodec<?>) EarthChunkGenerator.CODEC);
+        net.minecraft.core.Registry.register(net.minecraft.core.registries.BuiltInRegistries.BIOME_SOURCE,
+                ResourceLocation.fromNamespaceAndPath(MOD_ID, "earth"),
+                (com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.biome.BiomeSource>)
+                        (com.mojang.serialization.MapCodec<?>) EarthBiomeSource.CODEC);
     }
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =

@@ -26,6 +26,8 @@ public record CombatAnimPacket(UUID playerId, int combo) implements CustomPacket
                 PencilAnimOverlay.play();
             }
             ClientCombatAnim.slash(packet.playerId, packet.combo);
+            // full-body keyframed animation via Player Animator
+            PlayerSkillAnimations.play(packet.playerId, packet.combo);
         });
     }
 }

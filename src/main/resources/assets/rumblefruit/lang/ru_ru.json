@@ -46,5 +46,11 @@
   "rumblefruit.form.nature": "Природа-Мать",
   "rumblefruit.swirl_down": "Завитушка разбита!",
   "rumblefruit.core_exposed": "Щит пал! Ядро открыто — бей в ядро!",
-  "entity.rumblefruit.guardian_swirl": "Завитушка-страж"
+  "entity.rumblefruit.guardian_swirl": "Завитушка-страж",
+  "rumblefruit.earth_entered": "Вы вошли на территорию:",
+  "rumblefruit.earth_waters": "Международные воды",
+  "rumblefruit.earth_near": "Рядом: %s",
+  "rumblefruit.earth_arrived": "Добро пожаловать: %s",
+  "rumblefruit.earth_unknown_place": "Неизвестное место. Список: /rumblefruit earth и Tab",
+  "rumblefruit.earth_missing": "Измерение Земли недоступно в этом мире"
 }

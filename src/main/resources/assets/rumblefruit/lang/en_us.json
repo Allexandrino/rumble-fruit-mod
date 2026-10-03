@@ -46,5 +46,11 @@
   "rumblefruit.form.nature": "Mother Nature",
   "rumblefruit.swirl_down": "A swirl shattered!",
   "rumblefruit.core_exposed": "The ward is down! The core is exposed — strike it!",
-  "entity.rumblefruit.guardian_swirl": "Guardian Swirl"
+  "entity.rumblefruit.guardian_swirl": "Guardian Swirl",
+  "rumblefruit.earth_entered": "Now entering:",
+  "rumblefruit.earth_waters": "International waters",
+  "rumblefruit.earth_near": "Nearby: %s",
+  "rumblefruit.earth_arrived": "Welcome to %s",
+  "rumblefruit.earth_unknown_place": "Unknown place. List: /rumblefruit earth + Tab",
+  "rumblefruit.earth_missing": "The earth dimension is unavailable in this world"
 }

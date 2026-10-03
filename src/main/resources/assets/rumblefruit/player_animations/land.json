@@ -1,0 +1,104 @@
+{
+ "name": "land",
+ "author": "rumblefruit",
+ "description": "",
+ "emote": {
+  "beginTick": 0,
+  "endTick": 85,
+  "stopTick": 87,
+  "isLoop": false,
+  "returnTick": 2,
+  "nsfw": false,
+  "degrees": true,
+  "moves": [
+   {
+    "tick": 0,
+    "easing": "INOUTQUAD",
+    "body": {
+     "x": 0,
+     "y": -3,
+     "z": 0,
+     "pitch": 18
+    },
+    "rightLeg": {
+     "x": 0,
+     "y": 1,
+     "z": 0,
+     "pitch": -45
+    },
+    "leftLeg": {
+     "x": 0,
+     "y": 1,
+     "z": 0,
+     "pitch": 30
+    },
+    "rightArm": {
+     "pitch": -45,
+     "roll": -30
+    },
+    "leftArm": {
+     "pitch": -45,
+     "roll": 30
+    },
+    "head": {
+     "pitch": -10
+    }
+   },
+   {
+    "tick": 25,
+    "easing": "INOUTSINE",
+    "body": {
+     "x": 0,
+     "y": -2,
+     "z": 0,
+     "pitch": 10
+    },
+    "rightLeg": {
+     "pitch": -25
+    },
+    "leftLeg": {
+     "pitch": 18
+    },
+    "rightArm": {
+     "pitch": -25,
+     "roll": -15
+    },
+    "leftArm": {
+     "pitch": -25,
+     "roll": 15
+    }
+   },
+   {
+    "tick": 60,
+    "easing": "INOUTQUAD",
+    "body": {
+     "x": 0,
+     "y": -1,
+     "z": 0
+    },
+    "rightLeg": {
+     "pitch": -8
+    },
+    "leftLeg": {
+     "pitch": 6
+    },
+    "rightArm": {
+     "pitch": -10
+    },
+    "leftArm": {
+     "pitch": -10
+    }
+   },
+   {
+    "tick": 85,
+    "easing": "INOUTQUAD",
+    "body": {},
+    "rightLeg": {},
+    "leftLeg": {},
+    "rightArm": {},
+    "leftArm": {},
+    "head": {}
+   }
+  ]
+ }
+}
