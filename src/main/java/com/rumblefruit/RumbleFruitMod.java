@@ -66,19 +66,20 @@ public class RumbleFruitMod {
         ModSounds.SOUNDS.register(modEventBus);
         CREATIVE_TABS.register(modEventBus);
         // the earth dimension: real-heightmap terrain + latitude biome bands
-        registerEarthCodecs();
+        // (DeferredRegister fires before the vanilla registries freeze —
+        //  direct Registry.register in the constructor is already too late)
+        CHUNK_GENERATORS.register(modEventBus);
+        BIOME_SOURCES.register(modEventBus);
     }
 
-    @SuppressWarnings("unchecked")
-    private static void registerEarthCodecs() {
-        net.minecraft.core.Registry.register(net.minecraft.core.registries.BuiltInRegistries.CHUNK_GENERATOR,
-                ResourceLocation.fromNamespaceAndPath(MOD_ID, "earth"),
-                (com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.chunk.ChunkGenerator>)
-                        (com.mojang.serialization.MapCodec<?>) EarthChunkGenerator.CODEC);
-        net.minecraft.core.Registry.register(net.minecraft.core.registries.BuiltInRegistries.BIOME_SOURCE,
-                ResourceLocation.fromNamespaceAndPath(MOD_ID, "earth"),
-                (com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.biome.BiomeSource>)
-                        (com.mojang.serialization.MapCodec<?>) EarthBiomeSource.CODEC);
+    public static final DeferredRegister<com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.chunk.ChunkGenerator>>
+            CHUNK_GENERATORS = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.CHUNK_GENERATOR, MOD_ID);
+    public static final DeferredRegister<com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.biome.BiomeSource>>
+            BIOME_SOURCES = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.BIOME_SOURCE, MOD_ID);
+
+    static {
+        CHUNK_GENERATORS.register("earth", () -> EarthChunkGenerator.CODEC);
+        BIOME_SOURCES.register("earth", () -> EarthBiomeSource.CODEC);
     }
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
