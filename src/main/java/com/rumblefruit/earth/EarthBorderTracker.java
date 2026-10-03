@@ -49,7 +49,12 @@ public class EarthBorderTracker {
         String country = EarthData.countryAt(x, z, true);
         String last = LAST_COUNTRY.get(player.getUUID());
         if (country == null ? last != null : !country.equals(last)) {
-            LAST_COUNTRY.put(player.getUUID(), country);
+            // ConcurrentHashMap rejects null values — drop the key instead
+            if (country == null) {
+                LAST_COUNTRY.remove(player.getUUID());
+            } else {
+                LAST_COUNTRY.put(player.getUUID(), country);
+            }
             if (country != null) {
                 player.connection.send(new ClientboundSetTitlesAnimationPacket(10, 70, 20));
                 player.connection.send(new ClientboundSetSubtitleTextPacket(
@@ -68,7 +73,12 @@ public class EarthBorderTracker {
         String placeId = place == null ? null : place.id();
         String lastPlace = LAST_PLACE.get(player.getUUID());
         if (placeId == null ? lastPlace != null : !placeId.equals(lastPlace)) {
-            LAST_PLACE.put(player.getUUID(), placeId);
+            // same null-value rule here: remove instead of putting null
+            if (placeId == null) {
+                LAST_PLACE.remove(player.getUUID());
+            } else {
+                LAST_PLACE.put(player.getUUID(), placeId);
+            }
             if (place != null) {
                 player.displayClientMessage(Component.translatable("rumblefruit.earth_near",
                         Component.literal(place.nameRu()).withStyle(ChatFormatting.YELLOW))
