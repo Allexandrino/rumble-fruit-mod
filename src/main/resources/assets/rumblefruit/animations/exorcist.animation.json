@@ -1,0 +1,101 @@
+{
+  "format_version": "1.10.0",
+  "animations": {
+    "animation.exorcist.idle": {
+      "loop": true,
+      "bones": {
+        "face": {
+          "position": {
+            "y": "math.sin(query.anim_time * 57.296) * 0.6"
+          },
+          "rotation": {
+            "x": "math.sin(query.anim_time * 45.837) * 3.438"
+          }
+        },
+        "wing0": {
+          "rotation": {
+            "z": "math.sin(query.anim_time * 91.673) * 4.584"
+          }
+        },
+        "wing1": {
+          "rotation": {
+            "z": "-math.sin(query.anim_time * 91.673) * 4.584"
+          }
+        },
+        "wing2": {
+          "rotation": {
+            "z": "math.sin(query.anim_time * 91.673) * 4.584"
+          }
+        },
+        "wing3": {
+          "rotation": {
+            "z": "-math.sin(query.anim_time * 91.673) * 4.584"
+          }
+        },
+        "tendril0": {
+          "rotation": {
+            "x": "math.sin(query.anim_time * 103.132) * 4.011"
+          }
+        },
+        "tendril1": {
+          "rotation": {
+            "x": "math.sin(query.anim_time * 103.132 + 57.296) * 4.011"
+          }
+        },
+        "tendril2": {
+          "rotation": {
+            "x": "math.sin(query.anim_time * 103.132 + 114.592) * 4.011"
+          }
+        },
+        "tendril3": {
+          "rotation": {
+            "x": "math.sin(query.anim_time * 103.132 + 171.887) * 4.011"
+          }
+        },
+        "core": {
+          "scale": {
+            "x": "0.9 + math.sin(query.anim_time * 137.510) * 0.06",
+            "y": "0.9 + math.sin(query.anim_time * 137.510) * 0.06",
+            "z": "0.9 + math.sin(query.anim_time * 137.510) * 0.06"
+          }
+        },
+        "eye_r": {
+          "scale": {
+            "x": "1.0 + math.sin(query.anim_time * 229.183) * 0.08",
+            "y": "1.0 + math.sin(query.anim_time * 229.183) * 0.08"
+          }
+        },
+        "eye_l": {
+          "scale": {
+            "x": "1.0 + math.sin(query.anim_time * 229.183 + 90) * 0.08",
+            "y": "1.0 + math.sin(query.anim_time * 229.183 + 90) * 0.08"
+          }
+        }
+      }
+    },
+    "animation.exorcist.attack": {
+      "loop": false,
+      "animation_length": 1.0,
+      "bones": {
+        "face": {
+          "position": {
+            "z": "-2.2 * math.sin(query.anim_time * 180)"
+          },
+          "rotation": {
+            "x": "14.324 * math.sin(query.anim_time * 180)"
+          }
+        },
+        "horn_r": {
+          "rotation": {
+            "z": "-6.0 * math.sin(query.anim_time * 180)"
+          }
+        },
+        "horn_l": {
+          "rotation": {
+            "z": "6.0 * math.sin(query.anim_time * 180)"
+          }
+        }
+      }
+    }
+  }
+}

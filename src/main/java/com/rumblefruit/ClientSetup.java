@@ -18,7 +18,8 @@ public class ClientSetup {
         event.registerLayerDefinition(WeaponModels.SWORD_LAYER, WeaponModels::createSwordLayer);
         event.registerLayerDefinition(WeaponModels.BOW_LAYER, WeaponModels::createBowLayer);
         event.registerLayerDefinition(EpicPlayerModel.LAYER, EpicPlayerModel::createLayer);
-        event.registerLayerDefinition(ExorcistModel.LAYER, ExorcistModel::createLayer);
+        // the Fallen Exorcist no longer needs a baked layer: GeckoLib loads
+        // its geometry from assets/rumblefruit/geo/exorcist.geo.json
     }
 
     @SubscribeEvent

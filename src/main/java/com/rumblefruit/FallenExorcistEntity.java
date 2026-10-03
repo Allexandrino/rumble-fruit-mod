@@ -15,12 +15,47 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 // the Fallen Exorcist: a colossal horned face looming out of the abyss pit of
-// its realm (see ExorcistModel). stationary, all-seeing, armed with a 25-move
+// its realm (see exorcist.geo.json). stationary, all-seeing, armed with a 25-move
 // arsenal (see ExorcistAttacks); below half health it attacks twice as fast.
 // its core is warded by four guardian swirls — break them, then the core
-public class FallenExorcistEntity extends Monster {
+public class FallenExorcistEntity extends Monster implements GeoEntity {
+
+    // GeckoLib: looping idle menace + triggered attack lunge
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.exorcist.idle");
+    private static final RawAnimation ATTACK = RawAnimation.begin().thenPlay("animation.exorcist.attack");
+    private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "main", 0,
+                state -> state.setAndContinue(IDLE)));
+        controllers.add(new AnimationController<>(this, "attack", 0, state -> PlayState.STOP)
+                .triggerableAnim("attack", ATTACK));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return geoCache;
+    }
+
+    // every wind-up swing (telegraphed or striking) lunges the whole visage
+    // forward on the client too — swing packets reach clients for free
+    @Override
+    public void swing(net.minecraft.world.InteractionHand hand) {
+        super.swing(hand);
+        if (level().isClientSide) {
+            triggerAnim("attack", "attack");
+        }
+    }
 
     private int attackCooldown = 70;
     private int attackIndex = 0;

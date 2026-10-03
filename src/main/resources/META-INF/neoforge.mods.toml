@@ -27,3 +27,17 @@ mandatory=true
 versionRange="[1.21.1,1.22)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.rumblefruit]]
+modId="geckolib"
+mandatory=true
+versionRange="[4.7,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.rumblefruit]]
+modId="lithostitched"
+mandatory=true
+versionRange="[1.7,)"
+ordering="AFTER"
+side="BOTH"
