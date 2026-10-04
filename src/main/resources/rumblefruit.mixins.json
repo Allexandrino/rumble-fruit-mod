@@ -1,8 +1,16 @@
 {
-  "required": false,
+  "required": true,
   "package": "com.rumblefruit.mixin",
   "compatibilityLevel": "JAVA_17",
-  "client": [],
+  "client": [
+    "PlayerSkinMixin",
+    "LivingEntityRendererAccessor",
+    "PlayerRendererMixin",
+    "CameraAccessor",
+    "CameraMixin",
+    "GameRendererAccessor",
+    "PostChainAccessor"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

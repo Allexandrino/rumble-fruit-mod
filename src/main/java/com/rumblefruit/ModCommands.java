@@ -20,6 +20,14 @@ public class ModCommands {
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         dispatcher.register(Commands.literal("rumblefruit")
+                // /rumblefruit charge — полный заряд силы
+                .then(Commands.literal("charge")
+                        .executes(ctx -> {
+                            ServerPlayer player = ctx.getSource().getPlayerOrException();
+                            PowerChargeData.add(player, PowerChargeData.MAX);
+                            PowerChargeData.sync(player);
+                            return 1;
+                        }))
                 // /rumblefruit earth — step into the ancient world (spawn: Rome);
                 // /rumblefruit earth <place> — teleport to a city or landmark
                 .then(Commands.literal("earth")

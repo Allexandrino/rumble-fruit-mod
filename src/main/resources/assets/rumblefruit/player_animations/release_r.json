@@ -1,0 +1,104 @@
+{
+ "name": "release_r",
+ "author": "rumblefruit",
+ "description": "",
+ "emote": {
+  "beginTick": 0,
+  "endTick": 75,
+  "stopTick": 77,
+  "isLoop": false,
+  "returnTick": 2,
+  "nsfw": false,
+  "degrees": true,
+  "moves": [
+   {
+    "tick": 0,
+    "easing": "INOUTQUAD",
+    "rightArm": {},
+    "leftArm": {}
+   },
+   {
+    "tick": 12,
+    "easing": "INOUTSINE",
+    "rightArm": {
+     "pitch": -175,
+     "roll": -15
+    },
+    "leftArm": {
+     "pitch": -175,
+     "roll": 15
+    },
+    "body": {
+     "pitch": -6
+    },
+    "head": {
+     "pitch": -25
+    }
+   },
+   {
+    "tick": 35,
+    "easing": "INOUTQUAD",
+    "rightArm": {
+     "pitch": -160,
+     "roll": -30
+    },
+    "leftArm": {
+     "pitch": -160,
+     "roll": 30
+    },
+    "head": {
+     "pitch": -20
+    }
+   },
+   {
+    "tick": 55,
+    "easing": "INQUAD",
+    "rightArm": {
+     "pitch": -170,
+     "roll": -10
+    },
+    "leftArm": {
+     "pitch": -170,
+     "roll": 10
+    },
+    "body": {
+     "x": 0,
+     "y": -1,
+     "z": 0
+    },
+    "head": {
+     "pitch": -15
+    }
+   },
+   {
+    "tick": 66,
+    "easing": "OUTQUAD",
+    "rightArm": {
+     "pitch": -15,
+     "roll": -20
+    },
+    "leftArm": {
+     "pitch": -15,
+     "roll": 20
+    },
+    "body": {
+     "x": 0,
+     "y": 1,
+     "z": 0,
+     "pitch": 12
+    },
+    "head": {
+     "pitch": 10
+    }
+   },
+   {
+    "tick": 75,
+    "easing": "INOUTQUAD",
+    "rightArm": {},
+    "leftArm": {},
+    "body": {},
+    "head": {}
+   }
+  ]
+ }
+}

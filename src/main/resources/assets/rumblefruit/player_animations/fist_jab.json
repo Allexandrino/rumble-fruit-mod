@@ -1,0 +1,55 @@
+{
+ "name": "fist_jab",
+ "author": "rumblefruit",
+ "description": "",
+ "emote": {
+  "beginTick": 0,
+  "endTick": 18,
+  "stopTick": 20,
+  "isLoop": false,
+  "returnTick": 2,
+  "nsfw": false,
+  "degrees": true,
+  "moves": [
+   {
+    "tick": 0,
+    "easing": "INOUTQUAD",
+    "rightArm": {}
+   },
+   {
+    "tick": 3,
+    "easing": "OUTQUAD",
+    "rightArm": {
+     "pitch": -92,
+     "yaw": 8
+    },
+    "body": {
+     "yaw": -8
+    }
+   },
+   {
+    "tick": 7,
+    "easing": "INOUTQUAD",
+    "rightArm": {
+     "pitch": -85
+    },
+    "body": {
+     "yaw": -6
+    }
+   },
+   {
+    "tick": 12,
+    "easing": "INOUTQUAD",
+    "rightArm": {
+     "pitch": -20
+    }
+   },
+   {
+    "tick": 18,
+    "easing": "INOUTQUAD",
+    "rightArm": {},
+    "body": {}
+   }
+  ]
+ }
+}

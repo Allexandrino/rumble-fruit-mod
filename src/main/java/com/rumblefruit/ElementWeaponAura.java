@@ -1,0 +1,63 @@
+package com.rumblefruit;
+
+import net.minecraft.client.Minecraft;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+
+// element charge crackling directly ON the hands: both fists smoulder in the
+// fruit's color while the power is active, and the drawn sword/bow crackles
+// along the blade — not around the body, right on the weapon
+@EventBusSubscriber(modid = RumbleFruitMod.MOD_ID, value = Dist.CLIENT)
+public class ElementWeaponAura {
+
+    private ElementWeaponAura() {
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null || !ClientPowerData.has()) {
+            return;
+        }
+        // the fists smolder only in the heat of action: a recent cast, swing
+        // or taken hit — never while idling
+        boolean active = ClientSkillInput.lastCastTick >= 0
+                && mc.player.tickCount - ClientSkillInput.lastCastTick < 60;
+        if (ClientStanceCombat.ticksSinceSlash() < 60) {
+            active = true;
+        }
+        if (mc.player.hurtTime > 0) {
+            active = true;
+        }
+        if (!active) {
+            // idle: the power still breathes — a single tiny spark every 2s
+            if (mc.player.tickCount % 40 == 0) {
+                float yawIdle = mc.player.getYRot() * 0.0174533F;
+                mc.level.addParticle(Element.byId(ClientPowerData.element()).spark(),
+                        mc.player.getX() + Math.cos(yawIdle) * 0.45,
+                        mc.player.getY() + 1.25,
+                        mc.player.getZ() - Math.sin(yawIdle) * 0.45,
+                        0.0, 0.01, 0.0);
+            }
+            return;
+        }
+        if (mc.player.tickCount % 2 != 0) {
+            return;
+        }
+        var element = Element.byId(ClientPowerData.element());
+        float yaw = mc.player.getYRot() * 0.0174533F;
+        // hand offsets from the body centre (right/left)
+        double rx = Math.cos(yaw);
+        double rz = -Math.sin(yaw);
+        double px = mc.player.getX();
+        double py = mc.player.getY();
+        double pz = mc.player.getZ();
+        // ONLY the fists burn in the element's color — no sea of effects
+        mc.level.addParticle(element.spark(),
+                px + rx * 0.45, py + 1.25, pz + rz * 0.45, 0.0, 0.01, 0.0);
+        mc.level.addParticle(element.spark(),
+                px - rx * 0.45, py + 1.25, pz - rz * 0.45, 0.0, 0.01, 0.0);
+    }
+}
