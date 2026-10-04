@@ -645,7 +645,35 @@ public final class EarthStructures {
         return true;
     }
 
-    // ---- гавань: молы в море с фонарями (длина из p0) ----
+    // торговое судно: корпус 11x5 м, нос и корма приподняты, мачта с реей
+    private static void buildShip(ChunkAccess c, BlockPos.MutableBlockPos p,
+                                  int x, int z, int deck, int lx, int lz, int dx, int dz) {
+        // корабль стоит бортом к молу: корпус по перпендикуляру
+        int ax = -dz * lx + dx * lz;  // вдоль корпуса
+        int az = dx * lx + dz * lz;   // поперёк
+        if (az < -3 || az > 3 || ax < -6 || ax > 6) return;
+        if (az >= 1) { // только с морской стороны мола
+            // корпус: палуба и борта
+            if (Math.abs(ax) <= 5 && az <= 2) {
+                put(c, p, x, deck, z, PLANKS);
+            }
+            boolean side = az == 2 || Math.abs(ax) == 5;
+            if (side) {
+                int rise = Math.abs(ax) >= 4 ? 2 : 1; // нос/корма выше
+                fill(c, p, x, z, deck + 1, deck + rise, PLANKS);
+            }
+            // мачта с реей
+            if (ax == 0 && az == 1) {
+                fill(c, p, x, z, deck + 1, deck + 8, Blocks.OAK_LOG.defaultBlockState());
+                put(c, p, x, deck + 9, z, Blocks.WHITE_WOOL.defaultBlockState());
+            }
+            if (Math.abs(ax) <= 3 && az == 1 && ax != 0) {
+                put(c, p, x, deck + 8, z, Blocks.OAK_LOG.defaultBlockState()); // рея
+            }
+        }
+    }
+
+    // ---- гавань: молы в море с фонарями (длина из p1, радиус из p2) ----
 
     private static boolean pier(ChunkAccess c, BlockPos.MutableBlockPos p,
                                 Struct s, int x, int z, int h, int lx, int lz) {
@@ -665,6 +693,10 @@ public final class EarthStructures {
                 if (Math.abs(lx - bx) == 2 && t % 25 == 0) {
                     put(c, p, x, deck + 1, z, STONE_BRICKS);
                     put(c, p, x, deck + 2, z, LANTERN);
+                }
+                // торговое судно у конца мола
+                if (t >= len - 2) {
+                    buildShip(c, p, x, z, deck, lx - bx, lz - bz, dx, dz);
                 }
                 return true;
             }

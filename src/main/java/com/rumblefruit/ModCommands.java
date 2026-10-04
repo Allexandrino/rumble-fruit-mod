@@ -12,7 +12,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-// /rumblefruit meteor — call a meteor down on your position right now
+// /rumblefruit earth — древний мир; debug-команды для карт/дорог/структур
 @EventBusSubscriber(modid = RumbleFruitMod.MOD_ID)
 public class ModCommands {
 
@@ -20,13 +20,6 @@ public class ModCommands {
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         dispatcher.register(Commands.literal("rumblefruit")
-                .then(Commands.literal("charge")
-                        .executes(ctx -> {
-                            ServerPlayer player = ctx.getSource().getPlayerOrException();
-                            PowerChargeData.add(player, PowerChargeData.MAX);
-                            PowerChargeData.sync(player);
-                            return 1;
-                        }))
                 // /rumblefruit earth — step into the ancient world (spawn: Rome);
                 // /rumblefruit earth <place> — teleport to a city or landmark
                 .then(Commands.literal("earth")
@@ -80,6 +73,17 @@ public class ModCommands {
                         .executes(ctx -> {
                             for (String s : com.rumblefruit.earth.EarthRoads.roadLog()) {
                                 ctx.getSource().sendSystemMessage(Component.literal(s));
+                            }
+                            return 1;
+                        }))
+                // /rumblefruit villagedebug — деревни вдоль дорог
+                .then(Commands.literal("villagedebug")
+                        .executes(ctx -> {
+                            var spots = com.rumblefruit.earth.EarthRoads.VILLAGE_SPOTS;
+                            ctx.getSource().sendSystemMessage(Component.literal("villages=" + spots.size()));
+                            for (int i = 0; i < Math.min(12, spots.size()); i++) {
+                                int[] s = spots.get(i);
+                                ctx.getSource().sendSystemMessage(Component.literal(s[0] + " " + s[1]));
                             }
                             return 1;
                         })));

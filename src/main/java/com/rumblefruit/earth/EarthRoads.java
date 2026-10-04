@@ -25,6 +25,9 @@ public final class EarthRoads {
     private static volatile boolean ready = false;
     private static final Map<Long, List<Seg>> GRID = new HashMap<>();
     public static final List<String> ROAD_LOG = new ArrayList<>();
+    // точки деревень (каждые ~2.5 км трассы) и миллиарных столбов (~1 км)
+    public static final List<int[]> VILLAGE_SPOTS = new ArrayList<>();
+    public static final List<int[]> MILE_STONES = new ArrayList<>();
 
     private static final double HALF_WIDTH = 3.0;   // полное сглаживание
     private static final double BLEND = 7.0;        // переход к рельефу
@@ -179,6 +182,27 @@ public final class EarthRoads {
         for (int i = 0; i <= steps; i++) {
             if (sh[i] < EarthData.SEA_LEVEL - 2) {
                 ry[i] = Math.max(ry[i], EarthData.SEA_LEVEL + 1);
+            }
+        }
+        // деревни и мильные столбы вдоль трассы: только на суше,
+        // вдали от городов; деревня смещена от полотна на 100-200 м
+        for (int i = 0; i <= steps; i++) {
+            if (sh[i] < EarthData.SEA_LEVEL + 1) continue;
+            int rx = (int) Math.round(sx[i]), rz = (int) Math.round(sz[i]);
+            if (EarthCities.insideCity(rx, rz)) continue;
+            if (i % 78 == 40) {
+                int side = hash(rx, rz, 501) % 2 == 0 ? 1 : -1;
+                int off = 100 + hash(rx, rz, 502) % 100;
+                int vx = (int) Math.round(rx + pnx * off * side);
+                int vz = (int) Math.round(rz + pnz * off * side);
+                if (sh[i] > EarthData.SEA_LEVEL + 1 && !EarthCities.insideCity(vx, vz)) {
+                    VILLAGE_SPOTS.add(new int[]{vx, vz});
+                }
+            }
+            if (i % 31 == 15) {
+                int mx = (int) Math.round(rx + pnx * 6);
+                int mz = (int) Math.round(rz + pnz * 6);
+                MILE_STONES.add(new int[]{mx, mz});
             }
         }
         // сегменты в пространственную сетку
