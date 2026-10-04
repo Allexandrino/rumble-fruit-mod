@@ -107,8 +107,8 @@ public final class EarthRoads {
             px[i] = ax + (bx - ax) * t + nx * off;
             pz[i] = az + (bz - az) * t + nz * off;
         }
-        // ресэмплинг каждые 16 блоков
-        int steps = (int) Math.max(2, Math.round(len / 16.0));
+        // ресэмплинг каждые 32 метра
+        int steps = (int) Math.max(2, Math.round(len / 32.0));
         double[] sx = new double[steps + 1];
         double[] sz = new double[steps + 1];
         double[] sh = new double[steps + 1];
@@ -122,9 +122,27 @@ public final class EarthRoads {
             sz[i] = pz[k] + (pz[k + 1] - pz[k]) * ft;
             sh[i] = terrainAt((int) Math.round(sx[i]), (int) Math.round(sz[i]));
         }
+        // объезд заливов: глубокие сэмплы сдвигаем перпендикулярно к суше
+        // (до ±2 км) — дорога огибает берег, а не идёт дамбой через залив
+        double pnx = -(bz - az) / len, pnz = (bx - ax) / len;
+        for (int i = 0; i <= steps; i++) {
+            if (sh[i] >= EarthData.SEA_LEVEL - 15) continue;
+            boolean found = false;
+            for (int k = 1; k <= 64 && !found; k++) {
+                for (int sgn = 1; sgn >= -1 && !found; sgn -= 2) {
+                    int ox = (int) Math.round(sx[i] + pnx * k * 32.0 * sgn);
+                    int oz = (int) Math.round(sz[i] + pnz * k * 32.0 * sgn);
+                    double hh = terrainAt(ox, oz);
+                    if (hh >= EarthData.SEA_LEVEL - 2) {
+                        sx[i] = ox; sz[i] = oz; sh[i] = hh;
+                        found = true;
+                    }
+                }
+            }
+        }
         // страховка от трасс через открытое море: непрерывный глубокий
-        // участок длиннее ~720 блоков. дельта Нила читается картой как
-        // лагуна — дорога Александрия—Каир идёт дамбой, её строим всегда
+        // участок длиннее ~3 км даже после объездов. дельта Нила читается
+        // картой как лагуна — дорога Александрия—Каир идёт дамбой всегда
         int deepRun = 0;
         int maxDeepRun = 0;
         int deepCount = 0;
@@ -140,7 +158,7 @@ public final class EarthRoads {
         double deepFrac = (double) deepCount / sh.length;
         boolean deltaRoad = (a.id().equals("alexandria") && b.id().equals("cairo"))
                 || (a.id().equals("cairo") && b.id().equals("alexandria"));
-        if (!deltaRoad && maxDeepRun > 45) {
+        if (!deltaRoad && maxDeepRun > 96) {
             ROAD_LOG.add(a.id() + "-" + b.id() + " len=" + (int) len
                     + " skip(deep frac=" + String.format("%.2f", deepFrac)
                     + " run=" + maxDeepRun + ")");

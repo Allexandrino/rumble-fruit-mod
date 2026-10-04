@@ -39,14 +39,15 @@ public final class EarthCities {
     private static final BlockState DIRT_PATH = Blocks.DIRT_PATH.defaultBlockState();
     private static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
 
-    // пирамиды Гизы: центр + смещения (в блоках), половина основания, высота
-    public static final int GIZA_X = 18680, GIZA_Z = -17988;
+    // пирамиды Гизы в реальных размерах: Хеопс 230×139 м, Хефрен 215×136 м,
+    // Микерин 105×65 м; Хефрен в 400 м к ЮЗ, Микерин в 830 м
+    public static final int GIZA_X = 3455907, GIZA_Z = -3327691;
     private static final int[][] PYRAMIDS = {
-            {GIZA_X, GIZA_Z, 45, 50},
-            {GIZA_X + 150, GIZA_Z + 70, 32, 36},
-            {GIZA_X - 130, GIZA_Z + 150, 20, 22},
+            {GIZA_X, GIZA_Z, 115, 139},
+            {GIZA_X - 400, GIZA_Z + 400, 107, 136},
+            {GIZA_X - 830, GIZA_Z + 830, 52, 65},
     };
-    private static final int GIZA_FLAT_RADIUS = 260;
+    private static final int GIZA_FLAT_RADIUS = 1200;
     private static volatile int gizaBaseY = Integer.MIN_VALUE;
 
     private EarthCities() {}
@@ -68,9 +69,9 @@ public final class EarthCities {
                         int cx = EarthData.blockFromLon(p.lon());
                         int cz = EarthData.blockFromLat(p.lat());
                         int radius = switch (p.id()) {
-                            case "rome" -> 180;
-                            case "alexandria", "byzantium", "carthage", "cairo" -> 130;
-                            default -> 90;
+                            case "rome" -> 1000;
+                            case "alexandria", "byzantium", "carthage", "cairo" -> 700;
+                            default -> 400;
                         };
                         int palette = switch (p.id()) {
                             case "athens", "sparta", "thebes", "corinth", "olympia",
@@ -175,13 +176,14 @@ public final class EarthCities {
         // городская стена с воротами по сторонам света; там, где стену
         // пересекает римская дорога, проезд остаётся свободным
         if (d >= r - 9 && d <= r - 6) {
-            boolean gate = Math.abs(lx) <= 4 || Math.abs(lz) <= 4
+            boolean gate = Math.abs(lx) <= 6 || Math.abs(lz) <= 6
                     || EarthRoads.isRoad(x, z);
             return gate ? KIND_STREET : KIND_WALL;
         }
         if (d > r - 14) return KIND_NONE;
-        // форум в центре
-        if (Math.abs(lx) <= 16 && Math.abs(lz) <= 16) return KIND_FORUM;
+        // форум в центре (площадь масштабируется с городом)
+        if (Math.abs(lx) <= Math.max(16, r / 20) && Math.abs(lz) <= Math.max(16, r / 28))
+            return KIND_FORUM;
         // улицы каждые 24 блока, ширина 3
         int sx = Math.floorMod(lx, 24);
         int sz = Math.floorMod(lz, 24);

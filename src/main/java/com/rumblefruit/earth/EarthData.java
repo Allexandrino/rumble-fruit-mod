@@ -17,12 +17,13 @@ import java.util.List;
 // crop of the NASA SRTM heightmap (srtm_ramp2 21600x10800, brightness 12.5 =
 // sea level, Everest ~ 219), Natural Earth 110m borders renamed to ancient
 // states and a curated list of ancient cities/landmarks.
-// scale: 1 degree = 600 blocks; x=0 is Greenwich, z=0 is the equator,
-// north is -z (vanilla convention). only the Mediterranean frame
-// (lon -10..45, lat 28..48) carries real terrain — beyond it lies open ocean
+// scale: 1 block = 1 meter (1 degree ~ 111000 blocks); x=0 is Greenwich,
+// z=0 is the equator, north is -z (vanilla convention). only the
+// Mediterranean frame (lon -10..45, lat 28..48) carries real terrain —
+// beyond it lies open ocean
 public final class EarthData {
-    // крупный масштаб: 1 градус = 600 блоков, ~18 км на пиксель карты
-    public static final double BLOCKS_PER_DEGREE = 600.0;
+    // реальный масштаб: 1 блок = 1 метр (1 градус ≈ 111 км)
+    public static final double BLOCKS_PER_DEGREE = 111000.0;
     public static final int SEA_LEVEL = 63;
 
     // Mediterranean frame in degrees
@@ -30,10 +31,12 @@ public final class EarthData {
     public static final double LAT_MIN = 28.0, LAT_MAX = 48.0;
 
     // heightmap calibration for srtm_ramp2: sea level ~ 12.5,
-    // Everest (8848 m) ~ 219 → ~42.7 m per brightness step
+    // Everest (8848 m) ~ 219 → ~42.7 m per brightness step.
+    // по вертикали 1:1 не влезает (потолок мира 319) — горы сжимаются
+    // мягким коленом выше 270, основной склон ~16 м на блок
     private static final double SEA_BRIGHTNESS = 12.5;
     private static final double METERS_PER_STEP = 8848.0 / (219.0 - SEA_BRIGHTNESS);
-    private static final double METERS_PER_BLOCK = 16.0; // огромные горы
+    private static final double METERS_PER_BLOCK = 16.0;
 
     // вертикальный предел мира — 319; выше 270 мягкое сжатие к потолку,
     // чтобы вершины не срезались в плоские плато

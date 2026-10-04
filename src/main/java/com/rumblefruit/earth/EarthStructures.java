@@ -8,11 +8,12 @@ import net.minecraft.core.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
-// unique multi-block landmarks of the ancient world, built per-column so
-// chunk borders never matter. every structure is a local-coordinate recipe:
-// colosseum and theater (ellipse/rings), peripteros and pylon temples,
-// basilica, pharos lighthouse, aqueduct arcade, triumphal arches, obelisks,
-// the sphinx and mastaba field at giza, harbor piers, baths and villas
+// unique multi-block landmarks of the ancient world at real scale
+// (1 block = 1 meter): colosseum 189x155 m, parthenon 70x31 m,
+// pharos lighthouse ~75 m, sphinx 73 m, theaters, basilicas, pylon
+// temples, aqueduct arcade, triumphal arches, obelisks, harbor moles,
+// baths and villas. everything is built per-column so chunk borders
+// never matter
 public final class EarthStructures {
 
     private static final BlockState STONE_BRICKS = Blocks.STONE_BRICKS.defaultBlockState();
@@ -39,7 +40,6 @@ public final class EarthStructures {
     private static final BlockState FLOWER1 = Blocks.POPPY.defaultBlockState();
     private static final BlockState FLOWER2 = Blocks.DANDELION.defaultBlockState();
     private static final BlockState PLANKS = Blocks.OAK_PLANKS.defaultBlockState();
-    private static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
 
     private static final int T_COLOSSEUM = 1, T_TEMPLE_GR = 2, T_TEMPLE_RO = 3,
             T_PYLON = 4, T_BASILICA = 5, T_PHAROS = 6, T_AQUEDUCT = 7,
@@ -71,14 +71,14 @@ public final class EarthStructures {
         l.add(s);
     }
 
-    // направление к морю: минимум рельефа на разрешении радиус+60
+    // направление к морю: минимум рельефа на разрешении радиус+300
     private static int seaDir(EarthCities.City c) {
         int best = 0;
         int bestH = Integer.MAX_VALUE;
         for (int deg = 0; deg < 360; deg += 45) {
             double a = Math.toRadians(deg);
-            int x = c.cx() + (int) Math.round(Math.cos(a) * (c.radius() + 60));
-            int z = c.cz() + (int) Math.round(Math.sin(a) * (c.radius() + 60));
+            int x = c.cx() + (int) Math.round(Math.cos(a) * (c.radius() + 300));
+            int z = c.cz() + (int) Math.round(Math.sin(a) * (c.radius() + 300));
             int h = EarthData.worldHeight(x, z);
             if (h < bestH) { bestH = h; best = deg; }
         }
@@ -93,10 +93,9 @@ public final class EarthStructures {
                     for (EarthCities.City c : EarthCities.cities()) {
                         place(l, c);
                     }
-                    // некрополь Гизы: сфинкс смотрит на восток + поле мастаб
-                    add(l, T_SPHINX, EarthCities.GIZA_X + 100, EarthCities.GIZA_Z + 130, 0, 0, 0, 2, 20, 8);
-                    // мастабы — на плато у пирамид (не в затопленной долине)
-                    add(l, T_MASTABAS, EarthCities.GIZA_X - 40, EarthCities.GIZA_Z + 160, 0, 0, 0, 2, 130, 60);
+                    // некрополь Гизы: сфинкс (73 м) восточнее Хефрена + мастабы
+                    add(l, T_SPHINX, EarthCities.GIZA_X - 150, EarthCities.GIZA_Z + 550, 0, 0, 0, 2, 60, 20);
+                    add(l, T_MASTABAS, EarthCities.GIZA_X + 250, EarthCities.GIZA_Z + 500, 0, 0, 0, 2, 350, 250);
                     structs = l;
                 }
             }
@@ -108,74 +107,63 @@ public final class EarthStructures {
         int cx = c.cx(), cz = c.cz(), r = c.radius();
         switch (c.id()) {
             case "rome" -> {
-                add(l, T_COLOSSEUM, cx + 95, cz - 55, 0, 0, 0, 0, 40, 32);
-                add(l, T_TEMPLE_RO, cx - 70, cz + 55, 0, 0, 0, 0, 16, 11);
-                add(l, T_BATHS, cx - 65, cz - 75, 0, 0, 0, 0, 13, 10);
+                add(l, T_COLOSSEUM, cx + r / 2, cz - r / 3, 0, 0, 0, 0, 100, 84);
+                add(l, T_TEMPLE_RO, cx - r / 3, cz + r / 4, 0, 0, 0, 0, 16, 11);
+                add(l, T_BATHS, cx - r / 3, cz - r / 3, 0, 0, 0, 0, 17, 12);
                 for (int g = 0; g < 4; g++) {
                     double a = Math.toRadians(g * 90);
-                    add(l, T_ARCH, cx + (int) Math.round(Math.cos(a) * (r + 8)),
-                            cz + (int) Math.round(Math.sin(a) * (r + 8)), g, 0, 0, 0, 8, 8);
+                    add(l, T_ARCH, cx + (int) Math.round(Math.cos(a) * (r + 10)),
+                            cz + (int) Math.round(Math.sin(a) * (r + 10)), g, 0, 0, 0, 10, 10);
                 }
-                add(l, T_AQUEDUCT, cx + r + 12, cz, 300, 0, 0, 0, 310, 3);
+                add(l, T_AQUEDUCT, cx + r + 14, cz, 1500, 0, 0, 0, 1510, 3);
             }
             case "athens" -> {
-                add(l, T_TEMPLE_GR, cx - 32, cz - 28, 1, 0, 0, 1, 17, 12); // Парфенон
-                add(l, T_THEATER, cx + 38, cz + 32, 0, 0, 0, 1, 24, 24);
-                add(l, T_ARCH, cx - r - 8, cz, 3, 0, 0, 1, 8, 8);
+                add(l, T_TEMPLE_GR, cx - r / 3, cz - r / 4, 1, 0, 0, 1, 40, 20); // Парфенон
+                add(l, T_THEATER, cx + r / 3, cz + r / 3, 60, 0, 0, 1, 64, 64);
+                add(l, T_ARCH, cx - r - 10, cz, 3, 0, 0, 1, 10, 10);
             }
             case "alexandria" -> {
                 int dir = seaDir(c);
                 double a = Math.toRadians(dir);
-                add(l, T_PHAROS, cx + (int) Math.round(Math.cos(a) * (r + 40)),
-                        cz + (int) Math.round(Math.sin(a) * (r + 40)), 0, 0, 0, 2, 10, 10);
-                add(l, T_PYLON, cx - 45, cz + 40, 0, 0, 0, 2, 18, 12);
-                add(l, T_OBELISKS, cx + 40, cz + 45, 0, 0, 0, 2, 10, 6);
-                add(l, T_PIER, cx, cz, dir, 0, 0, 2, r + 60, r + 60);
+                add(l, T_PHAROS, cx + (int) Math.round(Math.cos(a) * (r + 120)),
+                        cz + (int) Math.round(Math.sin(a) * (r + 120)), 0, 0, 0, 2, 16, 16);
+                add(l, T_PYLON, cx - r / 3, cz + r / 4, 1, 0, 0, 2, 34, 22);
+                add(l, T_OBELISKS, cx + r / 4, cz + r / 3, 0, 0, 0, 2, 14, 8);
+                add(l, T_PIER, cx, cz, dir, 200, r, 2, r + 300, r + 300);
             }
             case "carthage" -> {
-                add(l, T_BATHS, cx - 45, cz - 40, 0, 0, 0, 0, 13, 10);
-                add(l, T_TEMPLE_RO, cx + 45, cz + 40, 0, 0, 0, 0, 16, 11);
-                add(l, T_PIER, cx, cz, seaDir(c), 0, 0, 0, r + 60, r + 60);
+                add(l, T_BATHS, cx - r / 3, cz - r / 4, 0, 0, 0, 0, 17, 12);
+                add(l, T_TEMPLE_RO, cx + r / 3, cz + r / 4, 0, 0, 0, 0, 16, 11);
+                add(l, T_PIER, cx, cz, seaDir(c), 200, r, 0, r + 300, r + 300);
             }
             case "byzantium" -> {
-                add(l, T_BASILICA, cx - 38, cz - 32, 0, 0, 0, 3, 14, 11);
-                add(l, T_PIER, cx, cz, seaDir(c), 0, 0, 3, r + 60, r + 60);
-                add(l, T_ARCH, cx - r - 8, cz, 3, 0, 0, 3, 8, 8);
+                add(l, T_BASILICA, cx - r / 4, cz - r / 4, 1, 0, 0, 3, 24, 18);
+                add(l, T_PIER, cx, cz, seaDir(c), 200, r, 3, r + 300, r + 300);
+                add(l, T_ARCH, cx - r - 10, cz, 3, 0, 0, 3, 10, 10);
             }
             case "cairo" -> {
-                add(l, T_PYLON, cx - 45, cz + 40, 0, 0, 0, 2, 18, 12);
-                add(l, T_OBELISKS, cx + 38, cz + 38, 0, 0, 0, 2, 10, 6);
+                add(l, T_PYLON, cx - r / 3, cz + r / 4, 1, 0, 0, 2, 34, 22);
+                add(l, T_OBELISKS, cx + r / 4, cz + r / 4, 0, 0, 0, 2, 14, 8);
             }
             default -> {
                 switch (c.palette()) {
                     case 1 -> { // греческие города
-                        add(l, T_TEMPLE_GR, cx - 25, cz - 22, 0, 0, 0, 1, 14, 10);
-                        add(l, T_THEATER, cx + 30, cz + 28, 0, 0, 0, 1, 20, 20);
+                        add(l, T_TEMPLE_GR, cx - r / 4, cz - r / 4, 0, 0, 0, 1, 18, 12);
+                        add(l, T_THEATER, cx + r / 4, cz + r / 4, 45, 0, 0, 1, 50, 50);
                     }
-                    case 2 -> add(l, T_OBELISKS, cx + 28, cz + 28, 0, 0, 0, 2, 10, 6);
-                    case 3 -> add(l, T_BASILICA, cx - 28, cz - 24, 0, 0, 0, 3, 14, 11);
-                    default -> add(l, T_TEMPLE_RO, cx - 28, cz - 24, 0, 0, 0, 0, 16, 11);
+                    case 2 -> add(l, T_OBELISKS, cx + r / 4, cz + r / 4, 0, 0, 0, 2, 14, 8);
+                    case 3 -> add(l, T_BASILICA, cx - r / 4, cz - r / 4, 0, 0, 0, 3, 16, 12);
+                    default -> add(l, T_TEMPLE_RO, cx - r / 4, cz - r / 4, 0, 0, 0, 0, 16, 11);
                 }
             }
         }
         // виллы с садами — у всех городов, позиции из хэша
         for (int v = 0; v < 2; v++) {
-            int off = 45 + hash(cx, cz, v) % Math.max(20, r - 60);
+            int off = r / 3 + hash(cx, cz, v) % Math.max(60, r / 2);
             double a = Math.toRadians(hash(cz, v, cx) % 360);
             add(l, T_VILLA, cx + (int) Math.round(Math.cos(a) * off),
-                    cz + (int) Math.round(Math.sin(a) * off), v, 0, 0, c.palette(), 12, 10);
+                    cz + (int) Math.round(Math.sin(a) * off), v, 0, 0, c.palette(), 16, 13);
         }
-    }
-
-    // отладка: какие структуры покрывают колонну
-    public static String debugAt(int x, int z) {
-        StringBuilder sb = new StringBuilder();
-        for (Struct s : structs()) {
-            if (x >= s.minX && x <= s.maxX && z >= s.minZ && z <= s.maxZ) {
-                sb.append("t=").append(s.type).append('@').append(s.x).append(',').append(s.z).append(' ');
-            }
-        }
-        return sb.length() == 0 ? "нет структур" : sb.toString();
     }
 
     // перекрытие блока поверхности (мощение площадей у структур)
@@ -191,20 +179,31 @@ public final class EarthStructures {
 
     private static boolean claimsFloor(Struct s, int lx, int lz) {
         return switch (s.type) {
-            case T_COLOSSEUM -> ellipse(lx, lz, 38, 30);
-            case T_TEMPLE_GR -> Math.abs(lx) <= 16 && Math.abs(lz) <= 11;
+            case T_COLOSSEUM -> ellipse(lx, lz, 98, 81);
+            case T_TEMPLE_GR -> Math.abs(lx) <= (s.p0 == 1 ? 38 : 15) && Math.abs(lz) <= (s.p0 == 1 ? 18 : 10);
             case T_TEMPLE_RO -> Math.abs(lx) <= 15 && Math.abs(lz) <= 10;
-            case T_PYLON -> Math.abs(lx) <= 17 && Math.abs(lz) <= 11;
-            case T_BASILICA -> Math.abs(lx) <= 13 && Math.abs(lz) <= 10;
-            case T_THEATER -> lx * lx + lz * lz <= 23 * 23;
-            case T_BATHS -> Math.abs(lx) <= 12 && Math.abs(lz) <= 9;
-            case T_VILLA -> Math.abs(lx) <= 11 && Math.abs(lz) <= 9;
+            case T_PYLON -> Math.abs(lx) <= 33 && Math.abs(lz) <= 21;
+            case T_BASILICA -> Math.abs(lx) <= (s.p0 == 1 ? 23 : 15) && Math.abs(lz) <= (s.p0 == 1 ? 17 : 11);
+            case T_THEATER -> lx * lx + lz * lz <= (s.p0 + 3) * (s.p0 + 3);
+            case T_BATHS -> Math.abs(lx) <= 16 && Math.abs(lz) <= 11;
+            case T_VILLA -> Math.abs(lx) <= 15 && Math.abs(lz) <= 12;
             default -> false;
         };
     }
 
     private static boolean ellipse(int lx, int lz, double rx, double rz) {
         return (lx * lx) / (rx * rx) + (lz * lz) / (rz * rz) <= 1.0;
+    }
+
+    // отладка: какие структуры покрывают колонну
+    public static String debugAt(int x, int z) {
+        StringBuilder sb = new StringBuilder();
+        for (Struct s : structs()) {
+            if (x >= s.minX && x <= s.maxX && z >= s.minZ && z <= s.maxZ) {
+                sb.append("t=").append(s.type).append('@').append(s.x).append(',').append(s.z).append(' ');
+            }
+        }
+        return sb.length() == 0 ? "нет структур" : sb.toString();
     }
 
     // вызывается из EarthCities.buildAbove до городской застройки;
@@ -251,249 +250,257 @@ public final class EarthStructures {
         };
     }
 
-    // ---- Колизей: эллипс 76x60, три яруса арок, арена, развалины ----
+    // ---- Колизей: эллипс 189x155 м, арена, три яруса арок, развалины ----
 
     private static boolean colosseum(ChunkAccess c, BlockPos.MutableBlockPos p,
                                      Struct s, int x, int z, int h, int lx, int lz) {
-        if (!ellipse(lx, lz, 38, 30)) return false;
-        double rr = Math.sqrt((lx * lx) / (38.0 * 38.0) + (lz * lz) / (30.0 * 30.0));
+        if (!ellipse(lx, lz, 95, 78)) return false;
+        double rr = Math.sqrt((lx * lx) / (95.0 * 95.0) + (lz * lz) / (78.0 * 78.0));
         if (rr <= 0.45) {
-            // арена: песок с барьером
-            if (rr > 0.42) fill(c, p, x, z, h + 1, h + 3, STONE_BRICKS);
+            // арена: песок с барьером-подиумом
+            if (rr > 0.42) fill(c, p, x, z, h + 1, h + 4, STONE_BRICKS);
             else if (h >= EarthData.SEA_LEVEL) put(c, p, x, h, z, SAND);
             return true;
         }
-        if (rr <= 0.75) {
+        if (rr <= 0.8) {
             // зрительные ярусы: кольца-ступени к центру
-            int tier = (int) ((0.75 - rr) / 0.30 * 10.0);
+            int tier = (int) ((0.8 - rr) / 0.35 * 16.0);
             int top = h + 1 + tier;
             fill(c, p, x, z, h + 1, top, tier % 2 == 0 ? STONE_BRICKS : SMOOTH_SAND);
             put(c, p, x, top + 1, z, BRICK_SLAB);
             return true;
         }
-        // внешняя стена: пилястры каждые 3 градуса, арки, 3 яруса
-        double ang = Math.atan2(lz / 30.0, lx / 38.0);
-        int seg = (int) Math.floor((ang + Math.PI) / (Math.PI / 20));
+        // внешняя стена: 80 арочных пролётов, 4 яруса (реальные 48 м → 20 бл.)
+        double ang = Math.atan2(lz / 78.0, lx / 95.0);
+        int seg = (int) Math.floor((ang + Math.PI) / (Math.PI / 40));
         boolean pillar = (seg % 2) == 0;
-        // руины: верхний ярус местами обвален
-        boolean ruined = hash(x >> 2, z >> 2, 77) % 5 == 0;
+        boolean ruined = hash(x >> 2, z >> 2, 77) % 5 == 0; // верх местами обвален
         BlockState stone = hash(x, z, 78) % 4 == 0 ? CRACKED : STONE_BRICKS;
         if (pillar) {
-            fill(c, p, x, z, h + 1, h + (ruined ? 9 : 15), stone);
-            if (!ruined) put(c, p, x, h + 16, z, BRICK_SLAB);
+            fill(c, p, x, z, h + 1, h + (ruined ? 11 : 19), stone);
+            if (!ruined) put(c, p, x, h + 20, z, BRICK_SLAB);
         } else {
             fill(c, p, x, z, h + 1, h + 2, stone);           // цоколь
-            put(c, p, x, h + 6, z, stone);                   // перемычка 1 яруса
+            put(c, p, x, h + 7, z, stone);                   // перемычка 1 яруса
+            put(c, p, x, h + 12, z, stone);                  // перемычка 2 яруса
             if (!ruined) {
-                put(c, p, x, h + 11, z, stone);              // перемычка 2 яруса
-                fill(c, p, x, z, h + 14, h + 15, stone);     // аттик
+                put(c, p, x, h + 16, z, stone);              // перемычка 3 яруса
+                fill(c, p, x, z, h + 18, h + 19, stone);     // аттик
             }
         }
         return true;
     }
 
-    // ---- греческий храм-периптер: стилобат, колонны, фронтон, целла ----
+    // ---- греческий храм-периптер: Парфенон 70x31 м / малый 26x13 м ----
 
     private static boolean templeGreek(ChunkAccess c, BlockPos.MutableBlockPos p,
                                        Struct s, int x, int z, int h, int lx, int lz) {
         boolean big = s.p0 == 1;
-        int hx = big ? 14 : 11, hz = big ? 8 : 7;
-        if (Math.abs(lx) > hx + 2 || Math.abs(lz) > hz + 2) return false;
+        int hx = big ? 35 : 13, hz = big ? 15 : 6;
+        if (Math.abs(lx) > hx + 3 || Math.abs(lz) > hz + 3) return false;
         // три ступени стилобата
-        if (Math.abs(lx) <= hx + 2 && Math.abs(lz) <= hz + 2) put(c, p, x, h + 1, z, QUARTZ_SLAB);
-        if (Math.abs(lx) <= hx + 1 && Math.abs(lz) <= hz + 1) put(c, p, x, h + 2, z, QUARTZ_SLAB);
-        if (Math.abs(lx) <= hx && Math.abs(lz) <= hz) put(c, p, x, h + 3, z, SMOOTH_QUARTZ);
+        if (Math.abs(lx) <= hx + 3 && Math.abs(lz) <= hz + 3) put(c, p, x, h + 1, z, QUARTZ_SLAB);
+        if (Math.abs(lx) <= hx + 2 && Math.abs(lz) <= hz + 2) put(c, p, x, h + 2, z, QUARTZ_SLAB);
+        if (Math.abs(lx) <= hx + 1 && Math.abs(lz) <= hz + 1) put(c, p, x, h + 3, z, SMOOTH_QUARTZ);
         if (Math.abs(lx) > hx || Math.abs(lz) > hz) return true;
-        // колонны по периметру
+        // колонны по периметру (шаг 5 — реальные 4.3 м)
         boolean colRing = (Math.abs(lx) == hx || Math.abs(lz) == hz);
         boolean colAt = colRing && (Math.abs(lx) == hx
-                ? Math.floorMod(lz, 3) == 0 : Math.floorMod(lx, 3) == 0);
+                ? Math.floorMod(lz, 5) == 0 : Math.floorMod(lx, 5) == 0);
+        int colH = big ? 15 : 10; // Парфенон: колонны 10.4 м + капитель
         if (colAt) {
-            fill(c, p, x, z, h + 4, h + 12, QUARTZ_PILLAR);
-            put(c, p, x, h + 13, z, QUARTZ_SLAB);
+            fill(c, p, x, z, h + 4, h + 3 + colH, QUARTZ_PILLAR);
+            put(c, p, x, h + 4 + colH, z, QUARTZ_SLAB);
             return true;
         }
-        // архитрав + фронтон (треугольник на торцах)
+        // архитрав + фронтон на торцах
         if (colRing) {
-            put(c, p, x, h + 14, z, QUARTZ);
+            put(c, p, x, h + 5 + colH, z, QUARTZ);
             if (Math.abs(lx) == hx) {
-                for (int i = 0; i < 4; i++) {
-                    if (Math.abs(lz) <= hz - i * 2) put(c, p, x, h + 15 + i, z, QUARTZ);
+                for (int i = 0; i < (big ? 6 : 3); i++) {
+                    if (Math.abs(lz) <= hz - i * (big ? 2 : 1)) {
+                        put(c, p, x, h + 6 + colH + i, z, QUARTZ);
+                    }
                 }
             }
             return true;
         }
-        // целла со статуей
-        boolean cella = Math.abs(lx) <= hx - 5 && Math.abs(lz) <= hz - 4;
+        // целла со статуей (у Парфенона — Афина 12 м)
+        int cx0 = big ? hx - 9 : hx - 5, cz0 = big ? hz - 6 : hz - 3;
+        boolean cella = Math.abs(lx) <= cx0 && Math.abs(lz) <= cz0;
         if (cella) {
-            boolean wall = Math.abs(lx) == hx - 5 || Math.abs(lz) == hz - 4;
-            boolean door = lx == hx - 5 && Math.abs(lz) <= 1;
-            if (wall && !door) fill(c, p, x, z, h + 4, h + 9, SMOOTH_QUARTZ);
-            if (wall) put(c, p, x, h + 10, z, QUARTZ_SLAB);
-            if (lx == 0 && lz == 0) { // культовая статуя
-                fill(c, p, x, z, h + 4, h + 6, QUARTZ_PILLAR);
-                put(c, p, x, h + 7, z, GOLD);
+            boolean wall = Math.abs(lx) == cx0 || Math.abs(lz) == cz0;
+            boolean door = lx == cx0 && Math.abs(lz) <= 1;
+            if (wall && !door) fill(c, p, x, z, h + 4, h + 4 + colH - 4, SMOOTH_QUARTZ);
+            if (wall) put(c, p, x, h + 5 + colH - 4, z, QUARTZ_SLAB);
+            if (lx == 0 && lz == 0) {
+                fill(c, p, x, z, h + 4, h + (big ? 14 : 7), QUARTZ_PILLAR);
+                put(c, p, x, h + (big ? 15 : 8), z, GOLD);
             }
         }
         return true;
     }
 
-    // ---- римский подиумный храм: высокий цоколь, лестница, красная крыша ----
+    // ---- римский подиумный храм: Мезон-Карре 26x13 м ----
 
     private static boolean templeRoman(ChunkAccess c, BlockPos.MutableBlockPos p,
                                        Struct s, int x, int z, int h, int lx, int lz) {
         if (Math.abs(lx) > 14 || Math.abs(lz) > 9) return false;
-        // подиум 4 высотой, лестница с востока
+        // лестница с востока
         if (lx == 14 && Math.abs(lz) <= 2) {
-            int step = h + 4 - Math.max(0, 4 - (14 - lx));
-            fill(c, p, x, z, h + 1, h + 1, STONE_BRICKS);
+            put(c, p, x, h + 1, z, STONE_BRICKS);
             return true;
         }
-        if (Math.abs(lx) <= 13 && Math.abs(lz) <= 8) fill(c, p, x, z, h + 1, h + 4, STONE_BRICKS);
-        // портик: колонны на фронте и по бокам спереди
+        // подиум 3 м
+        if (Math.abs(lx) <= 13 && Math.abs(lz) <= 8) fill(c, p, x, z, h + 1, h + 3, STONE_BRICKS);
+        // портик: колонны 9 м
         boolean front = lx >= 6 && lx <= 13 && (Math.abs(lz) == 8 || (lx == 13 || lx == 9) && Math.abs(lz) <= 8);
         if (front && Math.floorMod(lx - lz, 3) == 0) {
-            fill(c, p, x, z, h + 5, h + 12, QUARTZ_PILLAR);
+            fill(c, p, x, z, h + 4, h + 12, QUARTZ_PILLAR);
             put(c, p, x, h + 13, z, RED);
             return true;
         }
         // целла
         if (lx <= 5 && Math.abs(lz) <= 6) {
             boolean wall = lx == 5 || lx == -13 + 8 || Math.abs(lz) == 6;
-            if (wall) fill(c, p, x, z, h + 5, h + 11, SMOOTH_QUARTZ);
+            if (wall) fill(c, p, x, z, h + 4, h + 10, SMOOTH_QUARTZ);
             if (lx == -1 && lz == 0) {
-                fill(c, p, x, z, h + 5, h + 7, QUARTZ_PILLAR);
-                put(c, p, x, h + 8, z, GOLD);
+                fill(c, p, x, z, h + 4, h + 6, QUARTZ_PILLAR);
+                put(c, p, x, h + 7, z, GOLD);
             }
         }
         // двускатная черепичная крыша
         if (Math.abs(lx) <= 13 && Math.abs(lz) <= 8) {
-            int roofY = h + 12 + Math.max(0, 5 - Math.abs(lz));
+            int roofY = h + 11 + Math.max(0, 5 - Math.abs(lz));
             put(c, p, x, roofY, z, RED);
             if (Math.abs(lz) <= 1) put(c, p, x, roofY + 1, z, RED);
         }
         return true;
     }
 
-    // ---- египетский пилонный храм: башни-пилоны, двор, колонны с орнаментом ----
+    // ---- египетский пилонный храм: башни-пилоны 20 м, двор, гипостиль ----
 
     private static boolean pylonTemple(ChunkAccess c, BlockPos.MutableBlockPos p,
                                        Struct s, int x, int z, int h, int lx, int lz) {
-        if (Math.abs(lx) > 16 || Math.abs(lz) > 10) return false;
-        // пилоны: две башни у западного входа, сужаются кверху
-        boolean pylon = lx >= -14 && lx <= -10 && Math.abs(lz) >= 3 && Math.abs(lz) <= 9;
+        boolean big = s.p0 == 1;
+        int sx = big ? 32 : 20, sz = big ? 20 : 13;
+        if (Math.abs(lx) > sx || Math.abs(lz) > sz) return false;
+        int px0 = -sx + 2, px1 = -sx + 8; // пилоны у западного входа
+        boolean pylon = lx >= px0 && lx <= px1 && Math.abs(lz) >= 4 && Math.abs(lz) <= sz - 2;
         if (pylon) {
-            int height = 12 - (Math.abs(lx + 12));
+            int height = 20 - (lx - px0); // сужение кверху
             for (int y = 1; y <= height; y++) {
                 BlockState st = (y == height - 1) ? YELLOW
                         : (y % 4 == 0 ? SMOOTH_SAND : SANDSTONE);
                 put(c, p, x, h + y, z, st);
             }
-            put(c, p, x, h + height + 1, z, GOLD); // позолоченное тяжёлое навершие
+            put(c, p, x, h + height + 1, z, GOLD);
             return true;
         }
-        // флаги перед пилонами
-        if (lx == -15 && (Math.abs(lz) == 5 || Math.abs(lz) == 8)) {
-            fill(c, p, x, z, h + 1, h + 14, LOG);
-            put(c, p, x, h + 15, z, YELLOW);
-            put(c, p, x, h + 14, z, BLUE);
+        // флагштоки перед пилонами
+        if (lx == px0 - 2 && (Math.abs(lz) == 7 || Math.abs(lz) == 12)) {
+            fill(c, p, x, z, h + 1, h + 20, LOG);
+            put(c, p, x, h + 21, z, YELLOW);
+            put(c, p, x, h + 20, z, BLUE);
             return true;
         }
         // гипостильный зал: колонны с синими капителями
-        if (lx >= -6 && lx <= 6 && Math.abs(lz) <= 7) {
-            if (Math.floorMod(lx, 3) == 0 && Math.floorMod(lz, 3) == 0 && !(lx == 0 && lz == 0)) {
-                fill(c, p, x, z, h + 1, h + 7, SANDSTONE);
-                put(c, p, x, h + 8, z, BLUE);
-                put(c, p, x, h + 9, z, SMOOTH_SAND);
+        if (lx >= -sx / 4 && lx <= sx / 2 && Math.abs(lz) <= sz - 4) {
+            if (Math.floorMod(lx, 4) == 0 && Math.floorMod(lz, 4) == 0 && !(lx == 0 && lz == 0)) {
+                fill(c, p, x, z, h + 1, h + 10, SANDSTONE);
+                put(c, p, x, h + 11, z, BLUE);
+                put(c, p, x, h + 12, z, SMOOTH_SAND);
             }
-            // плиты перекрытия
-            put(c, p, x, h + 10, z, SMOOTH_SAND);
+            put(c, p, x, h + 13, z, SMOOTH_SAND); // плиты перекрытия
             return true;
         }
         // святилище
-        if (lx >= 10 && lx <= 15 && Math.abs(lz) <= 4) {
-            boolean wall = lx == 10 || lx == 15 || Math.abs(lz) == 4;
-            if (wall) fill(c, p, x, z, h + 1, h + 6, CUT_SAND);
-            if (lx == 13 && lz == 0) {
+        if (lx >= sx - 8 && Math.abs(lz) <= 5) {
+            boolean wall = lx == sx - 8 || lx == sx || Math.abs(lz) == 5;
+            if (wall) fill(c, p, x, z, h + 1, h + 8, CUT_SAND);
+            if (lx == sx - 4 && lz == 0) {
                 put(c, p, x, h + 1, z, SMOOTH_SAND);
                 put(c, p, x, h + 2, z, GOLD);
             }
-            if (wall) put(c, p, x, h + 7, z, SMOOTH_SAND);
+            if (wall) put(c, p, x, h + 9, z, SMOOTH_SAND);
             return true;
         }
         return true;
     }
 
-    // ---- византийская базилика: неф, апсида, ступенчатый купол ----
+    // ---- византийская базилика: неф, апсида, купол ----
 
     private static boolean basilica(ChunkAccess c, BlockPos.MutableBlockPos p,
                                     Struct s, int x, int z, int h, int lx, int lz) {
-        if (Math.abs(lx) > 12 || Math.abs(lz) > 9) return false;
-        boolean apse = lx >= 9 && lx * lx + lz * lz <= 100 && lx * lx / 36.0 + lz * lz / 36.0 <= 1.2;
-        boolean wall = Math.abs(lx) == 12 || Math.abs(lz) == 9 || (lx >= 9 && Math.abs(lz) >= 8);
+        boolean big = s.p0 == 1;
+        int sx = big ? 22 : 14, sz = big ? 16 : 10;
+        if (Math.abs(lx) > sx || Math.abs(lz) > sz) return false;
+        boolean wall = Math.abs(lx) == sx || Math.abs(lz) == sz;
         if (wall) {
             boolean window = Math.floorMod(lx + lz, 4) == 1;
-            for (int y = 1; y <= 9; y++) {
-                if (window && y >= 5 && y <= 7) continue;
+            int wallH = big ? 12 : 9;
+            for (int y = 1; y <= wallH; y++) {
+                if (window && y >= wallH - 4 && y <= wallH - 2) continue;
                 put(c, p, x, h + y, z, (y % 3 == 0) ? SMOOTH_SAND : STONE_BRICKS);
             }
-            put(c, p, x, h + 10, z, BRICK_SLAB);
+            put(c, p, x, h + wallH + 1, z, BRICK_SLAB);
             return true;
         }
         // колонны нефа
-        if (Math.abs(lx) <= 8 && (Math.abs(lz) == 4) && Math.floorMod(lx, 4) == 0) {
-            fill(c, p, x, z, h + 1, h + 7, QUARTZ_PILLAR);
-            put(c, p, x, h + 8, z, QUARTZ_SLAB);
+        if (Math.abs(lx) <= sx - 3 && Math.abs(lz) == sz / 2 && Math.floorMod(lx, 5) == 0) {
+            fill(c, p, x, z, h + 1, h + 8, QUARTZ_PILLAR);
+            put(c, p, x, h + 9, z, QUARTZ_SLAB);
             return true;
         }
         // купол над средокрестием
         double rr = Math.sqrt(lx * lx + lz * lz);
-        if (rr <= 6) {
-            int dy = (int) Math.round(11 + 5 * (1 - rr / 6.0));
+        int domeR = big ? 11 : 7;
+        if (rr <= domeR) {
+            int dy = (big ? 13 : 10) + (int) Math.round((big ? 8 : 5) * (1 - rr / domeR));
             put(c, p, x, h + dy, z, rr < 1.5 ? GOLD : SMOOTH_SAND);
             return true;
         }
-        // крыша притворов
-        if (Math.abs(lx) <= 11 && Math.abs(lz) <= 8) put(c, p, x, h + 10, z, RED);
+        if (Math.abs(lx) <= sx - 1 && Math.abs(lz) <= sz - 1) {
+            put(c, p, x, h + (big ? 13 : 10), z, RED);
+        }
         // алтарь
-        if (lx == 9 && lz == 0) {
+        if (lx == sx - 3 && lz == 0) {
             put(c, p, x, h + 1, z, SMOOTH_QUARTZ);
             put(c, p, x, h + 2, z, GOLD);
         }
         return true;
     }
 
-    // ---- маяк Фарос: квадрат → восьмигранник → цилиндр, огонь наверху ----
+    // ---- маяк Фарос ~75 м: квадрат 22 м → восьмигранник → цилиндр ----
 
     private static boolean pharos(ChunkAccess c, BlockPos.MutableBlockPos p,
                                   Struct s, int x, int z, int h, int lx, int lz) {
-        if (Math.abs(lx) > 6 || Math.abs(lz) > 6) return false;
+        if (Math.abs(lx) > 12 || Math.abs(lz) > 12) return false;
         int base = Math.max(h, EarthData.SEA_LEVEL + 1);
-        // сначала верхние ярусы — их след отпечатков меньше, иначе
-        // широкие ярусы «съедают» центральные колонны цилиндра
-        if (lx * lx + lz * lz <= 6) {
-            fill(c, p, x, z, base + 33, base + 42, QUARTZ);
+        // цилиндр 56..73 + свет (первым — меньший след)
+        if (lx * lx + lz * lz <= 12) {
+            fill(c, p, x, z, base + 56, base + 73, QUARTZ);
             if (lx * lx + lz * lz <= 2) {
-                put(c, p, x, base + 43, z, SEA_LANTERN);
-                put(c, p, x, base + 44, z, GOLD);
+                put(c, p, x, base + 74, z, SEA_LANTERN);
+                put(c, p, x, base + 75, z, GOLD);
             }
             return true;
         }
-        // восьмигранник 19..32
-        if (Math.abs(lx) <= 4 && Math.abs(lz) <= 4 && Math.abs(lx) + Math.abs(lz) <= 6) {
-            boolean edge = Math.abs(lx) + Math.abs(lz) >= 5 || Math.abs(lx) == 4 || Math.abs(lz) == 4;
-            if (edge) fill(c, p, x, z, base + 19, base + 32, SMOOTH_QUARTZ);
+        // восьмигранник 31..55
+        if (Math.abs(lx) <= 7 && Math.abs(lz) <= 7 && Math.abs(lx) + Math.abs(lz) <= 10) {
+            boolean edge = Math.abs(lx) + Math.abs(lz) >= 9 || Math.abs(lx) == 7 || Math.abs(lz) == 7;
+            if (edge) fill(c, p, x, z, base + 31, base + 55, SMOOTH_QUARTZ);
             return true;
         }
-        // цоколь 11x11, 18 высоты, окна каждые 5, дверь с юга
-        if (Math.abs(lx) <= 5 && Math.abs(lz) <= 5) {
-            boolean edge = Math.abs(lx) == 5 || Math.abs(lz) == 5;
+        // цоколь 22x22 м, 30 м высотой, окна, дверь
+        if (Math.abs(lx) <= 11 && Math.abs(lz) <= 11) {
+            boolean edge = Math.abs(lx) == 11 || Math.abs(lz) == 11;
             if (edge) {
-                boolean window = (Math.floorMod(lx + lz, 4) == 0);
-                for (int y = 1; y <= 18; y++) {
-                    if (window && y % 5 == 0) continue;
-                    if (lz == 5 && Math.abs(lx) <= 1 && y <= 3) continue; // дверь
-                    put(c, p, x, base + y, z, y % 6 == 0 ? QUARTZ : STONE_BRICKS);
+                boolean window = (Math.floorMod(lx + lz, 5) == 0);
+                for (int y = 1; y <= 30; y++) {
+                    if (window && y % 6 == 0) continue;
+                    if (lz == 11 && Math.abs(lx) <= 1 && y <= 3) continue; // дверь
+                    put(c, p, x, base + y, z, y % 8 == 0 ? QUARTZ : STONE_BRICKS);
                 }
             }
             return true;
@@ -501,19 +508,16 @@ public final class EarthStructures {
         return false;
     }
 
-    // ---- акведук: аркада с водяным лотком, лоток идёт по сглаженному
-    // профилю рельефа +11 блоков — через холмы насыпью, через долы аркадой ----
+    // ---- акведук: аркада с водяным лотком по сглаженному профилю ----
 
     private static boolean aqueduct(ChunkAccess c, BlockPos.MutableBlockPos p,
                                     Struct s, int x, int z, int h, int lx, int lz) {
         if (lx < 0 || lx > s.p0 || Math.abs(lz) > 2) return false;
-        // сглаженная высота лотка: среднее рельефа ±24 блока по трассе
-        int t1 = EarthData.worldHeight(x - 24, z);
-        int t2 = EarthData.worldHeight(x + 24, z);
-        int channelY = Math.max((h + t1 + t2) / 3, h) + 11;
-        boolean pillar = Math.floorMod(lx, 8) <= 1;
+        int t1 = EarthData.worldHeight(x - 48, z);
+        int t2 = EarthData.worldHeight(x + 48, z);
+        int channelY = Math.max((h + t1 + t2) / 3, h) + 12;
+        boolean pillar = Math.floorMod(lx, 9) <= 1;
         if (Math.abs(lz) <= 1) {
-            // несущий хребет: насыпь/аркада до лотка
             fill(c, p, x, z, h + 1, channelY - 2, STONE_BRICKS);
             if (lz == 0) {
                 put(c, p, x, channelY - 1, z, STONE_BRICKS);
@@ -523,143 +527,142 @@ public final class EarthStructures {
             }
             return true;
         }
-        // боковые грани: опоры и арочные просветы
         if (pillar) {
             fill(c, p, x, z, h + 1, channelY - 1, STONE_BRICKS);
         } else {
-            put(c, p, x, channelY - 3, z, BRICK_SLAB); // намёт арки
+            put(c, p, x, channelY - 4, z, BRICK_SLAB);
             fill(c, p, x, z, channelY - 2, channelY, STONE_BRICKS);
         }
         return true;
     }
 
-    // ---- триумфальная арка на воротах ----
+    // ---- триумфальная арка на воротах (15 м) ----
 
     private static boolean arch(ChunkAccess c, BlockPos.MutableBlockPos p,
                                 Struct s, int x, int z, int h, int lx, int lz) {
-        // арка поворачивается по стороне света (p0: 0..3)
         boolean swap = s.p0 % 2 == 1;
         int ax = swap ? lz : lx, az = swap ? lx : lz;
-        if (Math.abs(ax) > 4 || Math.abs(az) > 2) return false;
+        if (Math.abs(ax) > 5 || Math.abs(az) > 2) return false;
         boolean pylon = Math.abs(ax) >= 3;
         if (pylon) {
-            fill(c, p, x, z, h + 1, h + 9, STONE_BRICKS);
-            put(c, p, x, h + 10, z, QUARTZ_SLAB); // капитель
-        } else if (Math.abs(ax) <= 2) {
-            put(c, p, x, h + 8, z, QUARTZ);       // перемычка проёма
-            put(c, p, x, h + 9, z, STONE_BRICKS);
+            fill(c, p, x, z, h + 1, h + 11, STONE_BRICKS);
+            put(c, p, x, h + 12, z, QUARTZ_SLAB);
+        } else {
+            put(c, p, x, h + 10, z, QUARTZ);
+            put(c, p, x, h + 11, z, STONE_BRICKS);
         }
-        // аттик и статуи
-        fill(c, p, x, z, h + 10, h + 11, STONE_BRICKS);
+        fill(c, p, x, z, h + 12, h + 14, STONE_BRICKS); // аттик
         if (pylon && az == 0) {
-            put(c, p, x, h + 12, z, QUARTZ_PILLAR);
-            put(c, p, x, h + 13, z, GOLD);
+            put(c, p, x, h + 15, z, QUARTZ_PILLAR);
+            put(c, p, x, h + 16, z, GOLD);
         }
         return true;
     }
 
-    // ---- пара обелисков с золотыми пирамидионами ----
+    // ---- пара обелисков 25 м с золотыми пирамидионами ----
 
     private static boolean obelisks(ChunkAccess c, BlockPos.MutableBlockPos p,
                                     Struct s, int x, int z, int h, int lx, int lz) {
-        if (Math.abs(lx) > 8 || Math.abs(lz) > 4) return false;
-        for (int ox : new int[]{-5, 5}) {
+        if (Math.abs(lx) > 12 || Math.abs(lz) > 5) return false;
+        for (int ox : new int[]{-8, 8}) {
             int dx = lx - ox, dz = lz;
+            if (Math.abs(dx) > 2 || Math.abs(dz) > 2) continue;
+            fill(c, p, x, z, h + 1, h + 2, CUT_SAND); // постамент 5x5
             if (Math.abs(dx) > 1 || Math.abs(dz) > 1) continue;
-            fill(c, p, x, z, h + 1, h + 2, CUT_SAND); // постамент
-            if (Math.abs(dx) <= 1 && Math.abs(dz) <= 1 && !(dx == 0 && dz == 0)) continue;
-            // ствол 1x1 с полосами иероглифов
-            for (int y = 3; y <= 18; y++) {
-                put(c, p, x, h + y, z, y % 3 == 0 ? SMOOTH_SAND : SANDSTONE);
+            if (dx == 0 && dz == 0) {
+                for (int y = 3; y <= 26; y++) {
+                    put(c, p, x, h + y, z, y % 4 == 0 ? SMOOTH_SAND : SANDSTONE);
+                }
+                put(c, p, x, h + 27, z, GOLD);
             }
-            put(c, p, x, h + 19, z, GOLD);
             return true;
         }
         return false;
     }
 
-    // ---- греческий театр: полукруглые ярусы, орхестра, скена ----
+    // ---- греческий театр: ярусы, орхестра, скена (радиус из p0) ----
 
     private static boolean theater(ChunkAccess c, BlockPos.MutableBlockPos p,
                                    Struct s, int x, int z, int h, int lx, int lz) {
+        int R = s.p0;
         double rr = Math.sqrt(lx * lx + lz * lz);
-        if (rr > 22) return false;
-        if (rr <= 7) return true; // орхестра — мощёная площадка
+        if (rr > R) return false;
+        int orch = R / 6;
+        if (rr <= orch) return true; // орхестра
         if (lz >= 0) {
-            // ярусы: каждое кольцо на блок выше
-            int tier = (int) ((rr - 7) / 2.2);
+            int tier = (int) ((rr - orch) / 2.5);
             fill(c, p, x, z, h + 1, h + tier, tier % 2 == 0 ? STONE_BRICKS : SMOOTH_QUARTZ);
             put(c, p, x, h + tier + 1, z, QUARTZ_SLAB);
             return true;
         }
         // скена: стена с колоннами за орхестрой
-        if (lz <= -8 && Math.abs(lx) <= 9) {
-            if (Math.abs(lx) == 9 || lz <= -10) {
-                fill(c, p, x, z, h + 1, h + 6, SMOOTH_QUARTZ);
-            } else if (Math.floorMod(lx, 3) == 0) {
-                fill(c, p, x, z, h + 1, h + 5, QUARTZ_PILLAR);
+        if (lz <= -orch - 1 && Math.abs(lx) <= orch + 3) {
+            if (Math.abs(lx) == orch + 3 || lz <= -orch - 3) {
+                fill(c, p, x, z, h + 1, h + 7, SMOOTH_QUARTZ);
+            } else if (Math.floorMod(lx, 4) == 0) {
+                fill(c, p, x, z, h + 1, h + 6, QUARTZ_PILLAR);
             }
             return true;
         }
         return true;
     }
 
-    // ---- сфинкс у Гизы ----
+    // ---- сфинкс у Гизы: 73 м, тело льва, голова с немесом ----
 
     private static boolean sphinx(ChunkAccess c, BlockPos.MutableBlockPos p,
                                   Struct s, int x, int z, int h, int lx, int lz) {
-        if (lx < -4 || lx > 16 || Math.abs(lz) > 3) return false;
-        // тело льва
-        if (lx <= 10 && Math.abs(lz) <= 2) fill(c, p, x, z, h + 1, h + 4, SANDSTONE);
-        // лапы вперёд
-        if (lx > 10 && Math.abs(lz) <= 2 && (Math.abs(lz) == 2 || lx <= 13)) {
-            fill(c, p, x, z, h + 1, h + 2, SMOOTH_SAND);
+        if (lx < -10 || lx > 55 || Math.abs(lz) > 8) return false;
+        // тело льва 12 м высотой
+        if (lx <= 30 && Math.abs(lz) <= 5) fill(c, p, x, z, h + 1, h + 12, SANDSTONE);
+        // вытянутые лапы вперёд
+        if (lx > 30 && lx <= 48 && Math.abs(lz) <= 5 && (Math.abs(lz) >= 3 || lx <= 38)) {
+            fill(c, p, x, z, h + 1, h + 4, SMOOTH_SAND);
         }
-        // голова с немесом
-        if (lx >= 7 && lx <= 10 && Math.abs(lz) <= 1) {
-            for (int y = 5; y <= 8; y++) {
-                BlockState st = (y == 6 && Math.abs(lz) == 1) ? BLUE
-                        : (y == 8 ? GOLD : SMOOTH_SAND);
+        // голова 10 м с немесом
+        if (lx >= 24 && lx <= 31 && Math.abs(lz) <= 3) {
+            for (int y = 13; y <= 21; y++) {
+                BlockState st = (y == 15 && Math.abs(lz) >= 2) ? BLUE
+                        : (y == 21 ? GOLD : SMOOTH_SAND);
                 put(c, p, x, h + y, z, st);
             }
         }
         return true;
     }
 
-    // ---- поле мастаб: ряды гробниц между пирамидами ----
+    // ---- поле мастаб: ряды гробниц 12x8 м ----
 
     private static boolean mastabas(ChunkAccess c, BlockPos.MutableBlockPos p,
                                     Struct s, int x, int z, int h, int lx, int lz) {
-        if (Math.abs(lx) > 125 || Math.abs(lz) > 65) return false;
-        int gx = Math.floorMod(lx, 18), gz = Math.floorMod(lz, 14);
-        if (gx > 8 || gz > 5) return false; // улицы между гробницами
-        int cellX = Math.floorDiv(lx, 18), cellZ = Math.floorDiv(lz, 14);
-        if (hash(cellX, cellZ, 900) % 4 == 0) return false; // пустые участки
-        boolean edge = gx == 0 || gx == 8 || gz == 0 || gz == 5;
-        int hh = 3 + hash(cellX, cellZ, 901) % 3;
+        if (Math.abs(lx) > 340 || Math.abs(lz) > 240) return false;
+        int gx = Math.floorMod(lx, 26), gz = Math.floorMod(lz, 20);
+        if (gx > 12 || gz > 8) return false; // улицы между гробницами
+        int cellX = Math.floorDiv(lx, 26), cellZ = Math.floorDiv(lz, 20);
+        if (hash(cellX, cellZ, 900) % 4 == 0) return false;
+        boolean edge = gx == 0 || gx == 12 || gz == 0 || gz == 8;
+        int hh = 3 + hash(cellX, cellZ, 901) % 4;
         fill(c, p, x, z, h + 1, h + hh, edge ? CUT_SAND : SANDSTONE);
         put(c, p, x, h + hh + 1, z, SMOOTH_SAND);
         return true;
     }
 
-    // ---- гавань: молы в море с фонарями ----
+    // ---- гавань: молы в море с фонарями (длина из p0) ----
 
     private static boolean pier(ChunkAccess c, BlockPos.MutableBlockPos p,
                                 Struct s, int x, int z, int h, int lx, int lz) {
-        double a = Math.toRadians(s.p0);
+        double a = Math.toRadians(s.p0 & 0xFFFF);
         int dx = (int) Math.round(Math.cos(a)), dz = (int) Math.round(Math.sin(a));
-        // два мола от края города в сторону моря
-        int r = 60;
-        for (int off : new int[]{-14, 14}) {
-            int px = -dz * off, pz = dx * off; // перпендикуляр
-            for (int t = 0; t <= 45; t++) {
+        int len = s.p1 > 0 ? s.p1 : 200;
+        int r = s.p2 > 0 ? s.p2 : 400; // радиус города из p2
+        for (int off : new int[]{-30, 30}) {
+            int px = -dz * off, pz = dx * off;
+            for (int t = 0; t <= len; t++) {
                 int bx = (int) Math.round(dx * (r * 0.8 + t)) + px;
                 int bz = (int) Math.round(dz * (r * 0.8 + t)) + pz;
                 if (Math.abs(lx - bx) > 2 || Math.abs(lz - bz) > 2) continue;
                 int deck = EarthData.SEA_LEVEL + 2;
                 if (h <= deck - 1) fill(c, p, x, z, h + 1, deck, STONE_BRICKS);
                 put(c, p, x, deck, z, SMOOTH_SAND);
-                if (Math.abs(lx - bx) == 2 && t % 10 == 0) {
+                if (Math.abs(lx - bx) == 2 && t % 25 == 0) {
                     put(c, p, x, deck + 1, z, STONE_BRICKS);
                     put(c, p, x, deck + 2, z, LANTERN);
                 }
@@ -669,82 +672,78 @@ public final class EarthStructures {
         return false;
     }
 
-    // ---- римские термы: зал с купальней, свод, окна ----
+    // ---- римские термы: зал 32x22 м с купальней и сводом ----
 
     private static boolean baths(ChunkAccess c, BlockPos.MutableBlockPos p,
                                  Struct s, int x, int z, int h, int lx, int lz) {
-        if (Math.abs(lx) > 11 || Math.abs(lz) > 8) return false;
-        boolean wall = Math.abs(lx) == 11 || Math.abs(lz) == 8;
+        if (Math.abs(lx) > 15 || Math.abs(lz) > 10) return false;
+        boolean wall = Math.abs(lx) == 15 || Math.abs(lz) == 10;
         if (wall) {
             boolean window = Math.floorMod(lx + lz, 4) == 2;
-            boolean door = lx == -11 && Math.abs(lz) <= 1;
-            for (int y = 1; y <= 7; y++) {
+            boolean door = lx == -15 && Math.abs(lz) <= 1;
+            for (int y = 1; y <= 9; y++) {
                 if (door && y <= 3) continue;
-                if (window && y >= 4 && y <= 6) continue;
+                if (window && y >= 5 && y <= 7) continue;
                 put(c, p, x, h + y, z, y % 3 == 0 ? BRICKS : STONE_BRICKS);
             }
             return true;
         }
-        // свод: ступенчатый полуциркуль
-        int vault = 8 + (int) Math.round(3 * (1 - Math.abs(lz) / 8.0));
+        int vault = 10 + (int) Math.round(4 * (1 - Math.abs(lz) / 10.0));
         put(c, p, x, h + vault, z, BRICKS);
-        // купальня
-        if (lx >= -6 && lx <= 2 && Math.abs(lz) <= 3) {
+        // купальня 12x7 м
+        if (lx >= -8 && lx <= 3 && Math.abs(lz) <= 3) {
             put(c, p, x, h, z, SMOOTH_QUARTZ);
-            put(c, p, x, h - 0, z, SMOOTH_QUARTZ);
-            put(c, p, x, h + 0, z, SMOOTH_QUARTZ);
-            if (lx >= -5 && lx <= 1 && Math.abs(lz) <= 2) put(c, p, x, h + 1, z, WATER);
+            if (lx >= -7 && lx <= 2 && Math.abs(lz) <= 2) put(c, p, x, h + 1, z, WATER);
             return true;
         }
-        // колонны зала
-        if (Math.floorMod(lx, 4) == 0 && Math.abs(lz) == 5) {
-            fill(c, p, x, z, h + 1, h + 6, QUARTZ_PILLAR);
+        if (Math.floorMod(lx, 5) == 0 && Math.abs(lz) == 7) {
+            fill(c, p, x, z, h + 1, h + 8, QUARTZ_PILLAR);
         }
         return true;
     }
 
-    // ---- вилла с садом: стены, двор, бассейн, живая изгородь ----
+    // ---- вилла с садом: 30x24 м, двор, бассейн, изгородь, дерево ----
 
     private static boolean villa(ChunkAccess c, BlockPos.MutableBlockPos p,
                                  Struct s, int x, int z, int h, int lx, int lz) {
-        if (Math.abs(lx) > 10 || Math.abs(lz) > 8) return false;
-        boolean wall = Math.abs(lx) == 10 || Math.abs(lz) == 8;
+        if (Math.abs(lx) > 14 || Math.abs(lz) > 11) return false;
+        boolean wall = Math.abs(lx) == 14 || Math.abs(lz) == 11;
         if (wall) {
-            boolean door = lx == 10 && Math.abs(lz) <= 1;
+            boolean door = lx == 14 && Math.abs(lz) <= 1;
             boolean window = Math.floorMod(lx * 3 + lz, 5) == 1;
-            for (int y = 1; y <= 5; y++) {
+            for (int y = 1; y <= 6; y++) {
                 if (door && y <= 2) continue;
                 if (window && y == 3) continue;
                 put(c, p, x, h + y, z, s.palette == 2 ? SANDSTONE : SMOOTH_QUARTZ);
             }
-            put(c, p, x, h + 6, z, RED);
+            put(c, p, x, h + 7, z, RED);
             return true;
         }
-        // жилая часть с плоской крышей (западная половина)
-        if (lx <= -2) {
-            boolean innerWall = lx == -2 || Math.abs(lz) >= 6;
-            if (innerWall) fill(c, p, x, z, h + 1, h + 4, s.palette == 2 ? SANDSTONE : SMOOTH_QUARTZ);
-            put(c, p, x, h + 5, z, PLANKS);
+        // жилая часть (западная половина)
+        if (lx <= -3) {
+            boolean innerWall = lx == -3 || Math.abs(lz) >= 9;
+            if (innerWall) fill(c, p, x, z, h + 1, h + 5, s.palette == 2 ? SANDSTONE : SMOOTH_QUARTZ);
+            put(c, p, x, h + 6, z, PLANKS);
             return true;
         }
-        // сад: бассейн, изгородь, клумбы, дерево
-        if (lx >= 0 && lx <= 8 && Math.abs(lz) <= 6) {
-            if (lx >= 2 && lx <= 5 && Math.abs(lz) <= 1) {
+        // сад
+        if (lx >= -1 && lx <= 12 && Math.abs(lz) <= 9) {
+            if (lx >= 3 && lx <= 7 && Math.abs(lz) <= 2) {
                 put(c, p, x, h, z, SMOOTH_QUARTZ);
-                put(c, p, x, h + 1, z, WATER);
+                if (lx >= 4 && lx <= 6 && Math.abs(lz) <= 1) put(c, p, x, h + 1, z, WATER);
                 return true;
             }
-            if (Math.abs(lz) == 5 && Math.floorMod(lx, 2) == 0) {
+            if (Math.abs(lz) == 8 && Math.floorMod(lx, 2) == 0) {
                 fill(c, p, x, z, h + 1, h + 2, LEAVES);
                 return true;
             }
-            if (Math.floorMod(lx + lz * 2, 7) == 0) {
+            if (Math.floorMod(lx + lz * 2, 9) == 0) {
                 put(c, p, x, h + 1, z, hash(x, z, 33) % 2 == 0 ? FLOWER1 : FLOWER2);
                 return true;
             }
-            if (lx == 7 && lz == 4) { // дерево в саду
-                fill(c, p, x, z, h + 1, h + 4, LOG);
-                for (int ddy = 4; ddy <= 6; ddy++) put(c, p, x, h + ddy, z, LEAVES);
+            if (lx == 10 && lz == 6) {
+                fill(c, p, x, z, h + 1, h + 5, LOG);
+                for (int ddy = 5; ddy <= 7; ddy++) put(c, p, x, h + ddy, z, LEAVES);
                 return true;
             }
         }

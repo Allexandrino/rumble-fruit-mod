@@ -20,7 +20,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 public class EarthMinimap {
 
     private static final int SIZE = 144;          // px
-    private static final int WINDOW = 1280;       // половина окна в блоках
+    private static final int WINDOW = 6000;       // половина окна в метрах (12 км вид)
     private static final ResourceLocation TEX_ID =
             ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "earth_minimap");
 
@@ -43,6 +43,13 @@ public class EarthMinimap {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         while (ModKeyBindings.MAP.consumeClick()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null
+                    && !mc.player.level().dimension().equals(EarthBorderTracker.EARTH)) {
+                mc.player.displayClientMessage(Component.literal(
+                        "Карта работает в древнем мире — телепортируйся: /rumblefruit earth"), true);
+                continue;
+            }
             visible = !visible;
             lastCX = Integer.MIN_VALUE; // форс-обновление при включении
         }
@@ -59,14 +66,14 @@ public class EarthMinimap {
             mc.getTextureManager().register(TEX_ID, texture);
         }
         long now = System.currentTimeMillis();
-        if (Math.abs(px - lastCX) > 32 || Math.abs(pz - lastCZ) > 32
-                || now - lastRefresh > 5000) {
+        if (Math.abs(px - lastCX) > 96 || Math.abs(pz - lastCZ) > 96
+                || now - lastRefresh > 8000) {
             redraw(px, pz);
             lastCX = px; lastCZ = pz; lastRefresh = now;
         }
 
         // рамка и карта
-        g.fill(4, 4, 4 + SIZE + 4, 4 + SIZE + 4, 0xAA1A1208);
+        g.fill(4, 4, 4 + SIZE + 4, 4 + SIZE + 20, 0xAA1A1208);
         g.blit(TEX_ID, 6, 6, 0, 0, SIZE, SIZE, SIZE, SIZE);
 
         // метка игрока: белая стрелка по курсу
@@ -76,10 +83,10 @@ public class EarthMinimap {
         g.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFFFFFFFF);
         g.fill(cx + ax - 1, cy + ay - 1, cx + ax + 1, cy + ay, 0xFFFF4040);
 
-        // государство под картой
+        // государство — внутри рамки внизу, ничего не перекрывает
         String country = EarthData.countryAt(px, pz, true);
         String label = country != null ? country : "Международные воды";
-        g.drawString(mc.font, Component.literal(label), 6, 4 + SIZE + 8, 0xFFE8C96A, true);
+        g.drawString(mc.font, Component.literal(label), 8, 4 + SIZE + 8, 0xFFE8C96A, true);
     }
 
     private static void redraw(int px, int pz) {
