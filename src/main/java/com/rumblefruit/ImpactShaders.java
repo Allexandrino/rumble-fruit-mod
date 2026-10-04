@@ -119,12 +119,6 @@ public class ImpactShaders {
         if (mc.player == null || mc.level == null) {
             return;
         }
-        // meteor just landed: the countdown wrapped back to the full interval
-        long left = ClientMeteorData.getTicksLeft();
-        if (prevTicksLeft > 0 && left > prevTicksLeft) {
-            impact();
-        }
-        prevTicksLeft = left;
         // J detonation / landing: combat-anim transitions rip the screen
         int combo = ClientCombatAnim.comboOf(mc.player.getUUID());
         if (combo != prevCombo && (combo == 20 || combo == 21)) {

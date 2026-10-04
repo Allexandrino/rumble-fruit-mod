@@ -40,6 +40,30 @@ public class EarthChunkGenerator extends ChunkGenerator {
     private static final BlockState SNOW = Blocks.SNOW_BLOCK.defaultBlockState();
     private static final BlockState WATER = Blocks.WATER.defaultBlockState();
     private static final BlockState AIR = Blocks.AIR.defaultBlockState();
+    private static final BlockState COARSE_DIRT = Blocks.COARSE_DIRT.defaultBlockState();
+    private static final BlockState PODZOL = Blocks.PODZOL.defaultBlockState();
+    private static final BlockState TERRACOTTA = Blocks.TERRACOTTA.defaultBlockState();
+    private static final BlockState RED_SAND = Blocks.RED_SAND.defaultBlockState();
+    private static final BlockState RED_SANDSTONE = Blocks.RED_SANDSTONE.defaultBlockState();
+
+    // лёгкий детерминированный шум для пятен поверхности
+    private static double patchNoise(int x, int z, int cell) {
+        double fx = (double) x / cell, fz = (double) z / cell;
+        int x0 = (int) Math.floor(fx), z0 = (int) Math.floor(fz);
+        double tx = fx - x0, tz = fz - z0;
+        tx = tx * tx * (3 - 2 * tx);
+        tz = tz * tz * (3 - 2 * tz);
+        double n00 = phash(x0, z0), n10 = phash(x0 + 1, z0);
+        double n01 = phash(x0, z0 + 1), n11 = phash(x0 + 1, z0 + 1);
+        return (n00 * (1 - tx) + n10 * tx) * (1 - tz) + (n01 * (1 - tx) + n11 * tx) * tz;
+    }
+
+    private static double phash(int x, int z) {
+        int h = x * 374761393 + z * 668265263;
+        h = (h ^ (h >> 13)) * 1274126177;
+        h ^= h >> 16;
+        return ((h & 0xFFFF) / 32767.5) - 1.0;
+    }
 
     public EarthChunkGenerator(BiomeSource biomeSource) {
         super(biomeSource);
@@ -90,21 +114,48 @@ public class EarthChunkGenerator extends ChunkGenerator {
                 if (underwater) {
                     top = ((x * 31 + z * 17) & 3) == 0 ? GRAVEL : SAND;
                     under = SAND;
-                } else if (h >= 230) {
-                    top = SNOW;   // jagged_peaks
+                } else if (h >= 250) {
+                    top = SNOW;   // вечные снега
                     under = STONE;
-                } else if (h >= 165) {
-                    top = STONE;  // stony_peaks
+                } else if (h >= 190) {
+                    // скалистый высокогорный пояс с гравийными осыпями
+                    double scree = patchNoise(x, z, 24);
+                    top = scree > 0.3 ? GRAVEL : STONE;
                     under = STONE;
                 } else if (h <= EarthData.SEA_LEVEL + 2) {
                     top = SAND;   // beach
                     under = SANDSTONE;
-                } else if (lat < 33.5 && h < 115) {
-                    top = SAND;   // североафриканская пустыня
-                    under = SANDSTONE;
+                } else if (lat < 33.5 && h < 130) {
+                    // североафриканская пустыня: песок, пятна красного песка,
+                    // у подножий — обожжённая глина
+                    double dune = patchNoise(x, z, 48);
+                    if (h > 100 && dune > 0.25) {
+                        top = TERRACOTTA;
+                        under = RED_SANDSTONE;
+                    } else if (dune > 0.45) {
+                        top = RED_SAND;
+                        under = RED_SANDSTONE;
+                    } else {
+                        top = SAND;
+                        under = SANDSTONE;
+                    }
                 } else {
-                    top = GRASS;
-                    under = DIRT;
+                    // средиземноморье: луга, сухая коштила, лесная подстилка,
+                    // каменистые холмы
+                    double patch = patchNoise(x, z, 32);
+                    if (h > 120 && patch > 0.2) {
+                        top = STONE;
+                        under = STONE;
+                    } else if (patch > 0.38) {
+                        top = COARSE_DIRT;
+                        under = DIRT;
+                    } else if (patch < -0.42) {
+                        top = PODZOL;
+                        under = DIRT;
+                    } else {
+                        top = GRASS;
+                        under = DIRT;
+                    }
                 }
                 // улицы городов и римские дороги перекрывают поверхность
                 BlockState cityTop = EarthCities.surfaceTop(x, z, h);

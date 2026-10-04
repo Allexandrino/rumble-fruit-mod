@@ -20,16 +20,9 @@
   "item.rumblefruit.electro_sword": "Electro Sword",
   "key.rumblefruit.stance": "Stance: switch weapon [H]",
   "rumblefruit.no_charge": "Not enough power! Deal damage",
-  "entity.rumblefruit.fallen_exorcist": "Fallen Exorcist",
-  "item.rumblefruit.fallen_exorcist_spawn_egg": "Fallen Exorcist Spawn Egg",
   "rumblefruit.execution": "EXECUTION: x3 damage to the wounded (12s)",
   "key.rumblefruit.skill_r": "Skill J: Release (spends the fruit!)",
   "rumblefruit.release_spent": "The fruit's power is spent... Eat another to regain it",
-  "block.rumblefruit.meteor_core": "Meteor Core",
-  "item.rumblefruit.meteor_core": "Meteor Core",
-  "rumblefruit.dungeon_cleared": "The Fallen Exorcist is down! The chambers release you...",
-  "rumblefruit.exorcist_phase": "The Fallen Exorcist enters stage %s!",
-  "rumblefruit.exorcist_shielded": "The guardian swirls ward the core! Shoot them all down!",
   "item.rumblefruit.inferno_fruit": "Inferno Fruit",
   "item.rumblefruit.void_fruit": "Void Fruit",
   "item.rumblefruit.frost_fruit": "Frost Fruit",
@@ -52,5 +45,6 @@
   "rumblefruit.earth_near": "Nearby: %s",
   "rumblefruit.earth_arrived": "Welcome to %s",
   "rumblefruit.earth_unknown_place": "Unknown place. List: /rumblefruit earth + Tab",
-  "rumblefruit.earth_missing": "Древнее измерение недоступно в этом мире"
+  "rumblefruit.earth_missing": "Древнее измерение недоступно в этом мире",
+  "key.rumblefruit.map": "World map"
 }

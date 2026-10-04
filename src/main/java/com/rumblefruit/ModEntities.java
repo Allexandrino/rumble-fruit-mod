@@ -60,19 +60,4 @@ public class ModEntities {
                     .updateInterval(20)
                     .noSave()
                     .build("rumblefruit:lightning_pillar"));
-
-    public static final DeferredHolder<EntityType<?>, EntityType<FallenExorcistEntity>> FALLEN_EXORCIST =
-            ENTITIES.register("fallen_exorcist", () -> EntityType.Builder
-                    .<FallenExorcistEntity>of(FallenExorcistEntity::new, MobCategory.MONSTER)
-                    .sized(0.8F, 2.0F) // SCALE 25 makes it a 20x50 colossus
-                    .clientTrackingRange(16)
-                    .build("rumblefruit:fallen_exorcist"));
-
-    public static final DeferredHolder<EntityType<?>, EntityType<GuardianSwirlEntity>> GUARDIAN_SWIRL =
-            ENTITIES.register("guardian_swirl", () -> EntityType.Builder
-                    .<GuardianSwirlEntity>of(GuardianSwirlEntity::new, MobCategory.MISC)
-                    .sized(1.2F, 1.2F)
-                    .clientTrackingRange(16)
-                    .updateInterval(3)
-                    .build("rumblefruit:guardian_swirl"));
 }

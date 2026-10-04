@@ -17,6 +17,7 @@ public class ModKeyBindings {
     public static KeyMapping SKILL_V;
     public static KeyMapping SKILL_R;
     public static KeyMapping STANCE;
+    public static KeyMapping MAP;
 
     @SubscribeEvent
     public static void register(RegisterKeyMappingsEvent event) {
@@ -27,6 +28,7 @@ public class ModKeyBindings {
         SKILL_V = new KeyMapping("key.rumblefruit.skill_v", GLFW.GLFW_KEY_V, "key.categories.rumblefruit");
         SKILL_R = new KeyMapping("key.rumblefruit.skill_j", GLFW.GLFW_KEY_J, "key.categories.rumblefruit");
         STANCE = new KeyMapping("key.rumblefruit.stance", GLFW.GLFW_KEY_H, "key.categories.rumblefruit");
+        MAP = new KeyMapping("key.rumblefruit.map", GLFW.GLFW_KEY_M, "key.categories.rumblefruit");
         event.register(SKILL_Z);
         event.register(SKILL_X);
         event.register(SKILL_C);
@@ -34,6 +36,7 @@ public class ModKeyBindings {
         event.register(SKILL_V);
         event.register(SKILL_R);
         event.register(STANCE);
-        System.out.println("[rumblefruit] KeyBindings registered: Z/X/C/F/V/H");
+        event.register(MAP);
+        System.out.println("[rumblefruit] KeyBindings registered: Z/X/C/F/V/H/M");
     }
 }

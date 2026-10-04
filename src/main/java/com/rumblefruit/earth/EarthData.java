@@ -17,11 +17,12 @@ import java.util.List;
 // crop of the NASA SRTM heightmap (srtm_ramp2 21600x10800, brightness 12.5 =
 // sea level, Everest ~ 219), Natural Earth 110m borders renamed to ancient
 // states and a curated list of ancient cities/landmarks.
-// scale: 1 degree = 300 blocks; x=0 is Greenwich, z=0 is the equator,
+// scale: 1 degree = 600 blocks; x=0 is Greenwich, z=0 is the equator,
 // north is -z (vanilla convention). only the Mediterranean frame
 // (lon -10..45, lat 28..48) carries real terrain — beyond it lies open ocean
 public final class EarthData {
-    public static final double BLOCKS_PER_DEGREE = 300.0;
+    // крупный масштаб: 1 градус = 600 блоков, ~18 км на пиксель карты
+    public static final double BLOCKS_PER_DEGREE = 600.0;
     public static final int SEA_LEVEL = 63;
 
     // Mediterranean frame in degrees
@@ -32,7 +33,13 @@ public final class EarthData {
     // Everest (8848 m) ~ 219 → ~42.7 m per brightness step
     private static final double SEA_BRIGHTNESS = 12.5;
     private static final double METERS_PER_STEP = 8848.0 / (219.0 - SEA_BRIGHTNESS);
-    private static final double METERS_PER_BLOCK = 20.0; // huge mountains
+    private static final double METERS_PER_BLOCK = 16.0; // огромные горы
+
+    // вертикальный предел мира — 319; выше 270 мягкое сжатие к потолку,
+    // чтобы вершины не срезались в плоские плато
+    private static final int Y_MIN = -60;
+    private static final double Y_SOFT = 270.0;
+    private static final double Y_CAP = 318.0;
 
     private static volatile int[] heightPixels; // grayscale crop
     private static volatile int hmW, hmH;
@@ -147,20 +154,28 @@ public final class EarthData {
         double y;
         if (b < 0) {
             // beyond the map frame: deep open ocean
-            y = SEA_LEVEL - 45 + smoothNoise(x, z, 128) * 6.0;
+            y = SEA_LEVEL - 45 + smoothNoise(x, z, 256) * 6.0;
         } else if (b >= SEA_BRIGHTNESS) {
             double meters = (b - SEA_BRIGHTNESS) * METERS_PER_STEP;
             y = SEA_LEVEL + meters / METERS_PER_BLOCK;
             // smoothing noise fades in with altitude so coastlines stay exact
             double ramp = Math.min(1.0, (y - SEA_LEVEL) / 15.0);
-            y += ramp * (smoothNoise(x, z, 4) * 1.5 + smoothNoise(x, z, 48) * 3.0);
+            y += ramp * (smoothNoise(x, z, 8) * 1.5 + smoothNoise(x, z, 96) * 4.0);
+            // острые хребты на высокогорье — ломают однотипные склоны
+            double ridgeRamp = Math.min(1.0, Math.max(0.0, (y - SEA_LEVEL) / 60.0));
+            double ridged = 1.0 - Math.abs(smoothNoise(x, z, 64));
+            y += ridgeRamp * ridged * ridged * 22.0;
         } else {
             // Mediterranean seafloor: shallow shelves, deeper basins
-            y = SEA_LEVEL - 18 + smoothNoise(x, z, 128) * 10.0 + smoothNoise(x, z, 16) * 2.0;
+            y = SEA_LEVEL - 18 + smoothNoise(x, z, 256) * 10.0 + smoothNoise(x, z, 32) * 2.0;
             if (y > SEA_LEVEL - 4) y = SEA_LEVEL - 4;
         }
+        // мягкое сжатие к потолку мира: вершины не срезаются в плато
+        if (y > Y_SOFT) {
+            y = Y_SOFT + (Y_CAP - Y_SOFT) * (1.0 - Math.exp(-(y - Y_SOFT) / 48.0));
+        }
         int h = (int) Math.round(y);
-        return Math.max(-52, Math.min(310, h));
+        return Math.max(Y_MIN, Math.min(319, h));
     }
 
     // ---- countries ----
@@ -312,6 +327,6 @@ public final class EarthData {
         double h = EarthCities.terrain(x, z, surfaceHeight(x, z));
         h = EarthRoads.terrain(x, z, h);
         int r = (int) Math.round(h);
-        return Math.max(-52, Math.min(310, r));
+        return Math.max(Y_MIN, Math.min(319, r));
     }
 }

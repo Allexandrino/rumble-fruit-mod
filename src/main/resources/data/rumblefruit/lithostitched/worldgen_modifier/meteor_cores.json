@@ -1,9 +1,0 @@
-{
-  "type": "lithostitched:add_features",
-  "priority": 1000,
-  "biomes": "#minecraft:is_overworld",
-  "features": [
-    "rumblefruit:meteor_core_ore"
-  ],
-  "step": "underground_ores"
-}

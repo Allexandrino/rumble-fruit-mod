@@ -20,18 +20,6 @@ public class ModCommands {
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         dispatcher.register(Commands.literal("rumblefruit")
-                .then(Commands.literal("meteor")
-                        .executes(ctx -> {
-                            ServerPlayer player = ctx.getSource().getPlayerOrException();
-                            MeteorShower.spawnMeteor((ServerLevel) player.level(), player);
-                            return 1;
-                        }))
-                .then(Commands.literal("dungeon")
-                        .executes(ctx -> {
-                            ServerPlayer player = ctx.getSource().getPlayerOrException();
-                            MeteorDungeon.enter((ServerLevel) player.level(), player);
-                            return 1;
-                        }))
                 .then(Commands.literal("charge")
                         .executes(ctx -> {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
@@ -74,6 +62,17 @@ public class ModCommands {
                                             int z = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "z");
                                             ctx.getSource().sendSystemMessage(Component.literal(
                                                     com.rumblefruit.earth.EarthRoads.debugInfo(x, z)));
+                                            return 1;
+                                        }))))
+                // /rumblefruit structdebug <x> <z> — структуры на колонне
+                .then(Commands.literal("structdebug")
+                        .then(Commands.argument("x", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                .then(Commands.argument("z", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                        .executes(ctx -> {
+                                            int x = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "x");
+                                            int z = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "z");
+                                            ctx.getSource().sendSystemMessage(Component.literal(
+                                                    com.rumblefruit.earth.EarthStructures.debugAt(x, z)));
                                             return 1;
                                         }))))
                 // /rumblefruit roadlog — какие пары городов построились/скипнулись

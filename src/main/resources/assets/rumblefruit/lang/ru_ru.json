@@ -20,16 +20,9 @@
   "item.rumblefruit.electro_sword": "Электро-меч",
   "key.rumblefruit.stance": "Стойка: кулаки/копьё [H]",
   "rumblefruit.no_charge": "Недостаточно силы! Наносите урон",
-  "entity.rumblefruit.fallen_exorcist": "Падший экзорцист",
-  "item.rumblefruit.fallen_exorcist_spawn_egg": "Яйцо призыва падшего экзорциста",
   "rumblefruit.execution": "КАЗНЬ: x3 урон по раненым (12с)",
   "key.rumblefruit.skill_r": "Скилл J: Высвобождение (тратит фрукт!)",
   "rumblefruit.release_spent": "Сила фрукта исчерпана... Съешь новый, чтобы вернуть её",
-  "block.rumblefruit.meteor_core": "Ядро метеорита",
-  "item.rumblefruit.meteor_core": "Ядро метеорита",
-  "rumblefruit.dungeon_cleared": "Падший экзорцист повержен! Покои отпускают тебя...",
-  "rumblefruit.exorcist_phase": "Падший Экзорцист переходит в стадию %s!",
-  "rumblefruit.exorcist_shielded": "Завитушки-стражи охраняют ядро! Сбей их все!",
   "item.rumblefruit.inferno_fruit": "Фрукт Инферно",
   "item.rumblefruit.void_fruit": "Фрукт Пустоты",
   "item.rumblefruit.frost_fruit": "Фрукт Холода",
@@ -52,5 +45,6 @@
   "rumblefruit.earth_near": "Рядом: %s",
   "rumblefruit.earth_arrived": "Добро пожаловать: %s",
   "rumblefruit.earth_unknown_place": "Неизвестное место. Список: /rumblefruit earth и Tab",
-  "rumblefruit.earth_missing": "Древнее измерение недоступно в этом мире"
+  "rumblefruit.earth_missing": "Древнее измерение недоступно в этом мире",
+  "key.rumblefruit.map": "Карта мира"
 }

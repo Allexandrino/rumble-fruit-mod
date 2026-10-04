@@ -40,13 +40,13 @@ public final class EarthCities {
     private static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
 
     // пирамиды Гизы: центр + смещения (в блоках), половина основания, высота
-    private static final int GIZA_X = 9300, GIZA_Z = -8994;
+    public static final int GIZA_X = 18680, GIZA_Z = -17988;
     private static final int[][] PYRAMIDS = {
-            {GIZA_X, GIZA_Z, 30, 34},
-            {GIZA_X + 75, GIZA_Z + 35, 21, 24},
-            {GIZA_X - 65, GIZA_Z + 75, 13, 15},
+            {GIZA_X, GIZA_Z, 45, 50},
+            {GIZA_X + 150, GIZA_Z + 70, 32, 36},
+            {GIZA_X - 130, GIZA_Z + 150, 20, 22},
     };
-    private static final int GIZA_FLAT_RADIUS = 130;
+    private static final int GIZA_FLAT_RADIUS = 260;
     private static volatile int gizaBaseY = Integer.MIN_VALUE;
 
     private EarthCities() {}
@@ -68,9 +68,9 @@ public final class EarthCities {
                         int cx = EarthData.blockFromLon(p.lon());
                         int cz = EarthData.blockFromLat(p.lat());
                         int radius = switch (p.id()) {
-                            case "rome" -> 120;
-                            case "alexandria", "byzantium", "carthage", "cairo" -> 90;
-                            default -> 60;
+                            case "rome" -> 180;
+                            case "alexandria", "byzantium", "carthage", "cairo" -> 130;
+                            default -> 90;
                         };
                         int palette = switch (p.id()) {
                             case "athens", "sparta", "thebes", "corinth", "olympia",
@@ -233,6 +233,8 @@ public final class EarthCities {
 
     // top block override for the terrain surface inside cities, or null
     public static BlockState surfaceTop(int x, int z, int h) {
+        BlockState structFloor = EarthStructures.surfaceTop(x, z);
+        if (structFloor != null) return structFloor;
         City c = cityAt(x, z);
         if (c == null) return null;
         int kind = kind(c, x, z, null);
@@ -278,6 +280,9 @@ public final class EarthCities {
             }
             return;
         }
+
+        // уникальные структуры (колизей, храмы, маяк, акведук и др.)
+        if (EarthStructures.build(chunk, pos, x, z, h)) return;
 
         City c = cityAt(x, z);
         if (c == null) return;
