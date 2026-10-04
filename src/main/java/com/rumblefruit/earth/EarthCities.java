@@ -40,7 +40,7 @@ public final class EarthCities {
     private static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
 
     // пирамиды Гизы: центр + смещения (в блоках), половина основания, высота
-    private static final int GIZA_X = 9340, GIZA_Z = -8994;
+    private static final int GIZA_X = 9300, GIZA_Z = -8994;
     private static final int[][] PYRAMIDS = {
             {GIZA_X, GIZA_Z, 30, 34},
             {GIZA_X + 75, GIZA_Z + 35, 21, 24},
@@ -68,9 +68,9 @@ public final class EarthCities {
                         int cx = EarthData.blockFromLon(p.lon());
                         int cz = EarthData.blockFromLat(p.lat());
                         int radius = switch (p.id()) {
-                            case "rome" -> 240;
-                            case "alexandria", "byzantium", "carthage", "cairo" -> 180;
-                            default -> 120;
+                            case "rome" -> 120;
+                            case "alexandria", "byzantium", "carthage", "cairo" -> 90;
+                            default -> 60;
                         };
                         int palette = switch (p.id()) {
                             case "athens", "sparta", "thebes", "corinth", "olympia",
@@ -158,18 +158,25 @@ public final class EarthCities {
         return best;
     }
 
-    // what kind of city column is this; building params go into out[2]
-    // (out[0]=cellX, out[1]=cellZ) when it is a house
+    // что за городская колонна; параметры дома уходят в out
+    // (out[0]=cellX, out[1]=cellZ, out[2]=bx, out[3]=bz)
     private static int kind(City c, int x, int z, int[] out) {
-        // некрополь Гизы — без городской застройки
-        if (Math.hypot(x - GIZA_X, z - GIZA_Z) < GIZA_FLAT_RADIUS - 10) return KIND_NONE;
+        // пирамиды — без городской застройки (зона каждой пирамиды своя,
+        // чтобы не стереть соседний Мемфис)
+        for (int[] p : PYRAMIDS) {
+            if (Math.max(Math.abs(x - p[0]), Math.abs(z - p[1])) <= p[2] + 8) {
+                return KIND_NONE;
+            }
+        }
         int lx = x - c.cx();
         int lz = z - c.cz();
         double d = Math.hypot(lx, lz);
         int r = c.radius();
-        // городская стена с воротами по сторонам света
+        // городская стена с воротами по сторонам света; там, где стену
+        // пересекает римская дорога, проезд остаётся свободным
         if (d >= r - 9 && d <= r - 6) {
-            boolean gate = Math.abs(lx) <= 4 || Math.abs(lz) <= 4;
+            boolean gate = Math.abs(lx) <= 4 || Math.abs(lz) <= 4
+                    || EarthRoads.isRoad(x, z);
             return gate ? KIND_STREET : KIND_WALL;
         }
         if (d > r - 14) return KIND_NONE;
@@ -242,16 +249,30 @@ public final class EarthCities {
         };
     }
 
+    // отладка: что генератор думает про колонну
+    public static String debugKind(int x, int z) {
+        String road = EarthRoads.debugInfo(x, z);
+        City c = cityAt(x, z);
+        if (c == null) return "нет города; " + road;
+        int lx = x - c.cx(), lz = z - c.cz();
+        double d = Math.hypot(lx, lz);
+        return c.id() + " d=" + (int) d + " r=" + c.radius()
+                + " kind=" + kind(c, x, z, null)
+                + " " + road;
+    }
+
     // structures above the terrain: walls, houses, temple, pyramids
     public static void buildAbove(ChunkAccess chunk, BlockPos.MutableBlockPos pos,
                                   int x, int z, int h) {
-        // пирамиды Гизы
+        // пирамиды Гизы (от местного рельефа, не от gizaBase —
+        // плато Каира частично перекрывает плато Гизы, иначе основание
+        // повисало бы в воздухе)
         for (int[] p : PYRAMIDS) {
             int dd = Math.max(Math.abs(x - p[0]), Math.abs(z - p[1]));
             int half = p[2], height = p[3];
             if (dd > half) continue;
-            int top = gizaBase() + height - (int) Math.ceil(dd * (double) height / (half + 1));
-            for (int y = Math.max(h + 1, gizaBase()); y <= top; y++) {
+            int top = h + height - (int) Math.ceil(dd * (double) height / (half + 1));
+            for (int y = h + 1; y <= top; y++) {
                 chunk.setBlockState(pos.set(x, y, z),
                         ((x + y + z) & 7) == 0 ? SMOOTH_SANDSTONE : SANDSTONE, false);
             }

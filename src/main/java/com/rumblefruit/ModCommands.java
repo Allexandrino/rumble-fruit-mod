@@ -52,7 +52,38 @@ public class ModCommands {
                                     return builder.buildFuture();
                                 })
                                 .executes(ctx -> earthTeleport(ctx.getSource().getPlayerOrException(),
-                                        com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "place"))))));
+                                        com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "place")))))
+                // /rumblefruit citydebug <x> <z> — отладка городского слоя
+                .then(Commands.literal("citydebug")
+                        .then(Commands.argument("x", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                .then(Commands.argument("z", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                        .executes(ctx -> {
+                                            int x = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "x");
+                                            int z = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "z");
+                                            String info = com.rumblefruit.earth.EarthCities.debugKind(x, z)
+                                                    + " h=" + EarthData.worldHeight(x, z);
+                                            ctx.getSource().sendSystemMessage(Component.literal(info));
+                                            return 1;
+                                        }))))
+                // /rumblefruit roaddebug <x> <z> — ближайшая дорога к точке
+                .then(Commands.literal("roaddebug")
+                        .then(Commands.argument("x", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                .then(Commands.argument("z", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                        .executes(ctx -> {
+                                            int x = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "x");
+                                            int z = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "z");
+                                            ctx.getSource().sendSystemMessage(Component.literal(
+                                                    com.rumblefruit.earth.EarthRoads.debugInfo(x, z)));
+                                            return 1;
+                                        }))))
+                // /rumblefruit roadlog — какие пары городов построились/скипнулись
+                .then(Commands.literal("roadlog")
+                        .executes(ctx -> {
+                            for (String s : com.rumblefruit.earth.EarthRoads.roadLog()) {
+                                ctx.getSource().sendSystemMessage(Component.literal(s));
+                            }
+                            return 1;
+                        })));
     }
 
     private static int earthTeleport(ServerPlayer player, String placeId) {

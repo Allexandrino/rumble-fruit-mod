@@ -24,6 +24,7 @@ public final class EarthRoads {
 
     private static volatile boolean ready = false;
     private static final Map<Long, List<Seg>> GRID = new HashMap<>();
+    public static final List<String> ROAD_LOG = new ArrayList<>();
 
     private static final double HALF_WIDTH = 3.0;   // полное сглаживание
     private static final double BLEND = 7.0;        // переход к рельефу
@@ -74,12 +75,26 @@ public final class EarthRoads {
         }
     }
 
+    // пары через открытое море — дорогу не строим вообще (список кураторский,
+    // по факту лога построения: шум дна рвёт глубокие участки, поэтому
+    // автоматика по доле моря ненадёжна)
+    private static final Set<String> SEA_BLOCKED = Set.of(
+            "carthage-rome", "alexandria-jerusalem", "carthage-syracuse",
+            "carthage-massalia", "massalia-rome", "carthage-gades",
+            "gades-massalia", "neapolis-syracuse", "cairo-tyre");
+
     // straight line with deterministic waypoint jitter, sampled every 16
     // blocks, smoothed profile, deep-water rejection
     private static void buildRoad(EarthCities.City a, EarthCities.City b) {
+        String pairKey = a.id().compareTo(b.id()) < 0
+                ? a.id() + "-" + b.id() : b.id() + "-" + a.id();
+        if (SEA_BLOCKED.contains(pairKey)) {
+            ROAD_LOG.add(pairKey + " skip(open-sea)");
+            return;
+        }
         double ax = a.cx(), az = a.cz(), bx = b.cx(), bz = b.cz();
         double len = Math.hypot(bx - ax, bz - az);
-        if (len < 50) return;
+        if (len < 50) { ROAD_LOG.add(a.id() + "-" + b.id() + " skip(short)"); return; }
         // вейпоинты каждые ~200 блоков с небольшим смещением
         int wp = (int) Math.max(1, Math.round(len / 200.0));
         double[] px = new double[wp + 1];
@@ -107,11 +122,29 @@ public final class EarthRoads {
             sz[i] = pz[k] + (pz[k + 1] - pz[k]) * ft;
             sh[i] = terrainAt((int) Math.round(sx[i]), (int) Math.round(sz[i]));
         }
-        // отказ от дорог через глубокое море (больше ~240 блоков глубины)
+        // страховка от трасс через открытое море: непрерывный глубокий
+        // участок длиннее ~720 блоков. дельта Нила читается картой как
+        // лагуна — дорога Александрия—Каир идёт дамбой, её строим всегда
         int deepRun = 0;
+        int maxDeepRun = 0;
+        int deepCount = 0;
         for (double h : sh) {
-            deepRun = h < EarthData.SEA_LEVEL - 15 ? deepRun + 1 : 0;
-            if (deepRun > 15) return;
+            if (h < EarthData.SEA_LEVEL - 15) {
+                deepRun++;
+                deepCount++;
+                maxDeepRun = Math.max(maxDeepRun, deepRun);
+            } else {
+                deepRun = 0;
+            }
+        }
+        double deepFrac = (double) deepCount / sh.length;
+        boolean deltaRoad = (a.id().equals("alexandria") && b.id().equals("cairo"))
+                || (a.id().equals("cairo") && b.id().equals("alexandria"));
+        if (!deltaRoad && maxDeepRun > 45) {
+            ROAD_LOG.add(a.id() + "-" + b.id() + " len=" + (int) len
+                    + " skip(deep frac=" + String.format("%.2f", deepFrac)
+                    + " run=" + maxDeepRun + ")");
+            return;
         }
         // сглаживание профиля (окно ±4 сэмпла ≈ ±64 блока)
         double[] ry = new double[steps + 1];
@@ -145,6 +178,14 @@ public final class EarthRoads {
                 }
             }
         }
+        ROAD_LOG.add(a.id() + "-" + b.id() + " len=" + (int) len
+                + " built deep=" + maxDeepRun
+                + String.format(" frac=%.2f", deepFrac));
+    }
+
+    public static List<String> roadLog() {
+        ensure();
+        return ROAD_LOG;
     }
 
     // ближайший сегмент дороги к колонне; null если дальше 10 блоков
@@ -174,9 +215,26 @@ public final class EarthRoads {
         return best;
     }
 
+    // отладка: сколько сегментов построено и где ближайшая дорога
+    public static String debugInfo(int x, int z) {
+        ensure();
+        double[] dy = new double[]{-1, 0};
+        nearest(x, z, dy);
+        int total = GRID.values().stream().mapToInt(List::size).sum();
+        return "segs=" + total + " dist=" + (int) dy[0] + " roadY=" + (int) dy[1];
+    }
+
+    // колонна на полотне дороги (дома и стены тут не ставим)
+    public static boolean isRoad(int x, int z) {
+        ensure();
+        double[] dy = new double[2];
+        return nearest(x, z, dy) != null && dy[0] <= 3.5;
+    }
+
     // высота рельефа с учётом дорожного коридора
     public static double terrain(int x, int z, double base) {
         ensure();
+        if (EarthCities.insideCity(x, z)) return base; // в городах — улицы
         double[] dy = new double[2];
         if (nearest(x, z, dy) == null) return base;
         double d = dy[0], roadY = dy[1];
@@ -192,6 +250,7 @@ public final class EarthRoads {
     // покрытие дороги: каменные плиты в центре, гравий по краям
     public static BlockState surfaceTop(int x, int z) {
         ensure();
+        if (EarthCities.insideCity(x, z)) return null; // в городах — улицы
         double[] dy = new double[2];
         if (nearest(x, z, dy) == null) return null;
         double d = dy[0];

@@ -64,13 +64,6 @@
       "lon": 21.63
     },
     {
-      "id": "pompeii",
-      "name": "Pompeii",
-      "name_ru": "Помпеи",
-      "lat": 40.746,
-      "lon": 14.4989
-    },
-    {
       "id": "delphi",
       "name": "Delphi",
       "name_ru": "Дельфы",
@@ -90,13 +83,6 @@
       "name_ru": "Иерусалим",
       "lat": 31.7683,
       "lon": 35.2137
-    },
-    {
-      "id": "memphis",
-      "name": "Memphis",
-      "name_ru": "Мемфис",
-      "lat": 29.8447,
-      "lon": 31.25
     },
     {
       "id": "pergamum",
@@ -239,6 +225,20 @@
       "name_ru": "Геркулесовы столпы",
       "lat": 35.95,
       "lon": -5.55
+    },
+    {
+      "id": "pompeii",
+      "name": "Pompeii",
+      "name_ru": "Руины Помпеи",
+      "lat": 40.746,
+      "lon": 14.4989
+    },
+    {
+      "id": "memphis",
+      "name": "Memphis",
+      "name_ru": "Руины Мемфиса",
+      "lat": 29.8447,
+      "lon": 31.25
     }
   ]
 }
