@@ -48,9 +48,9 @@
   "rumblefruit.core_exposed": "Щит пал! Ядро открыто — бей в ядро!",
   "entity.rumblefruit.guardian_swirl": "Завитушка-страж",
   "rumblefruit.earth_entered": "Вы вошли на территорию:",
-  "rumblefruit.earth_waters": "Международные воды",
+  "rumblefruit.earth_waters": "Открытое море",
   "rumblefruit.earth_near": "Рядом: %s",
   "rumblefruit.earth_arrived": "Добро пожаловать: %s",
   "rumblefruit.earth_unknown_place": "Неизвестное место. Список: /rumblefruit earth и Tab",
-  "rumblefruit.earth_missing": "Измерение Земли недоступно в этом мире"
+  "rumblefruit.earth_missing": "Древнее измерение недоступно в этом мире"
 }

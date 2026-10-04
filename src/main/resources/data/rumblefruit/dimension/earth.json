@@ -6,15 +6,14 @@
       "type": "rumblefruit:earth",
       "biomes": [
         "minecraft:ocean",
-        "minecraft:frozen_ocean",
         "minecraft:beach",
         "minecraft:desert",
         "minecraft:savanna",
         "minecraft:plains",
         "minecraft:forest",
-        "minecraft:jungle",
-        "minecraft:taiga",
-        "minecraft:snowy_plains"
+        "minecraft:grove",
+        "minecraft:stony_peaks",
+        "minecraft:jagged_peaks"
       ]
     }
   }

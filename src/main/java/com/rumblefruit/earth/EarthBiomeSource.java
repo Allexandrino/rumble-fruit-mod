@@ -11,16 +11,17 @@ import net.minecraft.world.level.biome.Climate;
 import java.util.List;
 import java.util.stream.Stream;
 
-// biome assignment for the earth dimension: climate bands by real latitude
-// (polar/taiga/temperate/subtropic desert belt/tropics) plus a deterministic
-// moisture noise for jungle/savanna/desert splits; oceans by the heightmap
+// biome assignment for the ancient-Mediterranean dimension: altitude bands
+// (beach → plains/forest → grove → stony peaks → jagged snow peaks) plus the
+// North-African desert belt; moisture noise splits forest/plains and
+// desert/savanna
 public class EarthBiomeSource extends BiomeSource {
     public static final MapCodec<EarthBiomeSource> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(Biome.CODEC.listOf().fieldOf("biomes").forGetter(s -> s.biomes))
                     .apply(instance, EarthBiomeSource::new));
 
-    // order matters: 0 ocean, 1 frozen_ocean, 2 beach, 3 desert, 4 savanna,
-    // 5 plains, 6 forest, 7 jungle, 8 taiga, 9 snowy_plains
+    // order matters: 0 ocean, 1 beach, 2 desert, 3 savanna, 4 plains,
+    // 5 forest, 6 grove, 7 stony_peaks, 8 jagged_peaks
     private final List<Holder<Biome>> biomes;
 
     public EarthBiomeSource(List<Holder<Biome>> biomes) {
@@ -42,31 +43,29 @@ public class EarthBiomeSource extends BiomeSource {
         int bx = QuartPos.toBlock(quartX);
         int bz = QuartPos.toBlock(quartZ);
         double lat = EarthData.latFromBlock(bz);
-        double absLat = Math.abs(lat);
         int h = EarthData.surfaceHeight(bx, bz);
 
         if (h < EarthData.SEA_LEVEL) {
-            return biomes.get(absLat > 58 ? 1 : 0); // frozen_ocean / ocean
+            return biomes.get(0); // ocean
         }
-        if (h <= EarthData.SEA_LEVEL + 2 && absLat < 55) {
-            return biomes.get(2); // beach
+        if (h <= EarthData.SEA_LEVEL + 2) {
+            return biomes.get(1); // beach
         }
-        if (absLat > 66) {
-            return biomes.get(9); // snowy_plains
+        if (h >= 230) {
+            return biomes.get(8); // jagged_peaks — высокий снег
         }
-        if (absLat > 52) {
-            return biomes.get(8); // taiga
+        if (h >= 165) {
+            return biomes.get(7); // stony_peaks
+        }
+        if (h >= 115) {
+            return biomes.get(6); // grove
         }
         double m = moisture(bx >> 5, bz >> 5); // coarse cells, ~32 blocks
-        if (absLat < 23.5) {
-            if (m > 0.62) return biomes.get(7); // jungle
-            if (m > 0.38) return biomes.get(4); // savanna
-            return biomes.get(3); // desert
+        if (lat < 33.5) {
+            // север Африки и Аравия: пустыня/саванна
+            return m < 0.55 ? biomes.get(2) : biomes.get(3);
         }
-        if (absLat < 38 && m < 0.42) {
-            return biomes.get(3); // subtropical desert belt (Sahara, Gobi, ...)
-        }
-        return m > 0.55 ? biomes.get(6) : biomes.get(5); // forest / plains
+        return m > 0.5 ? biomes.get(5) : biomes.get(4); // forest / plains
     }
 
     // deterministic value noise in [0,1), smoothed over neighbouring cells

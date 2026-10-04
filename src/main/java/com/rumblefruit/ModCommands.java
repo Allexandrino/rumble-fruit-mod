@@ -39,10 +39,10 @@ public class ModCommands {
                             PowerChargeData.sync(player);
                             return 1;
                         }))
-                // /rumblefruit earth — step onto real Earth (spawn: Moscow);
+                // /rumblefruit earth — step into the ancient world (spawn: Rome);
                 // /rumblefruit earth <place> — teleport to a city or landmark
                 .then(Commands.literal("earth")
-                        .executes(ctx -> earthTeleport(ctx.getSource().getPlayerOrException(), "moscow"))
+                        .executes(ctx -> earthTeleport(ctx.getSource().getPlayerOrException(), "rome"))
                         .then(Commands.argument("place",
                                         com.mojang.brigadier.arguments.StringArgumentType.word())
                                 .suggests((ctx, builder) -> {

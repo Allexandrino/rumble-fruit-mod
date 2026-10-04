@@ -83,18 +83,24 @@ public class EarthChunkGenerator extends ChunkGenerator {
             for (int dz = 0; dz < 16; dz++) {
                 int x = x0 + dx, z = z0 + dz;
                 int h = EarthData.surfaceHeight(x, z);
-                double lat = Math.abs(EarthData.latFromBlock(z));
+                double lat = EarthData.latFromBlock(z);
                 boolean underwater = h < EarthData.SEA_LEVEL;
                 BlockState top;
                 BlockState under;
                 if (underwater) {
                     top = ((x * 31 + z * 17) & 3) == 0 ? GRAVEL : SAND;
                     under = SAND;
-                } else if (lat > 66) {
-                    top = SNOW;
-                    under = DIRT;
+                } else if (h >= 230) {
+                    top = SNOW;   // jagged_peaks
+                    under = STONE;
+                } else if (h >= 165) {
+                    top = STONE;  // stony_peaks
+                    under = STONE;
                 } else if (h <= EarthData.SEA_LEVEL + 2) {
-                    top = SAND;
+                    top = SAND;   // beach
+                    under = SANDSTONE;
+                } else if (lat < 33.5 && h < 115) {
+                    top = SAND;   // североафриканская пустыня
                     under = SANDSTONE;
                 } else {
                     top = GRASS;
