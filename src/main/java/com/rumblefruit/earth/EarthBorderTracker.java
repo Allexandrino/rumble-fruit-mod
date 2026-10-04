@@ -69,7 +69,7 @@ public class EarthBorderTracker {
             }
         }
 
-        EarthData.Place place = EarthData.nearestPlace(x, z, 150.0);
+        EarthData.Place place = EarthData.nearestPlace(x, z, 320.0);
         String placeId = place == null ? null : place.id();
         String lastPlace = LAST_PLACE.get(player.getUUID());
         if (placeId == null ? lastPlace != null : !placeId.equals(lastPlace)) {

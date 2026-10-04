@@ -70,7 +70,7 @@ public class ModCommands {
         }
         int x = EarthData.blockFromLon(place.lon());
         int z = EarthData.blockFromLat(place.lat());
-        int y = EarthData.surfaceHeight(x, z) + 2;
+        int y = EarthData.worldHeight(x, z) + 2;
         player.teleportTo(earth, x + 0.5, Math.max(y, EarthData.SEA_LEVEL + 2), z + 0.5,
                 0.0F, 0.0F);
         player.displayClientMessage(Component.translatable("rumblefruit.earth_arrived",

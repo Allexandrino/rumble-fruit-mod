@@ -82,7 +82,7 @@ public class EarthChunkGenerator extends ChunkGenerator {
         for (int dx = 0; dx < 16; dx++) {
             for (int dz = 0; dz < 16; dz++) {
                 int x = x0 + dx, z = z0 + dz;
-                int h = EarthData.surfaceHeight(x, z);
+                int h = EarthData.worldHeight(x, z);
                 double lat = EarthData.latFromBlock(z);
                 boolean underwater = h < EarthData.SEA_LEVEL;
                 BlockState top;
@@ -106,6 +106,14 @@ public class EarthChunkGenerator extends ChunkGenerator {
                     top = GRASS;
                     under = DIRT;
                 }
+                // улицы городов и римские дороги перекрывают поверхность
+                BlockState cityTop = EarthCities.surfaceTop(x, z, h);
+                if (cityTop != null) {
+                    top = cityTop;
+                } else {
+                    BlockState roadTop = EarthRoads.surfaceTop(x, z);
+                    if (roadTop != null) top = roadTop;
+                }
                 for (int y = minY; y <= h; y++) {
                     BlockState state;
                     if (y == h) {
@@ -122,6 +130,8 @@ public class EarthChunkGenerator extends ChunkGenerator {
                         chunk.setBlockState(pos.set(x, y, z), WATER, false);
                     }
                 }
+                // стены, дома, форум, пирамиды
+                EarthCities.buildAbove(chunk, pos, x, z, h);
             }
         }
         return CompletableFuture.completedFuture(chunk);
@@ -129,7 +139,7 @@ public class EarthChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types type, LevelHeightAccessor level, RandomState random) {
-        int h = EarthData.surfaceHeight(x, z);
+        int h = EarthData.worldHeight(x, z);
         return Math.max(h + 1, EarthData.SEA_LEVEL + 1);
     }
 
@@ -138,7 +148,7 @@ public class EarthChunkGenerator extends ChunkGenerator {
         // every cell must be non-null: vanilla structure placement (e.g.
         // ruined portals) walks the column calling BlockState#isAir, and a
         // null above the terrain NPEs the chunk generator
-        int h = EarthData.surfaceHeight(x, z);
+        int h = EarthData.worldHeight(x, z);
         int minY = level.getMinBuildHeight();
         BlockState[] column = new BlockState[level.getHeight()];
         for (int i = 0; i < column.length; i++) {

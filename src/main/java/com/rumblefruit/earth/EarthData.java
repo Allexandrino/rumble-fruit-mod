@@ -41,7 +41,7 @@ public final class EarthData {
     private static volatile List<Place> places;
 
     public record Country(String name, String nameRu, List<double[][]> polygons) {}
-    public record Place(String id, String name, String nameRu, double lat, double lon) {}
+    public record Place(String id, String name, String nameRu, double lat, double lon, boolean city) {}
 
     private EarthData() {}
 
@@ -257,6 +257,7 @@ public final class EarthData {
                 JsonObject root = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
                 List<Place> list = new ArrayList<>();
                 for (String section : new String[]{"cities", "landmarks"}) {
+                    boolean isCity = "cities".equals(section);
                     for (JsonElement el : root.getAsJsonArray(section)) {
                         JsonObject o = el.getAsJsonObject();
                         list.add(new Place(
@@ -264,7 +265,8 @@ public final class EarthData {
                                 o.get("name").getAsString(),
                                 o.get("name_ru").getAsString(),
                                 o.get("lat").getAsDouble(),
-                                o.get("lon").getAsDouble()));
+                                o.get("lon").getAsDouble(),
+                                isCity));
                     }
                 }
                 places = list;
@@ -302,5 +304,14 @@ public final class EarthData {
             }
         }
         return best;
+    }
+
+    // final terrain: raw heightmap → city plateaus → road corridors.
+    // everything that asks "how high is the world here" must use this
+    public static int worldHeight(int x, int z) {
+        double h = EarthCities.terrain(x, z, surfaceHeight(x, z));
+        h = EarthRoads.terrain(x, z, h);
+        int r = (int) Math.round(h);
+        return Math.max(-52, Math.min(310, r));
     }
 }

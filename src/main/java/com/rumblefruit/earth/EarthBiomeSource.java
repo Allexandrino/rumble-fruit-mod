@@ -43,8 +43,11 @@ public class EarthBiomeSource extends BiomeSource {
         int bx = QuartPos.toBlock(quartX);
         int bz = QuartPos.toBlock(quartZ);
         double lat = EarthData.latFromBlock(bz);
-        int h = EarthData.surfaceHeight(bx, bz);
+        int h = EarthData.worldHeight(bx, bz);
 
+        if (h >= EarthData.SEA_LEVEL - 1 && EarthCities.insideCity(bx, bz)) {
+            return biomes.get(4); // plains — никаких деревьев посреди улиц
+        }
         if (h < EarthData.SEA_LEVEL) {
             return biomes.get(0); // ocean
         }
