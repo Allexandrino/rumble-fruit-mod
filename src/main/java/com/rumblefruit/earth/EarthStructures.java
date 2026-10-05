@@ -107,7 +107,7 @@ public final class EarthStructures {
         int cx = c.cx(), cz = c.cz(), r = c.radius();
         switch (c.id()) {
             case "rome" -> {
-                add(l, T_COLOSSEUM, cx + r / 2, cz - r / 3, 0, 0, 0, 0, 100, 84);
+                add(l, T_COLOSSEUM, cx + r / 2, cz - r / 3, 0, 0, 0, 0, 148, 122);
                 add(l, T_TEMPLE_RO, cx - r / 3, cz + r / 4, 0, 0, 0, 0, 16, 11);
                 add(l, T_BATHS, cx - r / 3, cz - r / 3, 0, 0, 0, 0, 17, 12);
                 for (int g = 0; g < 4; g++) {
@@ -118,7 +118,7 @@ public final class EarthStructures {
                 add(l, T_AQUEDUCT, cx + r + 14, cz, 1500, 0, 0, 0, 1510, 3);
             }
             case "athens" -> {
-                add(l, T_TEMPLE_GR, cx - r / 3, cz - r / 4, 1, 0, 0, 1, 40, 20); // Парфенон
+                add(l, T_TEMPLE_GR, cx - r / 3, cz - r / 4, 1, 0, 0, 1, 76, 36); // Парфенон ×2
                 add(l, T_THEATER, cx + r / 3, cz + r / 3, 60, 0, 0, 1, 64, 64);
                 add(l, T_ARCH, cx - r - 10, cz, 3, 0, 0, 1, 10, 10);
             }
@@ -179,7 +179,7 @@ public final class EarthStructures {
 
     private static boolean claimsFloor(Struct s, int lx, int lz) {
         return switch (s.type) {
-            case T_COLOSSEUM -> ellipse(lx, lz, 98, 81);
+            case T_COLOSSEUM -> ellipse(lx, lz, 146, 120);
             case T_TEMPLE_GR -> Math.abs(lx) <= (s.p0 == 1 ? 38 : 15) && Math.abs(lz) <= (s.p0 == 1 ? 18 : 10);
             case T_TEMPLE_RO -> Math.abs(lx) <= 15 && Math.abs(lz) <= 10;
             case T_PYLON -> Math.abs(lx) <= 33 && Math.abs(lz) <= 21;
@@ -254,8 +254,8 @@ public final class EarthStructures {
 
     private static boolean colosseum(ChunkAccess c, BlockPos.MutableBlockPos p,
                                      Struct s, int x, int z, int h, int lx, int lz) {
-        if (!ellipse(lx, lz, 95, 78)) return false;
-        double rr = Math.sqrt((lx * lx) / (95.0 * 95.0) + (lz * lz) / (78.0 * 78.0));
+        if (!ellipse(lx, lz, 143, 117)) return false;
+        double rr = Math.sqrt((lx * lx) / (143.0 * 143.0) + (lz * lz) / (117.0 * 117.0));
         if (rr <= 0.45) {
             // арена: песок с барьером-подиумом
             if (rr > 0.42) fill(c, p, x, z, h + 1, h + 4, STONE_BRICKS);
@@ -271,66 +271,91 @@ public final class EarthStructures {
             return true;
         }
         // внешняя стена: 80 арочных пролётов, 4 яруса (реальные 48 м → 20 бл.)
-        double ang = Math.atan2(lz / 78.0, lx / 95.0);
-        int seg = (int) Math.floor((ang + Math.PI) / (Math.PI / 40));
+        double ang = Math.atan2(lz / 117.0, lx / 143.0);
+        int seg = (int) Math.floor((ang + Math.PI) / (Math.PI / 60));
         boolean pillar = (seg % 2) == 0;
         boolean ruined = hash(x >> 2, z >> 2, 77) % 5 == 0; // верх местами обвален
         BlockState stone = hash(x, z, 78) % 4 == 0 ? CRACKED : STONE_BRICKS;
         if (pillar) {
-            fill(c, p, x, z, h + 1, h + (ruined ? 11 : 19), stone);
-            if (!ruined) put(c, p, x, h + 20, z, BRICK_SLAB);
+            fill(c, p, x, z, h + 1, h + (ruined ? 13 : 24), stone);
+            if (!ruined) put(c, p, x, h + 25, z, BRICK_SLAB);
         } else {
             fill(c, p, x, z, h + 1, h + 2, stone);           // цоколь
-            put(c, p, x, h + 7, z, stone);                   // перемычка 1 яруса
-            put(c, p, x, h + 12, z, stone);                  // перемычка 2 яруса
+            put(c, p, x, h + 8, z, stone);                   // перемычка 1 яруса
+            put(c, p, x, h + 14, z, stone);                  // перемычка 2 яруса
             if (!ruined) {
-                put(c, p, x, h + 16, z, stone);              // перемычка 3 яруса
-                fill(c, p, x, z, h + 18, h + 19, stone);     // аттик
+                put(c, p, x, h + 19, z, stone);              // перемычка 3 яруса
+                fill(c, p, x, z, h + 22, h + 24, stone);     // аттик
             }
         }
         return true;
     }
 
-    // ---- греческий храм-периптер: Парфенон 70x31 м / малый 26x13 м ----
+    // ---- греческий храм-периптер: Парфенон в удвоенном масштабе
+    // (140x62 м, колонны 3x3 «круглые», шаг 9 м) / малый 26x13 м ----
 
     private static boolean templeGreek(ChunkAccess c, BlockPos.MutableBlockPos p,
                                        Struct s, int x, int z, int h, int lx, int lz) {
         boolean big = s.p0 == 1;
-        int hx = big ? 35 : 13, hz = big ? 15 : 6;
+        int hx = big ? 70 : 13, hz = big ? 31 : 6;
         if (Math.abs(lx) > hx + 3 || Math.abs(lz) > hz + 3) return false;
         // три ступени стилобата
         if (Math.abs(lx) <= hx + 3 && Math.abs(lz) <= hz + 3) put(c, p, x, h + 1, z, QUARTZ_SLAB);
         if (Math.abs(lx) <= hx + 2 && Math.abs(lz) <= hz + 2) put(c, p, x, h + 2, z, QUARTZ_SLAB);
         if (Math.abs(lx) <= hx + 1 && Math.abs(lz) <= hz + 1) put(c, p, x, h + 3, z, SMOOTH_QUARTZ);
         if (Math.abs(lx) > hx || Math.abs(lz) > hz) return true;
-        // колонны по периметру (шаг 5 — реальные 4.3 м)
+        int colH = big ? 21 : 10;
+        // «круглые» колонны 3x3 по периметру (шаг 9 м — реальные 4.3 м ×2)
         boolean colRing = (Math.abs(lx) == hx || Math.abs(lz) == hz);
-        boolean colAt = colRing && (Math.abs(lx) == hx
-                ? Math.floorMod(lz, 5) == 0 : Math.floorMod(lx, 5) == 0);
-        int colH = big ? 15 : 10; // Парфенон: колонны 10.4 м + капитель
-        if (colAt) {
-            fill(c, p, x, z, h + 4, h + 3 + colH, QUARTZ_PILLAR);
-            put(c, p, x, h + 4 + colH, z, QUARTZ_SLAB);
-            return true;
+        if (!big && colRing) {
+            boolean colAt = Math.abs(lx) == hx ? Math.floorMod(lz, 5) == 0 : Math.floorMod(lx, 5) == 0;
+            if (colAt) {
+                fill(c, p, x, z, h + 4, h + 3 + colH, QUARTZ_PILLAR);
+                put(c, p, x, h + 4 + colH, z, QUARTZ_SLAB);
+                return true;
+            }
         }
-        // архитрав + фронтон на торцах
-        if (colRing) {
+        if (big) {
+            // пояс колонн: кластеры 3x3 вокруг центров кратных 9
+            boolean nearRing = Math.abs(Math.abs(lx) - hx) <= 1 || Math.abs(Math.abs(lz) - hz) <= 1;
+            if (nearRing) {
+                int dcx = Math.abs(Math.floorMod(lx + 4, 9) - 4);
+                int dcz = Math.abs(Math.floorMod(lz + 4, 9) - 4);
+                boolean inCluster = (Math.abs(lx) >= hx - 1 && dcz <= 1)
+                        || (Math.abs(lz) >= hz - 1 && dcx <= 1);
+                boolean cornerCol = Math.abs(lx) >= hx - 1 && Math.abs(lz) >= hz - 1;
+                if (inCluster || cornerCol) {
+                    fill(c, p, x, z, h + 4, h + 3 + colH, QUARTZ_PILLAR);
+                    if (dcx == 0 || dcz == 0) put(c, p, x, h + 4 + colH, z, QUARTZ_SLAB);
+                    return true;
+                }
+                return true; // промежутки между колоннами — воздух
+            }
+            // архитрав и фронтон над поясом
+            if (colRing) {
+                put(c, p, x, h + 5 + colH, z, QUARTZ);
+                if (Math.abs(lx) == hx) {
+                    for (int i = 0; i < 10; i++) {
+                        if (Math.abs(lz) <= hz - i * 3) put(c, p, x, h + 6 + colH + i, z, QUARTZ);
+                    }
+                }
+                return true;
+            }
+        } else if (colRing) {
             put(c, p, x, h + 5 + colH, z, QUARTZ);
             if (Math.abs(lx) == hx) {
-                for (int i = 0; i < (big ? 6 : 3); i++) {
-                    if (Math.abs(lz) <= hz - i * (big ? 2 : 1)) {
-                        put(c, p, x, h + 6 + colH + i, z, QUARTZ);
-                    }
+                for (int i = 0; i < 3; i++) {
+                    if (Math.abs(lz) <= hz - i) put(c, p, x, h + 6 + colH + i, z, QUARTZ);
                 }
             }
             return true;
         }
         // целла со статуей (у Парфенона — Афина 12 м)
-        int cx0 = big ? hx - 9 : hx - 5, cz0 = big ? hz - 6 : hz - 3;
+        int cx0 = big ? hx - 12 : hx - 5, cz0 = big ? hz - 10 : hz - 3;
         boolean cella = Math.abs(lx) <= cx0 && Math.abs(lz) <= cz0;
         if (cella) {
             boolean wall = Math.abs(lx) == cx0 || Math.abs(lz) == cz0;
-            boolean door = lx == cx0 && Math.abs(lz) <= 1;
+            boolean door = lx == cx0 && Math.abs(lz) <= 2;
             if (wall && !door) fill(c, p, x, z, h + 4, h + 4 + colH - 4, SMOOTH_QUARTZ);
             if (wall) put(c, p, x, h + 5 + colH - 4, z, QUARTZ_SLAB);
             if (lx == 0 && lz == 0) {

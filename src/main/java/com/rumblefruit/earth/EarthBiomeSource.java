@@ -60,15 +60,20 @@ public class EarthBiomeSource extends BiomeSource {
         if (h >= 330) {
             return biomes.get(7); // stony_peaks — скальный пояс
         }
-        if (h >= 200) {
-            return biomes.get(6); // grove — лесной пояс ~1200 м
-        }
         double m = moisture(bx >> 5, bz >> 5); // coarse cells, ~32 blocks
+        if (h >= 200) {
+            // лесной пояс ~1200 м: рощи и продуваемые холмы
+            return m > 0.45 ? biomes.get(6) : biomes.get(11);
+        }
         if (lat < 33.5) {
             // север Африки и Аравия: пустыня/саванна
             return m < 0.55 ? biomes.get(2) : biomes.get(3);
         }
-        return m > 0.5 ? biomes.get(5) : biomes.get(4); // forest / plains
+        // средиземноморская равнина: цветочные леса, дубравы, берёзы, луга
+        if (m > 0.82) return biomes.get(9);  // flower_forest
+        if (m > 0.58) return biomes.get(5);  // forest
+        if (m > 0.42) return biomes.get(10); // birch_forest
+        return biomes.get(4);                // plains
     }
 
     // deterministic value noise in [0,1), smoothed over neighbouring cells

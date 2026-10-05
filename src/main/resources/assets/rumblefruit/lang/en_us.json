@@ -46,5 +46,9 @@
   "rumblefruit.earth_arrived": "Welcome to %s",
   "rumblefruit.earth_unknown_place": "Unknown place. List: /rumblefruit earth + Tab",
   "rumblefruit.earth_missing": "Древнее измерение недоступно в этом мире",
-  "key.rumblefruit.map": "World map"
+  "key.rumblefruit.map": "World map",
+  "block.rumblefruit.travertine": "Travertine",
+  "block.rumblefruit.marble": "Marble",
+  "block.rumblefruit.mosaic_tile": "Mosaic Tile",
+  "block.rumblefruit.roman_roof_tile": "Roman Roof Tile"
 }

@@ -49,6 +49,20 @@ public class RumbleFruitMod {
     public static final DeferredHolder<Item, ?> ELECTRO_BOW_HOLY =
             ITEMS.register("electro_bow_holy", () -> new Item(new Item.Properties()));
 
+    // блоки древнего мира
+    public static final DeferredHolder<Item, ?> TRAVERTINE_ITEM =
+            ITEMS.register("travertine", () -> new net.minecraft.world.item.BlockItem(
+                    ModBlocks.TRAVERTINE.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, ?> MARBLE_ITEM =
+            ITEMS.register("marble", () -> new net.minecraft.world.item.BlockItem(
+                    ModBlocks.MARBLE.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, ?> MOSAIC_TILE_ITEM =
+            ITEMS.register("mosaic_tile", () -> new net.minecraft.world.item.BlockItem(
+                    ModBlocks.MOSAIC_TILE.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, ?> ROMAN_ROOF_TILE_ITEM =
+            ITEMS.register("roman_roof_tile", () -> new net.minecraft.world.item.BlockItem(
+                    ModBlocks.ROMAN_ROOF_TILE.get(), new Item.Properties()));
+
     public RumbleFruitMod(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
@@ -86,6 +100,10 @@ public class RumbleFruitMod {
                         output.accept(VOID_FRUIT.get());
                         output.accept(FROST_FRUIT.get());
                         output.accept(NATURE_FRUIT.get());
+                        output.accept(TRAVERTINE_ITEM.get());
+                        output.accept(MARBLE_ITEM.get());
+                        output.accept(MOSAIC_TILE_ITEM.get());
+                        output.accept(ROMAN_ROOF_TILE_ITEM.get());
                     })
                     .build());
 }

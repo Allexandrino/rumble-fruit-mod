@@ -46,5 +46,9 @@
   "rumblefruit.earth_arrived": "Добро пожаловать: %s",
   "rumblefruit.earth_unknown_place": "Неизвестное место. Список: /rumblefruit earth и Tab",
   "rumblefruit.earth_missing": "Древнее измерение недоступно в этом мире",
-  "key.rumblefruit.map": "Карта мира"
+  "key.rumblefruit.map": "Карта мира",
+  "block.rumblefruit.travertine": "Травертин",
+  "block.rumblefruit.marble": "Мрамор",
+  "block.rumblefruit.mosaic_tile": "Мозаичная плитка",
+  "block.rumblefruit.roman_roof_tile": "Римская черепица"
 }

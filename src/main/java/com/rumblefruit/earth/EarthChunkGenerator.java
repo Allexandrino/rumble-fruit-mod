@@ -141,9 +141,14 @@ public class EarthChunkGenerator extends ChunkGenerator {
                     }
                 } else {
                     // средиземноморье: луга, сухая коштила, лесная подстилка,
-                    // каменистые холмы
+                    // каменистые холмы; на крутых склонах — скальные выходы
+                    int sx1 = EarthData.surfaceHeight(x + 8, z) - EarthData.surfaceHeight(x - 8, z);
+                    int sz1 = EarthData.surfaceHeight(x, z + 8) - EarthData.surfaceHeight(x, z - 8);
                     double patch = patchNoise(x, z, 32);
-                    if (h > 120 && patch > 0.2) {
+                    if (Math.abs(sx1) + Math.abs(sz1) > 10) {
+                        top = STONE;   // утёс на крутом склоне
+                        under = STONE;
+                    } else if (h > 120 && patch > 0.2) {
                         top = STONE;
                         under = STONE;
                     } else if (patch > 0.38) {

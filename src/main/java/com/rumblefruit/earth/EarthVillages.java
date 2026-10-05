@@ -224,6 +224,50 @@ public final class EarthVillages {
                     }
                 }
             }
+            // пинии-зонтики пятнами (Италия/Греция)
+            double pn = groveNoise(x + 5000, z - 3000);
+            if (pn > 0.62 && h < 150) {
+                int px = Math.floorMod(x, 9), pz = Math.floorMod(z, 9);
+                if (px == 0 && pz == 0) { // ствол
+                    for (int y = h + 1; y <= h + 5; y++)
+                        chunk.setBlockState(pos.set(x, y, z), LOG, false);
+                    return true;
+                }
+                // зонтичная крона
+                if (px <= 4 && pz <= 4) {
+                    chunk.setBlockState(pos.set(x, h + 6, z), LEAVES, false);
+                    if (px >= 1 && px <= 3 && pz >= 1 && pz <= 3)
+                        chunk.setBlockState(pos.set(x, h + 7, z), LEAVES, false);
+                    return true;
+                }
+            }
+        }
+        // пальмы у египетского/африканского побережья
+        if (lat < 33.5 && h > EarthData.SEA_LEVEL + 1 && h < 90 && !EarthCities.insideCity(x, z)) {
+            double pn = groveNoise(x - 7000, z + 9000);
+            if (pn > 0.5) {
+                int px = Math.floorMod(x, 7), pz = Math.floorMod(z, 7);
+                if (px == 0 && pz == 0) {
+                    for (int y = h + 1; y <= h + 6; y++)
+                        chunk.setBlockState(pos.set(x, y, z), Blocks.JUNGLE_LOG.defaultBlockState(), false);
+                    return true;
+                }
+                if ((px <= 2 && pz == 0) || (pz <= 2 && px == 0)) { // веер листьев
+                    chunk.setBlockState(pos.set(x, h + 7, z), LEAVES, false);
+                    return true;
+                }
+            }
+        }
+        // кипарисовые аллеи вдоль римских дорог
+        if (h > EarthData.SEA_LEVEL + 1 && !EarthCities.insideCity(x, z)) {
+            double rd = EarthRoads.roadDistance(x, z);
+            if (rd > 5.5 && rd < 8.5 && Math.floorMod(x * 3 + z * 5, 18) == 0) {
+                for (int y = h + 1; y <= h + 7; y++)
+                    chunk.setBlockState(pos.set(x, y, z), Blocks.SPRUCE_LOG.defaultBlockState(), false);
+                for (int y = h + 3; y <= h + 8; y++)
+                    chunk.setBlockState(pos.set(x, y, z), Blocks.SPRUCE_LEAVES.defaultBlockState(), false);
+                return true;
+            }
         }
         return false;
     }

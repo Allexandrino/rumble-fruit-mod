@@ -13,7 +13,10 @@
         "minecraft:forest",
         "minecraft:grove",
         "minecraft:stony_peaks",
-        "minecraft:jagged_peaks"
+        "minecraft:jagged_peaks",
+        "minecraft:flower_forest",
+        "minecraft:birch_forest",
+        "minecraft:windswept_hills"
       ]
     }
   }

@@ -266,6 +266,14 @@ public final class EarthRoads {
         return "segs=" + total + " dist=" + (int) dy[0] + " roadY=" + (int) dy[1];
     }
 
+    // расстояние до ближайшей дороги (−1 если дальше 10 м) — для аллей
+    public static double roadDistance(int x, int z) {
+        ensure();
+        double[] dy = new double[]{-1, 0};
+        nearest(x, z, dy);
+        return dy[0];
+    }
+
     // колонна на полотне дороги (дома и стены тут не ставим)
     public static boolean isRoad(int x, int z) {
         ensure();

@@ -39,6 +39,15 @@ public final class EarthCities {
     private static final BlockState DIRT_PATH = Blocks.DIRT_PATH.defaultBlockState();
     private static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
     private static final BlockState RED_TERRACOTTA = Blocks.RED_TERRACOTTA.defaultBlockState();
+    private static final BlockState TRAVERTINE =
+            com.rumblefruit.ModBlocks.TRAVERTINE.get().defaultBlockState();
+    private static final BlockState MARBLE =
+            com.rumblefruit.ModBlocks.MARBLE.get().defaultBlockState();
+    private static final BlockState MOSAIC =
+            com.rumblefruit.ModBlocks.MOSAIC_TILE.get().defaultBlockState();
+    private static final BlockState ROMAN_TILE =
+            com.rumblefruit.ModBlocks.ROMAN_ROOF_TILE.get().defaultBlockState();
+    private static final BlockState MARBLE_SLAB_LINE = QUARTZ_SLAB;
 
     // пирамиды Гизы в реальных размерах: Хеопс 230×139 м, Хефрен 215×136 м,
     // Микерин 105×65 м; Хефрен в 400 м к ЮЗ, Микерин в 830 м
@@ -165,8 +174,8 @@ public final class EarthCities {
     // → [ширина улицы, размер квартала по x, по z]
     private static int[] districtLayout(City c, int lx, int lz) {
         int distX = Math.floorDiv(lx, 96), distZ = Math.floorDiv(lz, 96);
-        int wide = hash(distX, distZ, c.cx() + 63) % 4 == 0 ? 6
-                : (hash(distX, distZ, c.cz() + 64) % 3 == 0 ? 2 : 4);
+        int wide = hash(distX, distZ, c.cx() + 63) % 5 == 0 ? 4   // проспект 5 м
+                : (hash(distX, distZ, c.cz() + 64) % 3 == 0 ? 1 : 2); // переулок 2 м / улица 3 м
         int csX = hash(distX, distZ, c.cx() + 61) % 2 == 0 ? 32 : 24;
         int csZ = hash(distX, distZ, c.cz() + 62) % 2 == 0 ? 32 : 24;
         return new int[]{wide, csX, csZ};
@@ -306,7 +315,11 @@ public final class EarthCities {
                 if (center) yield STONE_BRICKS;
                 yield ((hash(x, z, 7) & 3) == 0) ? GRAVEL : DIRT_PATH;
             }
-            case KIND_FORUM -> ((hash(x, z, 13) & 7) == 0) ? CRACKED_BRICKS : STONE_BRICKS;
+            case KIND_FORUM -> {
+                // мозаичные вставки по камню
+                if ((hash(x, z, 13) & 15) == 0) yield MOSAIC;
+                yield ((hash(x, z, 13) & 7) == 0) ? CRACKED_BRICKS : STONE_BRICKS;
+            }
             case KIND_HOUSE_IN -> floorBlock(c);
             default -> null;
         };
@@ -470,15 +483,26 @@ public final class EarthCities {
                 chunk.setBlockState(pos.set(x, ry, z), roofMat, false);
                 if (wall) chunk.setBlockState(pos.set(x, ry + 1, z), ancientWall(c, hs, x, z, wallH), false);
             }
-            case 2 -> { // двускатная черепица вдоль короткой оси
-                int halfD = hs[3] / 2;
-                int rise = Math.max(0, halfD - Math.abs(bz - mz));
-                chunk.setBlockState(pos.set(x, ry + rise, z), roofMat, false);
+            case 2 -> { // двускатная черепица: конёк вдоль длинной оси
+                chunk.setBlockState(pos.set(x, ry, z), roofMat, false); // сплошной настил
+                boolean ridgeX = hs[2] >= hs[3];
+                int rise = ridgeX ? Math.max(0, hs[3] / 2 - Math.abs(bz - mz))
+                        : Math.max(0, hs[2] / 2 - Math.abs(bx - mx));
+                if (rise > 0) chunk.setBlockState(pos.set(x, ry + rise, z), roofMat, false);
+                // фронтоны: торцевые стены закрывают торцы конька
+                boolean gableEnd = ridgeX ? (bx == x0 || bx == x1) : (bz == z0 || bz == z1);
+                if (gableEnd) {
+                    for (int y = ry + 1; y <= ry + rise; y++) {
+                        chunk.setBlockState(pos.set(x, y, z), ancientWall(c, hs, x, z, wallH), false);
+                    }
+                }
             }
             default -> { // ступенчатый купол
+                chunk.setBlockState(pos.set(x, ry, z), roofMat, false); // сплошной настил
                 int dr = Math.min(hs[2], hs[3]) / 2;
                 int dd = Math.max(Math.abs(bx - mx), Math.abs(bz - mz));
-                chunk.setBlockState(pos.set(x, ry + Math.max(0, dr - dd), z), roofMat, false);
+                int rise = Math.max(0, dr - dd);
+                if (rise > 0) chunk.setBlockState(pos.set(x, ry + rise, z), roofMat, false);
             }
         }
 
@@ -561,12 +585,12 @@ public final class EarthCities {
         boolean corner = (hash(x, z, 61) & 3) == 0;
         return switch (c.palette()) {
             case 1 -> dy <= 2 ? SANDSTONE
-                    : (dy == 3 ? QUARTZ_SLAB : Blocks.WHITE_TERRACOTTA.defaultBlockState());
+                    : (dy == 3 ? MARBLE_SLAB_LINE : Blocks.WHITE_TERRACOTTA.defaultBlockState());
             case 2 -> dy <= 1 ? SANDSTONE : Blocks.MUD_BRICKS.defaultBlockState();
             case 3 -> (dy % 4 == 0) ? RED_TERRACOTTA
                     : ((hash(x, z, 62) & 3) == 0 ? MOSSY_BRICKS : STONE_BRICKS);
             default -> {
-                if (dy <= 2) yield STONE_BRICKS;
+                if (dy <= 2) yield TRAVERTINE;
                 if (hs[9] >= 2 && corner) yield Blocks.SPRUCE_LOG.defaultBlockState();
                 yield hs[9] >= 2 ? Blocks.WHITE_TERRACOTTA.defaultBlockState() : BRICKS;
             }
@@ -590,12 +614,12 @@ public final class EarthCities {
     }
 
     private static BlockState roofAncient(City c, int[] hs) {
-        if (hs[9] == 0) return Blocks.HAY_BLOCK.defaultBlockState(); // солома для бедных
+        if (hs[9] == 0) return Blocks.SPRUCE_SLAB.defaultBlockState(); // доски для бедных
         return switch (c.palette()) {
             case 1 -> BRICK_SLAB;
             case 2 -> Blocks.MUD_BRICK_SLAB.defaultBlockState();
             case 3 -> RED_TERRACOTTA;
-            default -> BRICK_SLAB;
+            default -> ROMAN_TILE; // римская черепица
         };
     }
 
