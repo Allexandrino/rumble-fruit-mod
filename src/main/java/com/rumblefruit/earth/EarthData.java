@@ -32,17 +32,17 @@ public final class EarthData {
 
     // heightmap calibration for srtm_ramp2: sea level ~ 12.5,
     // Everest (8848 m) ~ 219 → ~42.7 m per brightness step.
-    // по вертикали 1:1 не влезает (потолок мира 319) — горы сжимаются
-    // мягким коленом выше 270, основной склон ~16 м на блок
+    // по вертикали ~6 м на блок: Монблан (4808 м) встаёт на y≈860 —
+    // почти реальная высота. выше 800 мягкое колено к потолку 950
     private static final double SEA_BRIGHTNESS = 12.5;
     private static final double METERS_PER_STEP = 8848.0 / (219.0 - SEA_BRIGHTNESS);
-    private static final double METERS_PER_BLOCK = 16.0;
+    private static final double METERS_PER_BLOCK = 6.0;
 
-    // вертикальный предел мира — 319; выше 270 мягкое сжатие к потолку,
+    // вертикальный предел измерения — 960; выше 800 мягкое сжатие,
     // чтобы вершины не срезались в плоские плато
     private static final int Y_MIN = -60;
-    private static final double Y_SOFT = 270.0;
-    private static final double Y_CAP = 318.0;
+    private static final double Y_SOFT = 800.0;
+    private static final double Y_CAP = 950.0;
 
     private static volatile int[] heightPixels; // grayscale crop
     private static volatile int hmW, hmH;
@@ -175,10 +175,10 @@ public final class EarthData {
         }
         // мягкое сжатие к потолку мира: вершины не срезаются в плато
         if (y > Y_SOFT) {
-            y = Y_SOFT + (Y_CAP - Y_SOFT) * (1.0 - Math.exp(-(y - Y_SOFT) / 48.0));
+            y = Y_SOFT + (Y_CAP - Y_SOFT) * (1.0 - Math.exp(-(y - Y_SOFT) / 120.0));
         }
         int h = (int) Math.round(y);
-        return Math.max(Y_MIN, Math.min(319, h));
+        return Math.max(Y_MIN, Math.min(959, h));
     }
 
     // ---- countries ----
@@ -330,6 +330,6 @@ public final class EarthData {
         double h = EarthCities.terrain(x, z, surfaceHeight(x, z));
         h = EarthRoads.terrain(x, z, h);
         int r = (int) Math.round(h);
-        return Math.max(Y_MIN, Math.min(319, r));
+        return Math.max(Y_MIN, Math.min(959, r));
     }
 }

@@ -196,28 +196,42 @@ public final class EarthCities {
         int bz = Math.floorMod(lz - 3, 24);
         int[] hs = houseSpec(c, cellX, cellZ);
         if (hs[8] > 0) return KIND_LOT; // двор: колодец/сад/рынок/мастерская
-        if (bx < hs[0] || bx >= hs[0] + hs[2] || bz < hs[1] || bz >= hs[1] + hs[3]) {
-            return KIND_LOT;
-        }
+        if (!inHouse(hs, bx, bz)) return KIND_LOT;
         if (out != null) {
             out[0] = cellX;
             out[1] = cellZ;
             out[2] = bx;
             out[3] = bz;
         }
-        if (bx == hs[0] || bx == hs[0] + hs[2] - 1
-                || bz == hs[1] || bz == hs[1] + hs[3] - 1) return KIND_HOUSE_WALL;
-        return KIND_HOUSE_IN;
+        return isHouseWall(hs, bx, bz) ? KIND_HOUSE_WALL : KIND_HOUSE_IN;
+    }
+
+    // колонна внутри пятна дома (с учётом формы: прямоугольник/Г/атриум/портик)
+    private static boolean inHouse(int[] s, int bx, int bz) {
+        boolean in = bx >= s[0] && bx < s[0] + s[2] && bz >= s[1] && bz < s[1] + s[3];
+        if (in && s[10] == 1) {
+            // Г-образный: срезанный угол 6x6
+            int cutX = (s[9] & 1) == 0 ? s[0] + s[2] - 6 : s[0];
+            int cutZ = (s[9] & 2) == 0 ? s[1] + s[3] - 6 : s[1];
+            if (bx >= cutX && bx < cutX + 6 && bz >= cutZ && bz < cutZ + 6) return false;
+        }
+        return in;
+    }
+
+    private static boolean isHouseWall(int[] s, int bx, int bz) {
+        // граница пятна: сосед по любой стороне уже вне дома
+        return !inHouse(s, bx - 1, bz) || !inHouse(s, bx + 1, bz)
+                || !inHouse(s, bx, bz - 1) || !inHouse(s, bx, bz + 1);
     }
 
     // уникальная спецификация дома из хэша квартала:
     // [0-1] смещение, [2-3] ширина/глубина, [4] этажи, [5] тип крыши,
     // [6] сторона двери, [7] шаг окон, [8] тип двора (0 = жилой дом),
-    // [9] декоративный вариант
+    // [9] декоративный вариант, [10] форма: прямоугольник/Г/атриум/портик
     private static int[] houseSpec(City c, int cellX, int cellZ) {
         int h1 = hash(c.cx(), cellX * 3 + 11, cellZ * 7 + 5);
         int h2 = hash(c.cz(), cellX ^ 991, cellZ ^ 517);
-        int[] s = new int[10];
+        int[] s = new int[11];
         s[0] = 3 + h1 % 3;                 // ox 3..5
         s[1] = 3 + (h1 >> 4) % 3;          // oz
         s[2] = Math.min(10 + (h1 >> 8) % 8, 20 - s[0]);   // w 10..17
@@ -228,6 +242,7 @@ public final class EarthCities {
         s[7] = 2 + (h2 >> 6) % 3;          // шаг окон
         s[8] = (h1 >> 16) % 5 == 0 ? 1 + (h2 >> 8) % 5 : 0; // каждый пятый — двор
         s[9] = (h2 >> 11) % 4;             // вариант отделки
+        s[10] = s[2] >= 13 ? (h2 >> 13) % 4 : 0; // форма (большие дома)
         return s;
     }
 
@@ -354,72 +369,95 @@ public final class EarthCities {
         }
     }
 
-    // уникальный дом по спецификации лота: стены с дверью и окнами,
-    // четыре типа крыш, мебель внутри
+    // уникальный старинный дом: материалы по культуре и этажу, формы
+    // (прямоугольник/Г/атриум с бассейном/портик), лавка у двери, жилец
     private static void buildHouse(ChunkAccess chunk, BlockPos.MutableBlockPos pos,
                                    City c, int x, int z, int h, int[] out, boolean wall) {
         int cellX = out[0], cellZ = out[1], bx = out[2], bz = out[3];
         int[] hs = houseSpec(c, cellX, cellZ);
         int wallH = hs[4] * 4;
         int x0 = hs[0], z0 = hs[1], x1 = hs[0] + hs[2] - 1, z1 = hs[1] + hs[3] - 1;
+        int mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
+
+        boolean door = switch (hs[6]) {
+            case 0 -> bz == z1 && (bx == mx || (hs[2] >= 13 && bx == mx + 1));
+            case 1 -> bz == z0 && (bx == mx || (hs[2] >= 13 && bx == mx + 1));
+            case 2 -> bx == x1 && (bz == mz || (hs[3] >= 13 && bz == mz + 1));
+            default -> bx == x0 && (bz == mz || (hs[3] >= 13 && bz == mz + 1));
+        };
+        boolean doorSide = switch (hs[6]) {
+            case 0 -> bz == z1;
+            case 1 -> bz == z0;
+            case 2 -> bx == x1;
+            default -> bx == x0;
+        };
 
         if (wall) {
-            // дверь 1-2 шириной посередине выбранной стороны
-            int mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
-            boolean door = switch (hs[6]) {
-                case 0 -> bz == z1 && (bx == mx || (hs[2] >= 13 && bx == mx + 1));
-                case 1 -> bz == z0 && (bx == mx || (hs[2] >= 13 && bx == mx + 1));
-                case 2 -> bx == x1 && (bz == mz || (hs[3] >= 13 && bz == mz + 1));
-                default -> bx == x0 && (bz == mz || (hs[3] >= 13 && bz == mz + 1));
-            };
-            boolean doorSide = switch (hs[6]) {
-                case 0 -> bz == z1;
-                case 1 -> bz == z0;
-                case 2 -> bx == x1;
-                default -> bx == x0;
-            };
+            // портик: передний фасад заменён колоннадой
+            boolean portico = hs[10] == 3 && doorSide && !door
+                    && Math.floorMod(bx + bz, 2) == 0;
             for (int y = h + 1; y <= h + wallH; y++) {
                 if (door && y <= h + 2) continue;
-                // окна не на стороне двери, два ряда у двухэтажных
+                if (portico) {
+                    if (y == h + wallH) {
+                        chunk.setBlockState(pos.set(x, y, z), archBlock(c), false);
+                    } else {
+                        chunk.setBlockState(pos.set(x, y, z), columnBlock(c), false);
+                    }
+                    continue;
+                }
                 boolean window = !doorSide && Math.floorMod(bx + bz, hs[7]) == 1
                         && (y == h + 2 || (hs[4] == 2 && y == h + 6));
                 if (window) continue;
-                // угловые пилястры у части домов
-                boolean corner = (bx == x0 || bx == x1) && (bz == z0 || bz == z1);
-                BlockState st = corner && hs[9] >= 2 ? wallBlock(c, x + 31, z + 17)
-                        : wallBlock(c, x, z);
-                chunk.setBlockState(pos.set(x, y, z), st, false);
+                chunk.setBlockState(pos.set(x, y, z), ancientWall(c, hs, x, z, y - h), false);
             }
         }
 
-        // крыша
+        // крыша — старинные материалы по культуре
         int ry = h + wallH + 1;
+        BlockState roofMat = roofAncient(c, hs);
         switch (hs[5]) {
-            case 0 -> chunk.setBlockState(pos.set(x, ry, z), roofBlock(c), false);
+            case 0 -> chunk.setBlockState(pos.set(x, ry, z), roofMat, false);
             case 1 -> { // парапет
-                chunk.setBlockState(pos.set(x, ry, z), roofBlock(c), false);
-                if (wall) chunk.setBlockState(pos.set(x, ry + 1, z),
-                        wallBlock(c, x, z), false);
+                chunk.setBlockState(pos.set(x, ry, z), roofMat, false);
+                if (wall) chunk.setBlockState(pos.set(x, ry + 1, z), ancientWall(c, hs, x, z, wallH), false);
             }
-            case 2 -> { // двускатная вдоль короткой оси
+            case 2 -> { // двускатная черепица вдоль короткой оси
                 int halfD = hs[3] / 2;
-                int rise = Math.max(0, halfD - Math.abs(bz - (z0 + z1) / 2));
-                chunk.setBlockState(pos.set(x, ry + rise, z),
-                        c.palette() == 2 ? SANDSTONE_SLAB : RED_TERRACOTTA, false);
+                int rise = Math.max(0, halfD - Math.abs(bz - mz));
+                chunk.setBlockState(pos.set(x, ry + rise, z), roofMat, false);
             }
             default -> { // ступенчатый купол
-                int cxc = (x0 + x1) / 2, czc = (z0 + z1) / 2;
                 int dr = Math.min(hs[2], hs[3]) / 2;
-                int dd = Math.max(Math.abs(bx - cxc), Math.abs(bz - czc));
-                chunk.setBlockState(pos.set(x, ry + Math.max(0, dr - dd), z),
-                        c.palette() == 2 ? SMOOTH_SANDSTONE : QUARTZ_SLAB, false);
+                int dd = Math.max(Math.abs(bx - mx), Math.abs(bz - mz));
+                chunk.setBlockState(pos.set(x, ry + Math.max(0, dr - dd), z), roofMat, false);
             }
+        }
+
+        // атриум: бассейн-имплювий с колоннами по углам
+        if (!wall && hs[10] == 2) {
+            if (Math.abs(bx - mx) <= 1 && Math.abs(bz - mz) <= 1) {
+                boolean rim = Math.abs(bx - mx) == 1 || Math.abs(bz - mz) == 1;
+                chunk.setBlockState(pos.set(x, h + 1, z),
+                        rim ? SMOOTH_QUARTZ : Blocks.WATER.defaultBlockState(), false);
+                return;
+            }
+            if (Math.abs(bx - mx) == 2 && Math.abs(bz - mz) == 2) {
+                for (int y = h + 1; y <= h + 4; y++)
+                    chunk.setBlockState(pos.set(x, y, z), columnBlock(c), false);
+                return;
+            }
+        }
+
+        // лавка у двери: прилавок, тент, товар, бочка
+        if (hs[9] == 3) {
+            buildShop(chunk, pos, c, x, z, h, hs, bx, bz, door, doorSide, mx, mz);
         }
 
         // мебель у внутренних колонн
         if (!wall) {
             int fh = hash(x, z, cellX + cellZ);
-            if (fh % 13 == 0) { // кровать из шерсти
+            if (fh % 13 == 0) { // ложе
                 BlockState wool = switch (hs[9]) {
                     case 1 -> Blocks.RED_WOOL.defaultBlockState();
                     case 2 -> Blocks.BLUE_WOOL.defaultBlockState();
@@ -429,16 +467,124 @@ public final class EarthCities {
             } else if (fh % 13 == 5) { // стол
                 chunk.setBlockState(pos.set(x, h + 1, z), Blocks.OAK_FENCE.defaultBlockState(), false);
                 chunk.setBlockState(pos.set(x, h + 2, z), Blocks.OAK_SLAB.defaultBlockState(), false);
-            } else if (fh % 17 == 9) { // сундук с добром
+            } else if (fh % 17 == 9) { // сундук
                 chunk.setBlockState(pos.set(x, h + 1, z), Blocks.CHEST.defaultBlockState(), false);
+            } else if (fh % 19 == 11) { // амфора
+                chunk.setBlockState(pos.set(x, h + 1, z), Blocks.DECORATED_POT.defaultBlockState(), false);
             }
         }
+
+        // жилец в центре дома: каждый третий
+        if (bx == mx && bz == mz && hash(cellX, cellZ, 777) % 3 == 0) {
+            String prof = hs[9] == 3
+                    ? switch (hash(cellX, cellZ, 778) % 3) {
+                        case 0 -> "mason"; case 1 -> "butcher"; default -> "leatherworker"; }
+                    : switch (hash(cellX, cellZ, 779) % 3) {
+                        case 0 -> "librarian"; case 1 -> "cleric"; default -> "nitwit"; };
+            spawnVillager(chunk, x, h + 1, z, prof);
+        }
+    }
+
+    // прилавок с тентом и товаром перед дверью
+    private static void buildShop(ChunkAccess chunk, BlockPos.MutableBlockPos pos,
+                                  City c, int x, int z, int h, int[] hs,
+                                  int bx, int bz, boolean door, boolean doorSide, int mx, int mz) {
+        if (!doorSide) return;
+        int goods = hash(mx, mz, 881) % 4;
+        if (door) {
+            // прилавок в проёме и товар на нём
+            chunk.setBlockState(pos.set(x, h + 1, z), Blocks.OAK_SLAB.defaultBlockState(), false);
+            BlockState good = switch (goods) {
+                case 0 -> Blocks.MELON.defaultBlockState();
+                case 1 -> Blocks.HAY_BLOCK.defaultBlockState();
+                case 2 -> Blocks.PUMPKIN.defaultBlockState();
+                default -> Blocks.BARREL.defaultBlockState();
+            };
+            chunk.setBlockState(pos.set(x, h + 2, z), good, false);
+            // тент над лавкой
+            chunk.setBlockState(pos.set(x, h + 4, z),
+                    goods % 2 == 0 ? Blocks.RED_WOOL.defaultBlockState()
+                            : Blocks.YELLOW_WOOL.defaultBlockState(), false);
+        }
+    }
+
+    // старинные материалы стен: низ каменный, верх по культуре
+    private static BlockState ancientWall(City c, int[] hs, int x, int z, int dy) {
+        boolean corner = (hash(x, z, 61) & 3) == 0;
+        return switch (c.palette()) {
+            case 1 -> dy <= 2 ? SANDSTONE
+                    : (dy == 3 ? QUARTZ_SLAB : Blocks.WHITE_TERRACOTTA.defaultBlockState());
+            case 2 -> dy <= 1 ? SANDSTONE : Blocks.MUD_BRICKS.defaultBlockState();
+            case 3 -> (dy % 4 == 0) ? RED_TERRACOTTA
+                    : ((hash(x, z, 62) & 3) == 0 ? MOSSY_BRICKS : STONE_BRICKS);
+            default -> {
+                if (dy <= 2) yield STONE_BRICKS;
+                if (hs[9] >= 2 && corner) yield Blocks.SPRUCE_LOG.defaultBlockState();
+                yield hs[9] >= 2 ? Blocks.WHITE_TERRACOTTA.defaultBlockState() : BRICKS;
+            }
+        };
+    }
+
+    private static BlockState columnBlock(City c) {
+        return switch (c.palette()) {
+            case 1 -> QUARTZ_PILLAR;
+            case 2 -> SANDSTONE;
+            default -> Blocks.SPRUCE_LOG.defaultBlockState();
+        };
+    }
+
+    private static BlockState archBlock(City c) {
+        return switch (c.palette()) {
+            case 1 -> QUARTZ_SLAB;
+            case 2 -> SMOOTH_SANDSTONE;
+            default -> Blocks.OAK_SLAB.defaultBlockState();
+        };
+    }
+
+    private static BlockState roofAncient(City c, int[] hs) {
+        if (hs[9] == 0) return Blocks.HAY_BLOCK.defaultBlockState(); // солома для бедных
+        return switch (c.palette()) {
+            case 1 -> BRICK_SLAB;
+            case 2 -> Blocks.MUD_BRICK_SLAB.defaultBlockState();
+            case 3 -> RED_TERRACOTTA;
+            default -> BRICK_SLAB;
+        };
+    }
+
+    // жилец-деревенщина с профессией через NBT проточанка
+    static void spawnVillager(ChunkAccess chunk, int x, int y, int z, String profession) {
+        if (!(chunk instanceof net.minecraft.world.level.chunk.ProtoChunk proto)) return;
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        tag.putString("id", "minecraft:villager");
+        net.minecraft.nbt.ListTag posTag = new net.minecraft.nbt.ListTag();
+        posTag.add(net.minecraft.nbt.DoubleTag.valueOf(x + 0.5));
+        posTag.add(net.minecraft.nbt.DoubleTag.valueOf(y));
+        posTag.add(net.minecraft.nbt.DoubleTag.valueOf(z + 0.5));
+        tag.put("Pos", posTag);
+        net.minecraft.nbt.CompoundTag vd = new net.minecraft.nbt.CompoundTag();
+        vd.putString("profession", "minecraft:" + profession);
+        vd.putString("type", "minecraft:plains");
+        vd.putInt("level", 2);
+        tag.put("VillagerData", vd);
+        tag.putBoolean("PersistenceRequired", true);
+        proto.addEntity(tag);
     }
 
     // двор вместо дома: колодец, сад, рынок, мастерская, олива
     private static void buildCourtyard(ChunkAccess chunk, BlockPos.MutableBlockPos pos,
                                        City c, int x, int z, int h, int[] hs, int bx, int bz) {
         int cx0 = 11, cz0 = 11; // центр лота
+        // хозяин двора с профессией
+        if (bx == cx0 && bz == cz0) {
+            String prof = switch (hs[8]) {
+                case 2 -> "farmer";
+                case 3 -> (hash(x, z, 91) & 1) == 0 ? "butcher" : "leatherworker";
+                case 4 -> switch (hash(x, z, 92) % 3) {
+                    case 0 -> "toolsmith"; case 1 -> "weaponsmith"; default -> "armorer"; };
+                default -> "shepherd";
+            };
+            if (hs[8] != 1) spawnVillager(chunk, x, h + 1, z, prof);
+        }
         switch (hs[8]) {
             case 1 -> { // колодец с навесом
                 if (Math.abs(bx - cx0) <= 1 && Math.abs(bz - cz0) <= 1) {

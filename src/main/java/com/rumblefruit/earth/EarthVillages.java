@@ -50,6 +50,52 @@ public final class EarthVillages {
         return null;
     }
 
+    // ---- сельская местность: хутора, рощи, руины — по всей карте ----
+
+    // хутор в ячейке 700 м: [x, z] или null
+    private static int[] farmsteadAt(int x, int z, int h) {
+        if (h < EarthData.SEA_LEVEL + 2 || h > 250) return null;
+        int cellX = Math.floorDiv(x, 700), cellZ = Math.floorDiv(z, 700);
+        int r = hash(cellX, cellZ, 701) % 100;
+        if (r >= 38) return null;
+        int fx = cellX * 700 + 200 + hash(cellX, cellZ, 702) % 300;
+        int fz = cellZ * 700 + 200 + hash(cellX, cellZ, 703) % 300;
+        if (Math.abs(x - fx) > 40 || Math.abs(z - fz) > 40) return null;
+        if (EarthCities.insideCity(fx, fz)) return null;
+        if (villageAt(fx, fz) != null) return null;
+        return new int[]{fx, fz};
+    }
+
+    // руины: редкие обломки колонн в ячейке 900 м
+    private static int[] ruinAt(int x, int z) {
+        int cellX = Math.floorDiv(x, 900), cellZ = Math.floorDiv(z, 900);
+        if (hash(cellX, cellZ, 801) % 100 >= 12) return null;
+        int rx = cellX * 900 + 300 + hash(cellX, cellZ, 802) % 300;
+        int rz = cellZ * 900 + 300 + hash(cellX, cellZ, 803) % 300;
+        if (Math.abs(x - rx) > 8 || Math.abs(z - rz) > 8) return null;
+        if (EarthCities.insideCity(rx, rz)) return null;
+        return new int[]{rx, rz};
+    }
+
+    // оливковые рощи и виноградники пятнами в средиземноморском поясе
+    private static double groveNoise(int x, int z) {
+        double fx = (double) x / 240, fz = (double) z / 240;
+        int x0 = (int) Math.floor(fx), z0 = (int) Math.floor(fz);
+        double tx = fx - x0, tz = fz - z0;
+        tx = tx * tx * (3 - 2 * tx);
+        tz = tz * tz * (3 - 2 * tz);
+        double n00 = nhash(x0, z0), n10 = nhash(x0 + 1, z0);
+        double n01 = nhash(x0, z0 + 1), n11 = nhash(x0 + 1, z0 + 1);
+        return (n00 * (1 - tx) + n10 * tx) * (1 - tz) + (n01 * (1 - tx) + n11 * tx) * tz;
+    }
+
+    private static double nhash(int x, int z) {
+        int h = x * 374761393 + z * 668265263;
+        h = (h ^ (h >> 13)) * 1274126177;
+        h ^= h >> 16;
+        return ((h & 0xFFFF) / 32767.5) - 1.0;
+    }
+
     // дома деревни: позиции и размеры из хэша деревни
     // возвращает [x0, z0, w, d] или null
     private static int[] houseAt(int[] v, int x, int z) {
@@ -94,15 +140,26 @@ public final class EarthVillages {
 
     public static BlockState surfaceTop(int x, int z) {
         int[] v = villageAt(x, z);
-        if (v == null) return null;
-        int[] f = fieldAt(v, x, z);
-        if (f != null) {
-            // ирригационные канавы каждые 4 ряда
-            if (Math.floorMod(x - f[0], 4) == 0) return WATER;
-            return f[4] == 0 ? FARMLAND : DIRT_PATH;
+        if (v != null) {
+            int[] f = fieldAt(v, x, z);
+            if (f != null) {
+                // ирригационные канавы каждые 4 ряда
+                if (Math.floorMod(x - f[0], 4) == 0) return WATER;
+                return f[4] == 0 ? FARMLAND : DIRT_PATH;
+            }
+            // тропинка к колодцу
+            if (Math.abs(x - v[0]) <= 1 || Math.abs(z - v[1]) <= 1) return DIRT_PATH;
+            return null;
         }
-        // тропинка к колодцу
-        if (Math.abs(x - v[0]) <= 1 || Math.abs(z - v[1]) <= 1) return DIRT_PATH;
+        // поле хутора
+        int[] fs = farmsteadAt(x, z, 64);
+        if (fs != null) {
+            int dx = x - fs[0], dz = z - fs[1];
+            if (dx >= 7 && dx <= 24 && Math.abs(dz) <= 4) {
+                if (Math.floorMod(dx - 7, 4) == 0) return WATER;
+                return FARMLAND;
+            }
+        }
         return null;
     }
 
@@ -119,8 +176,61 @@ public final class EarthVillages {
                 return false; // не прерываем: столб стоит у обочины
             }
         }
+
+        // руины: обломки колонн и щебень
+        int[] ruin = ruinAt(x, z);
+        if (ruin != null) {
+            int rdx = x - ruin[0], rdz = z - ruin[1];
+            if (Math.floorMod(rdx * 7 + rdz * 11, 13) == 0) {
+                int hh = 2 + hash(rdx, rdz, 810) % 5;
+                for (int y = h + 1; y <= h + hh; y++)
+                    chunk.setBlockState(pos.set(x, y, z), QUARTZ, false);
+            } else if (Math.floorMod(rdx * 5 + rdz * 3, 7) == 0) {
+                chunk.setBlockState(pos.set(x, h + 1, z), Blocks.QUARTZ_SLAB.defaultBlockState(), false);
+            }
+            return true;
+        }
+
+        // хутор: домик и полоса поля
+        int[] fs = farmsteadAt(x, z, h);
+        if (fs != null && buildFarmstead(chunk, pos, fs, x, z, h)) return true;
+
+        // деревня раньше рощ: поселения важнее деревьев
         int[] v = villageAt(x, z);
-        if (v == null) return false;
+        if (v != null && buildVillage(chunk, pos, v, x, z, h)) return true;
+
+        // рощи и виноградники пятнами пояса Средиземноморья
+        double lat = EarthData.latFromBlock(z);
+        if (lat > 33.5 && lat < 46.5 && h > EarthData.SEA_LEVEL + 3 && h < 200
+                && !EarthCities.insideCity(x, z)) {
+            double gn = groveNoise(x, z);
+            if (gn > 0.35) {
+                int gx = Math.floorMod(x, 6), gz = Math.floorMod(z, 6);
+                if (gn > 0.55) { // виноград шпалерами
+                    if (gz == 0 && gx % 3 == 0) {
+                        chunk.setBlockState(pos.set(x, h + 1, z), FENCE, false);
+                        chunk.setBlockState(pos.set(x, h + 2, z), LEAVES, false);
+                        return true;
+                    }
+                } else { // оливы
+                    if (gx == 0 && gz == 0) {
+                        for (int y = h + 1; y <= h + 3; y++)
+                            chunk.setBlockState(pos.set(x, y, z), LOG, false);
+                        return true;
+                    }
+                    if (gx <= 2 && gz <= 2) {
+                        chunk.setBlockState(pos.set(x, h + 4, z), LEAVES, false);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    // деревня: колодец, дома, загон, поля, фонари
+    private static boolean buildVillage(ChunkAccess chunk, BlockPos.MutableBlockPos pos,
+                                        int[] v, int x, int z, int h) {
 
         // колодец в центре
         if (Math.abs(x - v[0]) <= 1 && Math.abs(z - v[1]) <= 1) {
@@ -185,6 +295,43 @@ public final class EarthVillages {
         return false;
     }
 
+    // хутор: дом 9x7 с двускатной крышей и полоса поля 18x9 рядом
+    private static boolean buildFarmstead(ChunkAccess chunk, BlockPos.MutableBlockPos pos,
+                                          int[] fs, int x, int z, int h) {
+        int dx = x - fs[0], dz = z - fs[1];
+        // дом
+        if (dx >= -4 && dx <= 4 && dz >= -3 && dz <= 3) {
+            boolean wall = dx == -4 || dx == 4 || dz == -3 || dz == 3;
+            BlockState wb = hash(fs[0], fs[1], 71) % 2 == 0 ? SANDSTONE : BRICKS;
+            if (wall) {
+                boolean door = dx == 4 && dz == 0;
+                boolean window = !door && Math.floorMod(dx + dz, 3) == 1;
+                for (int y = h + 1; y <= h + 4; y++) {
+                    if (door && y <= h + 2) continue;
+                    if (window && y == h + 2) continue;
+                    chunk.setBlockState(pos.set(x, y, z), wb, false);
+                }
+            }
+            int rise = Math.max(0, 3 - Math.abs(dz));
+            chunk.setBlockState(pos.set(x, h + 5 + rise, z),
+                    hash(fs[0], fs[1], 72) % 3 == 0 ? HAY : RED, false);
+            if (dx == 0 && dz == 0 && hash(fs[0], fs[1], 73) % 2 == 0) {
+                EarthCities.spawnVillager(chunk, x, h + 1, z, "farmer");
+            }
+            return true;
+        }
+        // поле рядом
+        if (dx >= 7 && dx <= 24 && Math.abs(dz) <= 4) {
+            if (Math.floorMod(dx - 7, 4) == 0) {
+                chunk.setBlockState(pos.set(x, h, z), WATER, false);
+            } else if (Math.floorMod(dx + dz, 3) != 0) {
+                chunk.setBlockState(pos.set(x, h + 1, z), WHEAT, false);
+            }
+            return true;
+        }
+        return false;
+    }
+
     // маленький сельский дом: стены 4 м, дверь, окна, двускатная/плоская крыша
     private static void buildVillageHouse(ChunkAccess chunk, BlockPos.MutableBlockPos pos,
                                           int[] v, int x, int z, int h, int[] hs) {
@@ -216,6 +363,13 @@ public final class EarthVillages {
         // сеновал внутри
         if (!wall && Math.floorMod(x * 7 + z * 3, 19) == 0) {
             chunk.setBlockState(pos.set(x, h + 1, z), HAY, false);
+        }
+        // жилец почти в каждом доме: фермер/пастух/лучник
+        int mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
+        if (x == mx && z == mz && hash(x0, z0, 63) % 5 != 4) {
+            String prof = switch (hash(x0, z0, 64) % 3) {
+                case 0 -> "farmer"; case 1 -> "shepherd"; default -> "fletcher"; };
+            EarthCities.spawnVillager(chunk, x, h + 1, z, prof);
         }
     }
 }

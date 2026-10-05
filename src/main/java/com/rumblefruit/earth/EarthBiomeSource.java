@@ -54,14 +54,14 @@ public class EarthBiomeSource extends BiomeSource {
         if (h <= EarthData.SEA_LEVEL + 2) {
             return biomes.get(1); // beach
         }
-        if (h >= 230) {
-            return biomes.get(8); // jagged_peaks — высокий снег
+        if (h >= 480) {
+            return biomes.get(8); // jagged_peaks — снеговая линия ~2500 м
         }
-        if (h >= 165) {
-            return biomes.get(7); // stony_peaks
+        if (h >= 330) {
+            return biomes.get(7); // stony_peaks — скальный пояс
         }
-        if (h >= 115) {
-            return biomes.get(6); // grove
+        if (h >= 200) {
+            return biomes.get(6); // grove — лесной пояс ~1200 м
         }
         double m = moisture(bx >> 5, bz >> 5); // coarse cells, ~32 blocks
         if (lat < 33.5) {

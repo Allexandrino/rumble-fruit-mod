@@ -93,7 +93,7 @@ public class EarthChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getGenDepth() {
-        return 384;
+        return 1024;
     }
 
     @Override
@@ -114,10 +114,10 @@ public class EarthChunkGenerator extends ChunkGenerator {
                 if (underwater) {
                     top = ((x * 31 + z * 17) & 3) == 0 ? GRAVEL : SAND;
                     under = SAND;
-                } else if (h >= 250) {
-                    top = SNOW;   // вечные снега
+                } else if (h >= 480) {
+                    top = SNOW;   // вечные снега (реальная снеговая линия ~2500 м)
                     under = STONE;
-                } else if (h >= 190) {
+                } else if (h >= 330) {
                     // скалистый высокогорный пояс с гравийными осыпями
                     double scree = patchNoise(x, z, 24);
                     top = scree > 0.3 ? GRAVEL : STONE;

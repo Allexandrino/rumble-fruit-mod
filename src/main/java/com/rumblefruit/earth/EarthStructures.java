@@ -336,6 +336,7 @@ public final class EarthStructures {
             if (lx == 0 && lz == 0) {
                 fill(c, p, x, z, h + 4, h + (big ? 14 : 7), QUARTZ_PILLAR);
                 put(c, p, x, h + (big ? 15 : 8), z, GOLD);
+                EarthCities.spawnVillager(c, x, h + 4, z, "cleric"); // жрец храма
             }
         }
         return true;
@@ -693,6 +694,10 @@ public final class EarthStructures {
                 if (Math.abs(lx - bx) == 2 && t % 25 == 0) {
                     put(c, p, x, deck + 1, z, STONE_BRICKS);
                     put(c, p, x, deck + 2, z, LANTERN);
+                }
+                // рыбак у начала мола
+                if (t == 0 && lx == bx && lz == bz) {
+                    EarthCities.spawnVillager(c, x, deck + 1, z, "fisherman");
                 }
                 // торговое судно у конца мола
                 if (t >= len - 2) {
