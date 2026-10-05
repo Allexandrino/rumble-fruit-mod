@@ -75,8 +75,10 @@ public class RumblePowerData {
     }
 
     private static void syncToClient(Player player) {
-        // HUD скиллов убран — клиенту синхронизировать нечего,
-        // серверная правда хранится в persistent NBT
+        if (player instanceof ServerPlayer serverPlayer) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(serverPlayer,
+                    new PowerSyncPacket(hasPower(serverPlayer), elementOf(serverPlayer)));
+        }
     }
 
     @SubscribeEvent
