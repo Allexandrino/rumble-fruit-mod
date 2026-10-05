@@ -249,7 +249,7 @@ public final class EarthVillages {
             return true;
         }
 
-        // загон: ограда и сено
+        // загон: ограда, сено и скот
         if (penAt(v, x, z)) {
             int px = v[0] + 20 - hash(v[0], v[1], 51) % 40;
             int pz = v[1] + 20 - hash(v[0], v[1], 53) % 40;
@@ -258,6 +258,14 @@ public final class EarthVillages {
             if (edge && !gate) chunk.setBlockState(pos.set(x, h + 1, z), FENCE, false);
             if (!edge && Math.floorMod(x * 5 + z * 3, 17) == 0) {
                 chunk.setBlockState(pos.set(x, h + 1, z), HAY, false);
+            }
+            // скот в загоне
+            if (x == px + 3 && z == pz + 3) {
+                EarthCities.spawnEntity(chunk, x, h + 1, z,
+                        hash(v[0], v[1], 66) % 2 == 0 ? "minecraft:sheep" : "minecraft:cow", null);
+            }
+            if (x == px + 6 && z == pz + 4) {
+                EarthCities.spawnEntity(chunk, x, h + 1, z, "minecraft:pig", null);
             }
             return true;
         }
@@ -370,6 +378,14 @@ public final class EarthVillages {
             String prof = switch (hash(x0, z0, 64) % 3) {
                 case 0 -> "farmer"; case 1 -> "shepherd"; default -> "fletcher"; };
             EarthCities.spawnVillager(chunk, x, h + 1, z, prof);
+        }
+        // куры у домов
+        if (x == x0 + 1 && z == z0 + 1 && hash(x0, z0, 65) % 2 == 0) {
+            EarthCities.spawnEntity(chunk, x, h + 1, z, "minecraft:chicken", null);
+        }
+        // дворовый кот у части домов
+        if (x == x1 - 1 && z == z1 - 1 && hash(x0, z0, 67) % 3 == 0) {
+            EarthCities.spawnEntity(chunk, x, h + 1, z, "minecraft:cat", null);
         }
     }
 }

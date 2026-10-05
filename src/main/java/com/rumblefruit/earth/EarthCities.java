@@ -160,6 +160,18 @@ public final class EarthCities {
         return best;
     }
 
+    // районная раскладка (Помпеи/Остия): кварталы 24-32 м, переулки 2 м,
+    // обычные улицы 4 м, редкие проспекты 6 м
+    // → [ширина улицы, размер квартала по x, по z]
+    private static int[] districtLayout(City c, int lx, int lz) {
+        int distX = Math.floorDiv(lx, 96), distZ = Math.floorDiv(lz, 96);
+        int wide = hash(distX, distZ, c.cx() + 63) % 4 == 0 ? 6
+                : (hash(distX, distZ, c.cz() + 64) % 3 == 0 ? 2 : 4);
+        int csX = hash(distX, distZ, c.cx() + 61) % 2 == 0 ? 32 : 24;
+        int csZ = hash(distX, distZ, c.cz() + 62) % 2 == 0 ? 32 : 24;
+        return new int[]{wide, csX, csZ};
+    }
+
     // что за городская колонна; параметры дома уходят в out
     // (out[0]=cellX, out[1]=cellZ, out[2]=bx, out[3]=bz)
     private static int kind(City c, int x, int z, int[] out) {
@@ -185,16 +197,19 @@ public final class EarthCities {
         // форум в центре (площадь масштабируется с городом)
         if (Math.abs(lx) <= Math.max(16, r / 20) && Math.abs(lz) <= Math.max(16, r / 28))
             return KIND_FORUM;
-        // улицы каждые 24 блока, ширина 3
-        int sx = Math.floorMod(lx, 24);
-        int sz = Math.floorMod(lz, 24);
-        if (sx <= 2 || sz <= 2) return KIND_STREET;
-        // кварталы 24x24, дом по спецификации из хэша лота — каждый уникален
-        int cellX = Math.floorDiv(lx - 3, 24);
-        int cellZ = Math.floorDiv(lz - 3, 24);
-        int bx = Math.floorMod(lx - 3, 24);
-        int bz = Math.floorMod(lz - 3, 24);
-        int[] hs = houseSpec(c, cellX, cellZ);
+        // районы 96x96 м: у каждого свой ритм — кварталы 24/32 м,
+        // переулки 2 м, улицы 4 м, проспекты 6 м (как в Помпеях)
+        int[] dl = districtLayout(c, lx, lz);
+        int wide = dl[0], csX = dl[1], csZ = dl[2];
+        int sx = Math.floorMod(lx, csX);
+        int sz = Math.floorMod(lz, csZ);
+        if (sx <= wide || sz <= wide) return KIND_STREET;
+        // кварталы, дом по спецификации из хэша лота — каждый уникален
+        int cellX = Math.floorDiv(lx - wide - 1, csX);
+        int cellZ = Math.floorDiv(lz - wide - 1, csZ);
+        int bx = Math.floorMod(lx - wide - 1, csX);
+        int bz = Math.floorMod(lz - wide - 1, csZ);
+        int[] hs = houseSpec(c, cellX, cellZ, csX - wide - 1, csZ - wide - 1);
         if (hs[8] > 0) return KIND_LOT; // двор: колодец/сад/рынок/мастерская
         if (!inHouse(hs, bx, bz)) return KIND_LOT;
         if (out != null) {
@@ -228,14 +243,14 @@ public final class EarthCities {
     // [0-1] смещение, [2-3] ширина/глубина, [4] этажи, [5] тип крыши,
     // [6] сторона двери, [7] шаг окон, [8] тип двора (0 = жилой дом),
     // [9] декоративный вариант, [10] форма: прямоугольник/Г/атриум/портик
-    private static int[] houseSpec(City c, int cellX, int cellZ) {
+    private static int[] houseSpec(City c, int cellX, int cellZ, int ux, int uz) {
         int h1 = hash(c.cx(), cellX * 3 + 11, cellZ * 7 + 5);
         int h2 = hash(c.cz(), cellX ^ 991, cellZ ^ 517);
         int[] s = new int[11];
-        s[0] = 3 + h1 % 3;                 // ox 3..5
-        s[1] = 3 + (h1 >> 4) % 3;          // oz
-        s[2] = Math.min(10 + (h1 >> 8) % 8, 20 - s[0]);   // w 10..17
-        s[3] = Math.min(10 + (h1 >> 12) % 6, 20 - s[1]);  // d 10..15
+        s[0] = 1 + h1 % 3;                 // ox
+        s[1] = 1 + (h1 >> 4) % 3;          // oz
+        s[2] = Math.min(10 + (h1 >> 8) % 8, ux - s[0] - 1);   // w
+        s[3] = Math.min(10 + (h1 >> 12) % 6, uz - s[1] - 1);  // d
         s[4] = 1 + (h2 & 1);               // этажи
         s[5] = (h2 >> 2) % 4;              // крыша: плоская/парапет/двускат/купол
         s[6] = (h2 >> 4) % 4;              // дверь: юг/север/восток/запад
@@ -286,7 +301,8 @@ public final class EarthCities {
         return switch (kind) {
             case KIND_STREET -> {
                 int lx = x - c.cx(), lz = z - c.cz();
-                boolean center = Math.floorMod(lx, 24) == 1 || Math.floorMod(lz, 24) == 1;
+                int[] dl = districtLayout(c, lx, lz);
+                boolean center = Math.floorMod(lx, dl[1]) == 1 || Math.floorMod(lz, dl[2]) == 1;
                 if (center) yield STONE_BRICKS;
                 yield ((hash(x, z, 7) & 3) == 0) ? GRAVEL : DIRT_PATH;
             }
@@ -358,13 +374,40 @@ public final class EarthCities {
             return;
         }
 
+        if (kind == KIND_STREET) {
+            // уличные фонари каждые ~48 м вдоль центра улицы
+            int[] dl = districtLayout(c, lx, lz);
+            boolean centerLine = Math.floorMod(lx, dl[1]) == 1 || Math.floorMod(lz, dl[2]) == 1;
+            if (centerLine && Math.floorMod(lx + lz, 48) == 0) {
+                chunk.setBlockState(pos.set(x, h + 1, z), Blocks.OAK_FENCE.defaultBlockState(), false);
+                chunk.setBlockState(pos.set(x, h + 2, z), Blocks.OAK_FENCE.defaultBlockState(), false);
+                chunk.setBlockState(pos.set(x, h + 3, z), Blocks.LANTERN.defaultBlockState(), false);
+                return;
+            }
+            // балконы вторых этажей нависают над улицей (как в Помпеях)
+            int[][] nb = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+            for (int[] dxy : nb) {
+                int[] nout = new int[4];
+                if (kind(c, x + dxy[0], z + dxy[1], nout) == KIND_HOUSE_WALL) {
+                    int[] nhs = houseSpec(c, nout[0], nout[1], dl[1] - dl[0] - 1, dl[2] - dl[0] - 1);
+                    if (nhs[4] == 2 && hash(x, z, 91) % 2 == 0) {
+                        chunk.setBlockState(pos.set(x, h + 5, z), Blocks.OAK_SLAB.defaultBlockState(), false);
+                        return;
+                    }
+                }
+            }
+        }
+
         if (kind == KIND_LOT) {
-            int cellX = Math.floorDiv(lx - 3, 24);
-            int cellZ = Math.floorDiv(lz - 3, 24);
-            int[] hs = houseSpec(c, cellX, cellZ);
+            int[] dl = districtLayout(c, lx, lz);
+            int wide = dl[0], csX = dl[1], csZ = dl[2];
+            int cellX = Math.floorDiv(lx - wide - 1, csX);
+            int cellZ = Math.floorDiv(lz - wide - 1, csZ);
+            int[] hs = houseSpec(c, cellX, cellZ, csX - wide - 1, csZ - wide - 1);
             if (hs[8] > 0) {
                 buildCourtyard(chunk, pos, c, x, z, h, hs,
-                        Math.floorMod(lx - 3, 24), Math.floorMod(lz - 3, 24));
+                        Math.floorMod(lx - wide - 1, csX), Math.floorMod(lz - wide - 1, csZ),
+                        (csX - wide - 1) / 2, (csZ - wide - 1) / 2);
             }
         }
     }
@@ -374,7 +417,8 @@ public final class EarthCities {
     private static void buildHouse(ChunkAccess chunk, BlockPos.MutableBlockPos pos,
                                    City c, int x, int z, int h, int[] out, boolean wall) {
         int cellX = out[0], cellZ = out[1], bx = out[2], bz = out[3];
-        int[] hs = houseSpec(c, cellX, cellZ);
+        int[] dl = districtLayout(c, x - c.cx(), z - c.cz());
+        int[] hs = houseSpec(c, cellX, cellZ, dl[1] - dl[0] - 1, dl[2] - dl[0] - 1);
         int wallH = hs[4] * 4;
         int x0 = hs[0], z0 = hs[1], x1 = hs[0] + hs[2] - 1, z1 = hs[1] + hs[3] - 1;
         int mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
@@ -406,9 +450,13 @@ public final class EarthCities {
                     }
                     continue;
                 }
-                boolean window = !doorSide && Math.floorMod(bx + bz, hs[7]) == 1
-                        && (y == h + 2 || (hs[4] == 2 && y == h + 6));
-                if (window) continue;
+                boolean winCol = !doorSide && Math.floorMod(bx + bz, hs[7]) == 1;
+                // окно: проём + подоконник — читается как окно, не дыра
+                if (winCol && (y == h + 2 || (hs[4] == 2 && y == h + 6))) continue;
+                if (winCol && (y == h + 1 || (hs[4] == 2 && y == h + 5))) {
+                    chunk.setBlockState(pos.set(x, y, z), archBlock(c), false);
+                    continue;
+                }
                 chunk.setBlockState(pos.set(x, y, z), ancientWall(c, hs, x, z, y - h), false);
             }
         }
@@ -551,29 +599,35 @@ public final class EarthCities {
         };
     }
 
-    // жилец-деревенщина с профессией через NBT проточанка
-    static void spawnVillager(ChunkAccess chunk, int x, int y, int z, String profession) {
+    // сущность через NBT проточанка (жители, скот, птица)
+    static void spawnEntity(ChunkAccess chunk, int x, int y, int z, String id,
+                            net.minecraft.nbt.CompoundTag extra) {
         if (!(chunk instanceof net.minecraft.world.level.chunk.ProtoChunk proto)) return;
         net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
-        tag.putString("id", "minecraft:villager");
+        tag.putString("id", id);
         net.minecraft.nbt.ListTag posTag = new net.minecraft.nbt.ListTag();
         posTag.add(net.minecraft.nbt.DoubleTag.valueOf(x + 0.5));
         posTag.add(net.minecraft.nbt.DoubleTag.valueOf(y));
         posTag.add(net.minecraft.nbt.DoubleTag.valueOf(z + 0.5));
         tag.put("Pos", posTag);
+        tag.putBoolean("PersistenceRequired", true);
+        if (extra != null) tag.put("VillagerData", extra);
+        proto.addEntity(tag);
+    }
+
+    // жилец-деревенщина с профессией через NBT проточанка
+    static void spawnVillager(ChunkAccess chunk, int x, int y, int z, String profession) {
         net.minecraft.nbt.CompoundTag vd = new net.minecraft.nbt.CompoundTag();
         vd.putString("profession", "minecraft:" + profession);
         vd.putString("type", "minecraft:plains");
         vd.putInt("level", 2);
-        tag.put("VillagerData", vd);
-        tag.putBoolean("PersistenceRequired", true);
-        proto.addEntity(tag);
+        spawnEntity(chunk, x, y, z, "minecraft:villager", vd);
     }
 
     // двор вместо дома: колодец, сад, рынок, мастерская, олива
     private static void buildCourtyard(ChunkAccess chunk, BlockPos.MutableBlockPos pos,
-                                       City c, int x, int z, int h, int[] hs, int bx, int bz) {
-        int cx0 = 11, cz0 = 11; // центр лота
+                                       City c, int x, int z, int h, int[] hs,
+                                       int bx, int bz, int cx0, int cz0) {
         // хозяин двора с профессией
         if (bx == cx0 && bz == cz0) {
             String prof = switch (hs[8]) {
