@@ -121,7 +121,10 @@ public class ImpactShaders {
 
         boolean on = active();
         boolean blur = combo == 20;
-        boolean soft = mc.player.level().dimension()
+        // мягкий фильтр только без Iris: тот перехватывает пост-пайплайн,
+        // и ванильный PostChain под ним даёт чёрный экран
+        boolean iris = net.neoforged.fml.ModList.get().isLoaded("iris");
+        boolean soft = !iris && mc.player.level().dimension()
                 .equals(com.rumblefruit.earth.EarthBorderTracker.EARTH);
         if (on != shaderOn || blur != blurOn || soft != softOn) {
             shaderOn = on;
