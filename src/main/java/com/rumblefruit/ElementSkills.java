@@ -1,6 +1,7 @@
 package com.rumblefruit;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -82,47 +83,72 @@ public final class ElementSkills {
         }
     }
 
-    // ---------------- X: the area blast ----------------
+    // ---------------- X: the elemental aftermath ----------------
+    // the soul of X lives here: it fires standalone through cast() (vacuum
+    // tested) AND as the aftershock of the terra rip's slam in real gameplay
     private static void xSkill(Element element, ServerPlayer player, ServerLevel level) {
+        xAftermath(element, level, player.position(), player);
+    }
+
+    // elemental aftershock at a point: inferno burns a ring, the void wells
+    // and crushes, frost lattices the area in razor ice, nature blooms and
+    // mends the caster, lightning calls the storm cloud down on the mark
+    public static void xAftermath(Element element, ServerLevel level, Vec3 center, ServerPlayer player) {
         switch (element) {
-            case INFERNO -> { // Flame Ring: a burning nova around the caster
-                areaDamage(player, level, 9.0, 16.0F, element);
-                shatterFx(level, player.position(), element, 9.0);
-                explodeSafe(level, player, player.getX(), player.getY() + 1.0, player.getZ(), 3.0F,
-                        false);
-                sound(level, player, element.castSound(), 2.0F, 0.8F);
+            case LIGHTNING -> { // Storm Call: the thundercloud gathers over the point
+                level.addFreshEntity(StormEntity.storm(level, center, player));
+                for (int i = 0; i < 60; i++) {
+                    double angle = Math.random() * Math.PI * 2.0;
+                    double r = Math.random() * 10.0;
+                    level.sendParticles(ModParticles.ELECTRO_CLOUD.get(),
+                            center.x + Math.cos(angle) * r,
+                            center.y + 12.0 + Math.random() * 2.0,
+                            center.z + Math.sin(angle) * r,
+                            1, 0.02, -0.01, 0.02, 0.0);
+                    level.sendParticles(ParticleTypes.SMOKE,
+                            center.x + Math.cos(angle) * r * 0.9,
+                            center.y + 11.0,
+                            center.z + Math.sin(angle) * r * 0.9,
+                            1, 0.0, -0.02, 0.0, 0.0);
+                }
+                sound(level, center, element.castSound(), 4.0F, 1.0F);
             }
-            case VOID -> { // Gravity Well: drag everything in to one point and crush it
-                Vec3 well = player.position().add(player.getLookAngle().x * 8.0, 1.0,
-                        player.getLookAngle().z * 8.0);
-                for (LivingEntity e : nearby(player, level, 14.0)) {
-                    Vec3 pull = well.subtract(e.position()).normalize().scale(2.0);
+            case INFERNO -> { // Flame Ring: a burning nova at the point
+                areaDamage(player, level, center, 9.0, 16.0F, element);
+                shatterFx(level, center, element, 9.0);
+                explodeSafe(level, player, center.x, center.y + 1.0, center.z, 3.0F,
+                        false);
+                sound(level, center, element.castSound(), 2.0F, 0.8F);
+            }
+            case VOID -> { // Gravity Well: drag everything to the point and crush it
+                for (LivingEntity e : at(level, player, center, 14.0)) {
+                    Vec3 pull = center.subtract(e.position()).normalize().scale(2.0);
                     e.push(pull.x, 0.3, pull.z);
                     e.hurtMarked = true;
                     hurt(level, player, e, 15.0F, element);
                 }
-                crackWebFx(level, well, element, 8, 12.0); // the well tears open in cracks
-                sound(level, player, element.castSound(), 2.0F, 0.6F);
+                crackWebFx(level, center, element, 8, 12.0); // the well tears open in cracks
+                sound(level, center, element.castSound(), 2.0F, 0.6F);
             }
             case FROST -> { // Blizzard: a lattice of razor ice shards, everything freezes stiff
-                areaDamage(player, level, 10.0, 10.0F, element);
+                areaDamage(player, level, center, 10.0, 10.0F, element);
                 // straight shard lines in a hard lattice — no circles
                 for (int arm = 0; arm < 6; arm++) {
                     double a = arm * Math.PI / 3.0;
                     for (double d = 0.5; d <= 10.0; d += 0.8) {
                         level.sendParticles(element.spark(),
-                                player.getX() + Math.cos(a) * d,
-                                player.getY() + 0.3 + (d % 2.5) * 0.9,
-                                player.getZ() + Math.sin(a) * d, 1, 0.0, 0.0, 0.0, 0.0);
+                                center.x + Math.cos(a) * d,
+                                center.y + 0.3 + (d % 2.5) * 0.9,
+                                center.z + Math.sin(a) * d, 1, 0.0, 0.0, 0.0, 0.0);
                     }
                 }
-                sound(level, player, element.castSound(), 2.0F, 0.9F);
+                sound(level, center, element.castSound(), 2.0F, 0.9F);
             }
-            case NATURE -> { // Bloom Burst: friends mend, enemies rot
+            case NATURE -> { // Bloom Burst: the caster mends, the ground rots the rest
                 player.heal(8.0F);
-                areaDamage(player, level, 9.0, 12.0F, element);
-                shatterFx(level, player.position(), element, 9.0);
-                sound(level, player, element.castSound(), 1.5F, 1.2F);
+                areaDamage(player, level, center, 9.0, 12.0F, element);
+                shatterFx(level, center, element, 9.0);
+                sound(level, center, element.castSound(), 1.5F, 1.2F);
             }
             default -> {
             }

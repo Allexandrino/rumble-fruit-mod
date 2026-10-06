@@ -33,9 +33,6 @@ public class RumbleFruitMod {
     public static final DeferredHolder<Item, ?> NATURE_FRUIT =
             ITEMS.register("nature_fruit", () -> new ElementFruitItem(4));
 
-    public static final DeferredHolder<Item, ?> ELECTRO_BOW =
-            ITEMS.register("electro_bow", ElectroBowItem::new);
-
     public static final DeferredHolder<Item, ?> ELECTRO_SWORD =
             ITEMS.register("electro_sword", ElectroSwordItem::new);
 
@@ -43,11 +40,9 @@ public class RumbleFruitMod {
     public static final DeferredHolder<Item, ?> ELECTRO_ORB_ITEM =
             ITEMS.register("electro_orb", () -> new Item(new Item.Properties()));
 
-    // holy variants of the stance weapons (rendered while the angel form is active)
+    // holy variant of the spear (rendered while the angel form is active)
     public static final DeferredHolder<Item, ?> ELECTRO_SWORD_HOLY =
             ITEMS.register("electro_sword_holy", () -> new Item(new Item.Properties()));
-    public static final DeferredHolder<Item, ?> ELECTRO_BOW_HOLY =
-            ITEMS.register("electro_bow_holy", () -> new Item(new Item.Properties()));
 
     // блоки древнего мира
     public static final DeferredHolder<Item, ?> TRAVERTINE_ITEM =

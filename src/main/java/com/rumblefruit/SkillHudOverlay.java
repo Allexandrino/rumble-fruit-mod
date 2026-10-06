@@ -56,13 +56,9 @@ public class SkillHudOverlay {
 
             // current combat stance above the skill list (gold while transformed)
             int stance = ClientStanceData.get(mc.player.getUUID());
-            String stanceName = switch (stance) {
-                case 1 -> "КОПЬЁ";
-                case 2 -> "ЛУК";
-                default -> "КУЛАКИ";
-            };
+            String stanceName = stance == 1 ? "КОПЬЁ" : "КУЛАКИ";
             boolean holy = ClientWingsData.isActive(mc.player.getUUID());
-            int stanceColor = holy ? 0xFFD24A : stance == 1 ? 0x7FD4FF : stance == 2 ? 0xB0FF9E : 0xC0C0C0;
+            int stanceColor = holy ? 0xFFD24A : stance == 1 ? 0x7FD4FF : 0xC0C0C0;
             graphics.drawString(mc.font, stanceName, x + ICON_SIZE - mc.font.width(stanceName), y - 12, stanceColor, true);
 
             // the fruit (or the transformation) above the stance, in the element's color

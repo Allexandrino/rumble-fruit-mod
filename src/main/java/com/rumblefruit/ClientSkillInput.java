@@ -35,20 +35,20 @@ public class ClientSkillInput {
         Minecraft mc = Minecraft.getInstance();
         lastCastTick = mc.player != null ? mc.player.tickCount : 0;
         lastCastSkill = skillId;
-        if (skillId == 5 || skillId == 2) {
+        if (skillId == 5 || skillId == 2 || skillId == 1) {
             ImpactShaders.impact(); // heavy casts burn the screen in the fruit's color
         }
         // recoil on every cast: heavier skills kick the camera harder
         float kick = switch (skillId) {
             case 0 -> 0.3F;
-            case 1 -> 0.55F;
+            case 1 -> 0.7F; // the terra rip hits like a landslide
             case 2 -> 0.7F;
             case 5 -> 0.95F;
             case 9 -> 1.4F;
             default -> 0.2F;
         };
         ClientRpgCamera.addShake(kick);
-        if (skillId == 2 || skillId == 5 || skillId == 9) {
+        if (skillId == 2 || skillId == 5 || skillId == 9 || skillId == 1) {
             ClientRpgCamera.impactPulse(); // brief punch-in: the world zooms with the hit
             ClientRpgCamera.castCine();    // and the camera snaps back for the shot
         }
@@ -121,7 +121,7 @@ public class ClientSkillInput {
             prevDown[i] = down;
         }
 
-        // H: cycle the combat stance (fists -> electro sword -> electro bow)
+        // H: cycle the combat stance (fists <-> electro spear)
         boolean h = ModKeyBindings.STANCE.isDown();
         if (h && !prevH && hasItem) {
             net.neoforged.neoforge.network.PacketDistributor.sendToServer(new StancePacket());

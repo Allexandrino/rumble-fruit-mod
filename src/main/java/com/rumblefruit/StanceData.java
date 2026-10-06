@@ -9,13 +9,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-// combat stance for the lightning fruit: 0 = fists (force lightning),
+// combat stance for the fruit powers: 0 = fists (force lightning),
 // 1 = electro spear. cycled with H, synced to all clients.
 @net.neoforged.fml.common.EventBusSubscriber(modid = RumbleFruitMod.MOD_ID)
 public class StanceData {
     public static final int FISTS = 0;
     public static final int SWORD = 1;
-    public static final int BOW = 2;
 
     private static final Map<UUID, Integer> STANCE = new ConcurrentHashMap<>();
 

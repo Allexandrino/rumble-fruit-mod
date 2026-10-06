@@ -7,7 +7,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 // element charge crackling directly ON the hands: both fists smoulder in the
-// fruit's color while the power is active, and the drawn sword/bow crackles
+// fruit's color while the power is active, and the drawn spear crackles
 // along the blade — not around the body, right on the weapon
 @EventBusSubscriber(modid = RumbleFruitMod.MOD_ID, value = Dist.CLIENT)
 public class ElementWeaponAura {

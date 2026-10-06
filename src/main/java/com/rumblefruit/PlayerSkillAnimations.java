@@ -42,6 +42,7 @@ public final class PlayerSkillAnimations {
         BY_COMBO.put(31, "skill_x");
         BY_COMBO.put(32, "skill_c");
         BY_COMBO.put(33, "skill_v");
+        BY_COMBO.put(34, "skill_terra");
     }
 
     private PlayerSkillAnimations() {

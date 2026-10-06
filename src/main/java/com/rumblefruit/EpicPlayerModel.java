@@ -243,17 +243,7 @@ public class EpicPlayerModel extends PlayerModel<AbstractClientPlayer> {
             rightLeg.xRot += -0.12F * still;
             leftLeg.xRot += 0.12F * still;
         }
-        if (stance == StanceData.BOW) {
-            float hold = Math.max(still, 0.55F); // the bow stays raised even mid-step
-            rightArm.xRot = lerp(rightArm.xRot, -1.35F + pitchRad * 0.7F + breathe * 0.5F, hold);
-            rightArm.yRot = lerp(rightArm.yRot, -0.15F, hold);
-            rightArm.zRot = lerp(rightArm.zRot, 0.12F, hold);
-            leftArm.xRot = lerp(leftArm.xRot, -1.25F + pitchRad * 0.7F + breathe * 0.5F, hold);
-            leftArm.yRot = lerp(leftArm.yRot, 0.45F, hold);
-            leftArm.zRot = lerp(leftArm.zRot, -0.12F, hold);
-            leftForearm.xRot = -0.2F * hold; // fingers near the string
-            body.yRot = lerp(body.yRot, -0.3F + sway, hold); // side-on archer profile
-        } else if (stance == StanceData.SWORD) {
+        if (stance == StanceData.SWORD) {
             // wide swordsman stance: arms thrown clear of the body, elbows nearly
             // straight — the blade arm works from the shoulder and wrist
             float k = Math.max(still, 0.5F); // the sword arm keeps its poise mid-step

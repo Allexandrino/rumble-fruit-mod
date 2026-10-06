@@ -15,12 +15,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-// server-side stance combat: electro sword slashes and electro bow shots
+// server-side stance combat: electro sword slashes and charged fist strikes
 public class StanceCombat {
     private static final long SLASH_COOLDOWN = 18; // ticks
-    private static final long BOW_COOLDOWN = 14;
     private static final Map<UUID, Long> LAST_SLASH = new ConcurrentHashMap<>();
-    private static final Map<UUID, Long> LAST_SHOT = new ConcurrentHashMap<>();
 
     // sword slash: melee cone in front, epic-fight style chained strikes
     public static void slash(ServerPlayer player, int combo) {
@@ -149,30 +147,5 @@ public class StanceCombat {
         player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
         net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(
                 new CombatAnimPacket(player.getUUID(), 10 + move % 4));
-    }
-
-    // bow release: fire an electro arrow, speed scales with the draw time
-    public static void bowRelease(ServerPlayer player, int chargeTicks) {
-        if (StanceData.get(player.getUUID()) != StanceData.BOW) {
-            return;
-        }
-        long now = player.level().getGameTime();
-        if (now - LAST_SHOT.getOrDefault(player.getUUID(), -100L) < BOW_COOLDOWN) {
-            return;
-        }
-        LAST_SHOT.put(player.getUUID(), now);
-
-        ServerLevel level = (ServerLevel) player.level();
-        float power = net.minecraft.world.item.BowItem.getPowerForTime(Math.min(chargeTicks, 30));
-        if (power < 0.15F) {
-            power = 0.15F;
-        }
-        ElectroArrowEntity arrow = new ElectroArrowEntity(level, player);
-        arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, power * 3.2F, 0.6F);
-        level.addFreshEntity(arrow);
-        level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.2F);
-        level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 0.5F, 1.8F);
     }
 }

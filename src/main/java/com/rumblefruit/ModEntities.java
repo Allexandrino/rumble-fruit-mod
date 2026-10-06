@@ -35,14 +35,6 @@ public class ModEntities {
                     .updateInterval(10)
                     .build("rumblefruit:electro_orb"));
 
-    public static final DeferredHolder<EntityType<?>, EntityType<ElectroArrowEntity>> ELECTRO_ARROW =
-            ENTITIES.register("electro_arrow", () -> EntityType.Builder
-                    .<ElectroArrowEntity>of(ElectroArrowEntity::new, MobCategory.MISC)
-                    .sized(0.5F, 0.5F)
-                    .clientTrackingRange(4)
-                    .updateInterval(10)
-                    .build("rumblefruit:electro_arrow"));
-
     public static final DeferredHolder<EntityType<?>, EntityType<StormEntity>> STORM =
             ENTITIES.register("storm", () -> EntityType.Builder
                     .<StormEntity>of(StormEntity::new, MobCategory.MISC)
@@ -60,4 +52,13 @@ public class ModEntities {
                     .updateInterval(20)
                     .noSave()
                     .build("rumblefruit:lightning_pillar"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<EarthChunkEntity>> EARTH_CHUNK =
+            ENTITIES.register("earth_chunk", () -> EntityType.Builder
+                    .<EarthChunkEntity>of(EarthChunkEntity::new, MobCategory.MISC)
+                    .sized(1.8F, 1.8F)
+                    .clientTrackingRange(16)
+                    .updateInterval(2)
+                    .noSave()
+                    .build("rumblefruit:earth_chunk"));
 }

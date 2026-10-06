@@ -1,0 +1,112 @@
+{
+ "name": "skill_terra",
+ "author": "rumblefruit",
+ "description": "terra rip: grip the earth, tear the slab up overhead, hurl it",
+ "emote": {
+  "beginTick": 0,
+  "endTick": 24,
+  "stopTick": 26,
+  "isLoop": false,
+  "returnTick": 2,
+  "nsfw": false,
+  "degrees": true,
+  "moves": [
+   {
+    "tick": 0,
+    "easing": "INOUTQUAD",
+    "rightArm": {},
+    "leftArm": {},
+    "body": {},
+    "head": {}
+   },
+   {
+    "tick": 4,
+    "easing": "INQUAD",
+    "rightArm": {
+     "pitch": -30,
+     "roll": 15
+    },
+    "leftArm": {
+     "pitch": -30,
+     "roll": -15
+    },
+    "body": {
+     "pitch": 18
+    },
+    "head": {
+     "pitch": 15
+    },
+    "rightLeg": {
+     "pitch": -12
+    },
+    "leftLeg": {
+     "pitch": 10
+    }
+   },
+   {
+    "tick": 9,
+    "easing": "OUTQUAD",
+    "rightArm": {
+     "pitch": -175,
+     "roll": -18
+    },
+    "leftArm": {
+     "pitch": -175,
+     "roll": 18
+    },
+    "body": {
+     "pitch": -14
+    },
+    "head": {
+     "pitch": -25
+    }
+   },
+   {
+    "tick": 12,
+    "easing": "INQUAD",
+    "rightArm": {
+     "pitch": -170,
+     "roll": -15
+    },
+    "leftArm": {
+     "pitch": -170,
+     "roll": 15
+    },
+    "body": {
+     "pitch": -12
+    },
+    "head": {
+     "pitch": -22
+    }
+   },
+   {
+    "tick": 15,
+    "easing": "OUTQUAD",
+    "rightArm": {
+     "pitch": -45,
+     "roll": -8
+    },
+    "leftArm": {
+     "pitch": -45,
+     "roll": 8
+    },
+    "body": {
+     "pitch": 28
+    },
+    "head": {
+     "pitch": 12
+    }
+   },
+   {
+    "tick": 24,
+    "easing": "INOUTQUAD",
+    "rightArm": {},
+    "leftArm": {},
+    "body": {},
+    "head": {},
+    "rightLeg": {},
+    "leftLeg": {}
+   }
+  ]
+ }
+}

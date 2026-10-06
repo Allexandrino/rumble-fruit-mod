@@ -8,8 +8,9 @@ version="1.0.0"
 displayName="Rumble Fruit"
 authors="Allexandrino"
 description='''Blox Fruits Rumble (Goro Goro no Mi) moveset: Z/X/C/V skills, the nuke-tier R release,
-combat stances (fists/electro sword/electro bow) with fighting-game combos,
-the angel transformation with golden powers, and the Fallen Exorcist boss with its sky temple.'''
+combat stances (fists/electro spear) with fighting-game combos, elemental titan transformations
+(giant demon, ice dragon, king of darkness), the terra-rip ground slam, and the Fallen Exorcist boss
+with its sky temple.'''
 
 [[mixins]]
 config="rumblefruit.mixins.json"

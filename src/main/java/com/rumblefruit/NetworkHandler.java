@@ -23,5 +23,6 @@ public class NetworkHandler {
         r.playToClient(CombatAnimPacket.TYPE, CombatAnimPacket.CODEC, CombatAnimPacket::handle);
         r.playToClient(ChargePacket.TYPE, ChargePacket.CODEC, ChargePacket::handle);
         r.playToClient(ChannelSyncPacket.TYPE, ChannelSyncPacket.CODEC, ChannelSyncPacket::handle);
+        r.playToClient(ImpactShakePacket.TYPE, ImpactShakePacket.CODEC, ImpactShakePacket::handle);
     }
 }

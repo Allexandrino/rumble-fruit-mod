@@ -31,7 +31,7 @@ public class SkillExecutor {
     private static final java.util.Map<java.util.UUID, long[]> LAST_USE = new java.util.HashMap<>();
 
     public static void execute(ServerPlayer player, int skillId, int variantOrCharge) {
-        // abilities require: eaten the lightning fruit; weapon (sword/bow) OR bare hand for casting
+        // abilities require: eaten the fruit; weapon (spear) OR bare hand for casting
         if (!RumblePowerData.hasPower(player)) {
             player.displayClientMessage(net.minecraft.network.chat.Component.translatable(
                     "rumblefruit.need_eat").withStyle(net.minecraft.ChatFormatting.GRAY), true);
@@ -101,10 +101,15 @@ public class SkillExecutor {
         player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
         player.startUsingItem(net.minecraft.world.InteractionHand.MAIN_HAND);
         PENDING_POSE_STOP.put(player.getUUID(), now + 12);
-        // our own cast pose per skill family: Z thrust / X burst / C call / V channel
+        // stance-based skill sets: fists = blox fruits lightning,
+        // spear = "Крыло Ангела"
+        int stance = StanceData.get(player.getUUID());
+        // the fruit element the caster carries (lightning by default)
+        Element el = element(player);
+        // our own cast pose per skill family: Z thrust / X terra rip / C call / V channel
         int poseCode = switch (skillId) {
             case 0 -> 30;
-            case 1 -> 31;
+            case 1 -> stance == StanceData.SWORD && el == Element.LIGHTNING ? 31 : 34;
             case 2 -> 32;
             case 5 -> 33;
             default -> -1;
@@ -113,12 +118,18 @@ public class SkillExecutor {
             net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(
                     new CombatAnimPacket(player.getUUID(), poseCode));
         }
-        // stance-based skill sets: fists = blox fruits lightning,
-        // sword = "Крыло Ангела", bow = "Перо Бури"
-        int stance = StanceData.get(player.getUUID());
+        // X is the terra rip for every fruit: the earth itself is the weapon —
+        // tear a slab out, hurl it, the element's aftershock blooms at ground zero
+        if (skillId == 1 && (el != Element.LIGHTNING || stance != StanceData.SWORD)) {
+            if (el == Element.LIGHTNING) {
+                thunderstorm(player); // angel form: Judgment; otherwise the terra rip
+            } else {
+                TerraSkills.rip(player, el);
+            }
+            return;
+        }
         // elemental fruits have their OWN skill kits — not a lightning recolor
-        Element el = element(player);
-        if (el != Element.LIGHTNING && (skillId == 0 || skillId == 1 || skillId == 2 || skillId == 5)) {
+        if (el != Element.LIGHTNING && (skillId == 0 || skillId == 2 || skillId == 5)) {
             ElementSkills.cast(el, player, skillId, variantOrCharge);
             return;
         }
@@ -126,26 +137,16 @@ public class SkillExecutor {
             case 0 -> { // Z
                 if (stance == StanceData.SWORD) {
                     SwordSkills.severingStrike(player);
-                } else if (stance == StanceData.BOW) {
-                    BowSkills.chargedShot(player);
                 } else {
                     lightningOrb(player, variantOrCharge);
                 }
             }
-            case 1 -> { // X
-                if (stance == StanceData.SWORD) {
-                    SwordSkills.heavenlySlash(player);
-                } else if (stance == StanceData.BOW) {
-                    BowSkills.arrowRain(player);
-                } else {
-                    thunderstorm(player);
-                }
+            case 1 -> { // X (spear only — fists X is the terra rip above)
+                SwordSkills.heavenlySlash(player);
             }
             case 2 -> { // C
                 if (stance == StanceData.SWORD) {
                     SwordSkills.execution(player);
-                } else if (stance == StanceData.BOW) {
-                    BowSkills.thunderArrow(player);
                 } else {
                     lightningPillar(player);
                 }
@@ -153,8 +154,6 @@ public class SkillExecutor {
             case 5 -> { // V
                 if (stance == StanceData.SWORD) {
                     SwordSkills.angelStance(player);
-                } else if (stance == StanceData.BOW) {
-                    BowSkills.windWings(player);
                 } else {
                     castThunderball(player, variantOrCharge);
                 }
@@ -207,20 +206,14 @@ public class SkillExecutor {
         ServerLevel level = (ServerLevel) player.level();
         boolean holy = holy(player);
         switch (variant) {
-            case 0 -> { // Z1: quick projectile — bow fires electricity, sword throws an orb
+            case 0 -> { // Z1: quick projectile — a thrown orb of electricity
                 if (holy) { // angel Z: Holy Spear — instant piercing golden lance
                     holySpear(player);
                     break;
                 }
-                if (StanceData.get(player.getUUID()) == StanceData.BOW) {
-                    ElectroArrowEntity arrow = new ElectroArrowEntity(level, player);
-                    arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 3.5F, 0.5F);
-                    level.addFreshEntity(arrow);
-                } else {
-                    ElectroOrbEntity orb = new ElectroOrbEntity(level, player);
-                    orb.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, (float) ORB_SPEED, 0.0F);
-                    level.addFreshEntity(orb);
-                }
+                ElectroOrbEntity orb = new ElectroOrbEntity(level, player);
+                orb.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, (float) ORB_SPEED, 0.0F);
+                level.addFreshEntity(orb);
                 level.playSound(null, player.getX(), player.getY(), player.getZ(),
                         ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 0.8F, 1.6F);
             }
@@ -252,59 +245,21 @@ public class SkillExecutor {
         }
     }
 
+    // X (lightning fists) is now the terra rip; the storm cloud it used to
+    // summon lives on as the lightning aftershock at the slam point
     public static void thunderstorm(ServerPlayer player) {
         ServerLevel level = (ServerLevel) player.level();
-        boolean hasBow = StanceData.get(player.getUUID()) == StanceData.BOW;
-        if (hasBow) {
-            // bow X: volley of 5 electric arrows in a spread
-            for (int i = -2; i <= 2; i++) {
-                ElectroArrowEntity arrow = new ElectroArrowEntity(level, player);
-                arrow.shootFromRotation(player, player.getXRot(), player.getYRot() + i * 4.0F, 0.0F, 3.0F, 0.5F);
-                level.addFreshEntity(arrow);
-            }
-            level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 1.5F, 1.0F);
-            return;
-        }
         Vec3 target = rayTrace(player, 40.0);
         if (holy(player)) { // angel X: Judgment — golden pillars rain around the target
             judgment(player, target);
             return;
         }
-        level.addFreshEntity(StormEntity.storm(level, target, player));
-        // blox-fruits storm cloud: big dark cap that lingers over the area
-        for (int i = 0; i < 60; i++) {
-            double angle = RANDOM.nextDouble() * Math.PI * 2.0;
-            double r = RANDOM.nextDouble() * 10.0;
-            level.sendParticles(ModParticles.ELECTRO_CLOUD.get(),
-                    target.x + Math.cos(angle) * r,
-                    target.y + 12.0 + RANDOM.nextDouble() * 2.0,
-                    target.z + Math.sin(angle) * r,
-                    1, 0.02, -0.01, 0.02, 0.0);
-            level.sendParticles(ParticleTypes.SMOKE,
-                    target.x + Math.cos(angle) * r * 0.9,
-                    target.y + 11.0,
-                    target.z + Math.sin(angle) * r * 0.9,
-                    1, 0.0, -0.02, 0.0, 0.0);
-        }
-        level.playSound(null, target.x, target.y, target.z,
-                ModSounds.ELECTRO_BLAST.get(), SoundSource.WEATHER, 4.0F, 1.0F);
+        TerraSkills.rip(player, Element.LIGHTNING);
     }
 
     // C: lightning pillar — continuous beam from a thundercloud down to the target
     public static void lightningPillar(ServerPlayer player) {
         ServerLevel level = (ServerLevel) player.level();
-        boolean hasBow = StanceData.get(player.getUUID()) == StanceData.BOW;
-        if (hasBow) {
-            // bow C: charged electric shot that calls the pillar on impact
-            ElectroArrowEntity arrow = new ElectroArrowEntity(level, player);
-            arrow.setPillarOnImpact(true);
-            arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 3.0F, 0.5F);
-            level.addFreshEntity(arrow);
-            level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    ModSounds.ELECTRO_ZAP.get(), SoundSource.PLAYERS, 1.5F, 0.7F);
-            return;
-        }
         Vec3 target = rayTrace(player, 40.0);
         // sword C: stick the sword into the ground, then the pillar strikes around it
         if (StanceData.get(player.getUUID()) == StanceData.SWORD) {
@@ -383,7 +338,7 @@ public class SkillExecutor {
         level.sendParticles(ModParticles.ELECTRO_SPARK.get(), target.x, target.y + 1.0, target.z, 25, 0.4, 0.6, 0.4, 0.05);
     }
 
-    // shared pillar effect at a position (used by sword C and charged bow shot)
+    // shared pillar effect at a position (used by spear C)
     public static void lightningPillarAt(ServerLevel level, Vec3 target, net.minecraft.world.entity.player.Player player) {
         boolean holy = WingsData.isActive(player.getUUID());
         RumblePillarEntity.summon(level, target.x, target.y, target.z, holy);

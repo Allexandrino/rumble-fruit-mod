@@ -5,7 +5,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-// client -> server: stance combat action. action 0 = sword slash, 1 = bow release,
+// client -> server: stance combat action. action 0 = sword slash,
 // 2 = fist strike (punches and kicks, charge = combo move index)
 public record AttackPacket(int action, int charge) implements CustomPacketPayload {
     public static final Type<AttackPacket> TYPE = new Type<>(
@@ -27,8 +27,6 @@ public record AttackPacket(int action, int charge) implements CustomPacketPayloa
             }
             if (packet.action == 0) {
                 StanceCombat.slash(sender, packet.charge);
-            } else if (packet.action == 1) {
-                StanceCombat.bowRelease(sender, packet.charge);
             } else if (packet.action == 2) {
                 StanceCombat.punch(sender, packet.charge);
             }

@@ -11,11 +11,10 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 
-// renders the virtual electro sword/bow in the player's right hand in third person
-// using our own 3d weapon models (same pipeline as the wings — works everywhere)
+// renders the virtual electro spear in the player's right hand in third person
+// using our own 3d weapon model (same pipeline as the wings — works everywhere)
 public class VirtualWeaponLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     private static WeaponModels swordModel = null;
-    private static WeaponModels bowModel = null;
 
     public VirtualWeaponLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent) {
         super(parent);
@@ -32,14 +31,10 @@ public class VirtualWeaponLayer extends RenderLayer<AbstractClientPlayer, Player
         if (swordModel == null) {
             swordModel = WeaponModels.sword(Minecraft.getInstance().getEntityModels()
                     .bakeLayer(WeaponModels.SWORD_LAYER));
-            bowModel = WeaponModels.bow(Minecraft.getInstance().getEntityModels()
-                    .bakeLayer(WeaponModels.BOW_LAYER));
         }
         boolean holy = ClientWingsData.isActive(player.getUUID());
-        WeaponModels model = stance == StanceData.SWORD ? swordModel : bowModel;
-        ResourceLocation texture = stance == StanceData.SWORD
-                ? (holy ? WeaponModels.SWORD_HOLY_TEXTURE : WeaponModels.SWORD_TEXTURE)
-                : (holy ? WeaponModels.BOW_HOLY_TEXTURE : WeaponModels.BOW_TEXTURE);
+        WeaponModels model = swordModel;
+        ResourceLocation texture = holy ? WeaponModels.SWORD_HOLY_TEXTURE : WeaponModels.SWORD_TEXTURE;
 
         poseStack.pushPose();
         this.getParentModel().rightArm.translateAndRotate(poseStack);

@@ -13,7 +13,15 @@ public class AttributeInstance {
         return modifiers.contains(id) ? new AttributeModifier(id, 0.0, AttributeModifier.Operation.ADD_VALUE) : null;
     }
 
+    public boolean hasModifier(ResourceLocation id) {
+        return modifiers.contains(id);
+    }
+
     public void addPermanentModifier(AttributeModifier modifier) {
+        modifiers.add(modifier.id);
+    }
+
+    public void addTransientModifier(AttributeModifier modifier) {
         modifiers.add(modifier.id);
     }
 

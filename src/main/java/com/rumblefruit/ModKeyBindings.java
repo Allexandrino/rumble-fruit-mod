@@ -37,6 +37,6 @@ public class ModKeyBindings {
         event.register(SKILL_R);
         event.register(STANCE);
         event.register(MAP);
-        System.out.println("[rumblefruit] KeyBindings registered: Z/X/C/F/V/H/M");
+        System.out.println("[rumblefruit] KeyBindings registered: Z/X/C/F/V/J/H/M");
     }
 }

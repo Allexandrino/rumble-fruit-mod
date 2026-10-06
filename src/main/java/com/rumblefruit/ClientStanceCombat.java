@@ -8,7 +8,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 
 // client-side stance combat input (epic-fight style):
-// sword stance: LMB clicks chain combo slashes; bow stance: hold LMB to draw, release to fire
+// sword stance: LMB clicks chain combo slashes; fists: punches and kicks
 @EventBusSubscriber(modid = RumbleFruitMod.MOD_ID, value = Dist.CLIENT)
 public class ClientStanceCombat {
     private static boolean prevAttack = false;
@@ -20,16 +20,12 @@ public class ClientStanceCombat {
     // fist combo state: 0 jab, 1 cross, 2 uppercut, 3 roundhouse
     private static int fistCombo = 0;
 
-    // bow draw state (read by SkillCastHandRenderer)
-    private static int drawStartTick = -1;
-
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         tick++;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.screen != null) {
             prevAttack = false;
-            drawStartTick = -1;
             return;
         }
         int stance = ClientStanceData.get(mc.player.getUUID());
@@ -50,17 +46,6 @@ public class ClientStanceCombat {
                 lastSlashTick = tick;
                 net.neoforged.neoforge.network.PacketDistributor.sendToServer(new AttackPacket(2, fistCombo));
             }
-        } else if (ready && stance == StanceData.BOW) {
-            if (attack && drawStartTick < 0) {
-                drawStartTick = tick;
-            }
-            if (!attack && drawStartTick >= 0) {
-                net.neoforged.neoforge.network.PacketDistributor.sendToServer(new AttackPacket(1, tick - drawStartTick));
-                lastSlashTick = tick; // release flick animation
-                drawStartTick = -1;
-            }
-        } else {
-            drawStartTick = -1;
         }
         prevAttack = attack;
 
@@ -96,14 +81,6 @@ public class ClientStanceCombat {
                         0.0, 0.03, 0.0);
             }
         }
-    }
-
-    public static boolean isDrawing() {
-        return drawStartTick >= 0;
-    }
-
-    public static int drawTicks() {
-        return drawStartTick >= 0 ? tick - drawStartTick : 0;
     }
 
     public static int ticksSinceSlash() {

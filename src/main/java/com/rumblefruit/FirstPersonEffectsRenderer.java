@@ -34,7 +34,6 @@ public class FirstPersonEffectsRenderer {
     }
 
     private static WeaponModels swordModel = null;
-    private static WeaponModels bowModel = null;
 
     @SubscribeEvent
     public static void onRenderHand(RenderHandEvent event) {
@@ -53,7 +52,6 @@ public class FirstPersonEffectsRenderer {
         }
         if (swordModel == null) {
             swordModel = WeaponModels.sword(mc.getEntityModels().bakeLayer(WeaponModels.SWORD_LAYER));
-            bowModel = WeaponModels.bow(mc.getEntityModels().bakeLayer(WeaponModels.BOW_LAYER));
         }
         int stance = ClientStanceData.get(player.getUUID());
         float partial = event.getPartialTick();
@@ -105,10 +103,8 @@ public class FirstPersonEffectsRenderer {
     private static void renderWeapon(PoseStack poseStack, MultiBufferSource buffers, LocalPlayer player,
                                      int stance, float time, float partial) {
         boolean holy = ClientWingsData.isActive(player.getUUID());
-        WeaponModels model = stance == StanceData.SWORD ? swordModel : bowModel;
-        ResourceLocation texture = stance == StanceData.SWORD
-                ? (holy ? WeaponModels.SWORD_HOLY_TEXTURE : WeaponModels.SWORD_TEXTURE)
-                : (holy ? WeaponModels.BOW_HOLY_TEXTURE : WeaponModels.BOW_TEXTURE);
+        WeaponModels model = swordModel;
+        ResourceLocation texture = holy ? WeaponModels.SWORD_HOLY_TEXTURE : WeaponModels.SWORD_TEXTURE;
         poseStack.pushPose();
         poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-90.0F));
         poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(28.0F));
@@ -133,18 +129,12 @@ public class FirstPersonEffectsRenderer {
         poseStack.translate(swayYaw * 0.006F, swayPitch * 0.006F, 0.0F);
         poseStack.mulPose(new Quaternionf().rotateZ((float) Math.toRadians(swayYaw * 0.8F)));
 
-        if (ClientStanceCombat.isDrawing() && stance == StanceData.BOW) {
-            applyBowDraw(poseStack, partial);
+        float sinceCast = time - ClientSkillInput.lastCastTick;
+        boolean flourish = sinceCast >= 0.0F && sinceCast <= 14.0F;
+        if (flourish) {
+            SkillAnim.applyFlourish(poseStack, sinceCast);
         } else {
-            float sinceCast = time - ClientSkillInput.lastCastTick;
-            boolean flourish = sinceCast >= 0.0F && sinceCast <= 14.0F;
-            if (flourish) {
-                SkillAnim.applyFlourish(poseStack, sinceCast);
-            } else if (stance == StanceData.SWORD) {
-                applySword(poseStack, player, partial, time);
-            } else {
-                applyBow(poseStack, player, partial, time);
-            }
+            applySword(poseStack, player, partial, time);
         }
 
         int light = Minecraft.getInstance().getEntityRenderDispatcher().getPackedLightCoords(player, partial);
@@ -217,31 +207,12 @@ public class FirstPersonEffectsRenderer {
         }
     }
 
-    // real-life archery: the draw pulls the bow to the screen center, aiming down the middle
-    private static void applyBowDraw(PoseStack poseStack, float partial) {
-        float draw = Math.min(1.0F, (ClientStanceCombat.drawTicks() + partial) / 18.0F);
-        float ease = draw * draw * (3.0F - 2.0F * draw);
-        poseStack.translate(-0.22F * ease, 0.16F * ease, 0.08F * ease);
-        poseStack.mulPose(new Quaternionf().rotateY((float) Math.toRadians(6.0F * ease)));
-        poseStack.mulPose(new Quaternionf().rotateZ((float) Math.toRadians(-3.0F * ease)));
-    }
-
     private static float phase(float t, float start, float end) {
         return AnimCurves.phase(t, start, end);
     }
 
     private static float lerp(float a, float b, float k) {
         return AnimCurves.lerp(a, b, k);
-    }
-
-    private static void applyBow(PoseStack poseStack, LocalPlayer player, float partial, float time) {
-        applyIdle(poseStack, player, partial, time);
-        float since = ClientStanceCombat.ticksSinceSlash() - partial;
-        if (since >= 0.0F && since < 8.0F) {
-            float t = since / 8.0F;
-            float flick = Mth.sin(t * (float) Math.PI);
-            poseStack.translate(0.0F, -0.06F * flick, 0.1F * flick);
-        }
     }
 
     private static void applyIdle(PoseStack poseStack, LocalPlayer player, float partial, float time) {

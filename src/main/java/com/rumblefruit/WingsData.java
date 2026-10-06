@@ -69,9 +69,14 @@ public class WingsData {
                 abilities.flying = false;
                 player.onUpdateAbilities();
             }
+            // the titan shrinks back to human size
+            TitanForms.remove(player);
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.8F, 0.8F);
         } else {
+            // the transformation: thunderclap, totem chime, golden burst + sky bolt,
+            // and the body GROWS into the element's titan form
+            TitanForms.apply(player);
             // the angel transformation: thunderclap, totem chime, golden burst + sky bolt
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 1.2F, 1.2F);
@@ -105,6 +110,8 @@ public class WingsData {
             setActive(player, false);
             return;
         }
+        // the titan body lives: auras, footprints, frost breath, meteor landings
+        TitanForms.tick(player, RumblePowerData.elementOf(player));
         // god aura: tiny electric sparkles drifting off the electro-angel
         if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel
                 && player.level().getGameTime() % 3 == 0) {

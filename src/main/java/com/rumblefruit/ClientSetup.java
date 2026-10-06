@@ -16,7 +16,6 @@ public class ClientSetup {
         event.registerLayerDefinition(WingsModel.LAYER_LOCATION, WingsModel::createBodyLayer);
         event.registerLayerDefinition(AngelRobeLayer.LAYER_LOCATION, AngelRobeLayer::createRobeLayer);
         event.registerLayerDefinition(WeaponModels.SWORD_LAYER, WeaponModels::createSwordLayer);
-        event.registerLayerDefinition(WeaponModels.BOW_LAYER, WeaponModels::createBowLayer);
         event.registerLayerDefinition(EpicPlayerModel.LAYER, EpicPlayerModel::createLayer);
         // the Fallen Exorcist no longer needs a baked layer: GeckoLib loads
         // its geometry from assets/rumblefruit/geo/exorcist.geo.json
@@ -43,7 +42,7 @@ public class ClientSetup {
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.STORM.get(), StormRenderer::new);
         event.registerEntityRenderer(ModEntities.LIGHTNING_PILLAR.get(), RumblePillarRenderer::new);
-        event.registerEntityRenderer(ModEntities.ELECTRO_ARROW.get(), ElectroArrowRenderer::new);
+        event.registerEntityRenderer(ModEntities.EARTH_CHUNK.get(), EarthChunkRenderer::new);
     }
 
     @SubscribeEvent

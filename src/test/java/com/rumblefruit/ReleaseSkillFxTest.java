@@ -182,14 +182,14 @@ class ReleaseSkillFxTest {
     void chargeStreamMatchesGoldenHashes() {
         // every phase boundary of the ascension, hashed against the golden capture
         long[][] golden = {
-                {1, 4005581143591340526L},
-                {4, -8476097461590516181L},
-                {8, -2323375850044317351L},
-                {10, 198338141664280123L},
-                {15, 716486681860093838L},
-                {30, 1692726685048110221L},
-                {45, -1328044681363538946L},
-                {60, -7616111126363924559L},
+                {1, 2082474151262542221L},
+                {4, 974617520344770506L},
+                {8, 7570898191240328383L},
+                {10, 839971615316590612L},
+                {15, -793592921199309836L},
+                {30, 4757276802892052987L},
+                {45, -7488180732752281344L},
+                {60, -2297830834916862254L},
         };
         for (long[] g : golden) {
             assertEquals(g[1], probeHash((int) g[0]), "stream hash diverged at tick " + g[0]);
@@ -234,6 +234,6 @@ class ReleaseSkillFxTest {
             h = hash(h, bc.y);
             h = hash(h, bc.z);
         }
-        assertEquals(7292176294049279493L, h);
+        assertEquals(-3286748218012597132L, h);
     }
 }
