@@ -16,6 +16,7 @@ public abstract class CameraMixin {
     @Inject(method = "setup", at = @At("RETURN"))
     private void rumblefruit$cinematic(BlockGetter level, Entity entity, boolean detached,
                                           boolean thirdPersonReverse, float partialTick, CallbackInfo ci) {
+        ClientRpgCamera.applyTitanZoom((Camera) (Object) this, entity);
         ClientRpgCamera.applyCinematic((Camera) (Object) this, entity);
     }
 }

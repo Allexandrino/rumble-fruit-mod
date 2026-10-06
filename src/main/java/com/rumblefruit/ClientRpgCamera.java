@@ -192,6 +192,36 @@ public class ClientRpgCamera {
                 com.rumblefruit.core.CameraMath.lookPitch(lookDir), roll * 0.3F);
     }
 
+    // titans need a wider shot: pull the third-person camera back with the body
+    public static void applyTitanZoom(net.minecraft.client.Camera camera, net.minecraft.world.entity.Entity entity) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null || isCinematic()) {
+            return;
+        }
+        if (mc.options.getCameraType() == CameraType.FIRST_PERSON) {
+            return;
+        }
+        double scale = 1.0;
+        if (entity instanceof net.minecraft.world.entity.LivingEntity living
+                && living.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE) != null) {
+            scale = living.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE).getValue();
+        }
+        if (scale <= 1.05) {
+            return;
+        }
+        net.minecraft.world.phys.Vec3 pos = camera.getPosition();
+        org.joml.Vector3f lv = camera.getLookVector();
+        net.minecraft.world.phys.Vec3 look = new net.minecraft.world.phys.Vec3(lv.x, lv.y, lv.z);
+        net.minecraft.world.phys.Vec3 target = pos.add(look.scale(-4.0 * (scale - 1.0)));
+        var hit = mc.level.clip(new net.minecraft.world.level.ClipContext(
+                pos, target, net.minecraft.world.level.ClipContext.Block.VISUAL,
+                net.minecraft.world.level.ClipContext.Fluid.NONE, entity));
+        if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+            target = pos.add(hit.getLocation().subtract(pos).scale(0.9));
+        }
+        ((com.rumblefruit.mixin.CameraAccessor) camera).rumblefruit$setPosition(target);
+    }
+
     @SubscribeEvent
     public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
         Minecraft mc = Minecraft.getInstance();
