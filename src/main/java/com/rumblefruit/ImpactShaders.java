@@ -25,8 +25,6 @@ public class ImpactShaders {
             ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "shaders/post/glitch.json");
     private static final ResourceLocation BLUR =
             ResourceLocation.withDefaultNamespace("shaders/post/blur.json");
-    private static final ResourceLocation SOFT =
-            ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "shaders/post/soft.json");
 
     private static final long TEAR_MILLIS = 2200;
     private static final long IMPACT_MILLIS = 900;
@@ -45,7 +43,6 @@ public class ImpactShaders {
 
     private static boolean shaderOn;
     private static boolean blurOn;
-    private static boolean softOn;
     private static long prevTicksLeft = -1;
     private static int prevCombo = -1;
     private static boolean wasHoly;
@@ -121,15 +118,9 @@ public class ImpactShaders {
 
         boolean on = active();
         boolean blur = combo == 20;
-        // мягкий фильтр только без Iris: тот перехватывает пост-пайплайн,
-        // и ванильный PostChain под ним даёт чёрный экран
-        boolean iris = net.neoforged.fml.ModList.get().isLoaded("iris");
-        boolean soft = !iris && mc.player.level().dimension()
-                .equals(com.rumblefruit.earth.EarthBorderTracker.EARTH);
-        if (on != shaderOn || blur != blurOn || soft != softOn) {
+        if (on != shaderOn || blur != blurOn) {
             shaderOn = on;
             blurOn = blur;
-            softOn = soft;
             refresh(mc);
         }
         if (shaderOn) {
@@ -145,9 +136,6 @@ public class ImpactShaders {
         if (!shaderOn) {
             if (blurOn) {
                 mc.gameRenderer.loadEffect(BLUR);
-            } else if (softOn) {
-                // в древнем мире постоянно работает мягкий тёплый фильтр
-                mc.gameRenderer.loadEffect(SOFT);
             } else {
                 mc.gameRenderer.shutdownEffect();
             }
