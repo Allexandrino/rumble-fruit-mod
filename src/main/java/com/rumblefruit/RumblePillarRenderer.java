@@ -44,51 +44,7 @@ public class RumblePillarRenderer extends EntityRenderer<RumblePillarEntity> {
             // white-hot core — huge 3D tube
             drawBeam(buffer, matrix, height, segments, 1.4F, 1.0F, 1.0F, 1.0F, alpha * 0.95F, age);
         }
-        // swirling portal at the top where the beam comes from
-        drawPortal(buffer, matrix, height, age, alpha, holy);
-        // expanding ground ring
-        drawGroundRing(buffer, matrix, age, alpha, holy);
-    }
-
-    // a portal/rift opening in the sky: concentric glowing rings + rotating arcs + dark vortex center
-    private static void drawPortal(VertexConsumer buffer, Matrix4f matrix, double beamTop, int age, float alpha,
-                                   boolean holy) {
-        double y = beamTop + 0.2;
-        float rot = age * 0.15F;
-        int rings = 3;
-        for (int ring = 0; ring < rings; ring++) {
-            float radius = 2.2F + ring * 1.2F;
-            int segments = 24;
-            for (int i = 0; i < segments; i++) {
-                double a0 = Math.PI * 2 * i / segments + rot * (ring % 2 == 0 ? 1 : -1);
-                double a1 = Math.PI * 2 * (i + 1) / segments + rot * (ring % 2 == 0 ? 1 : -1);
-                // alternate bright/dim segments for a swirling look
-                float seg = (i % 2 == 0) ? 1.0F : 0.4F;
-                float r = holy ? (ring == rings - 1 ? 1.0F : 0.95F) : (ring == rings - 1 ? 0.6F : 0.45F);
-                float g = holy ? (ring == rings - 1 ? 0.9F : 0.78F) : 0.75F;
-                float b = holy ? 0.35F : 1.0F;
-                float th = 0.18F; // ring thickness
-                float x0 = (float) (Math.cos(a0) * (radius - th)), z0 = (float) (Math.sin(a0) * (radius - th));
-                float x1 = (float) (Math.cos(a1) * (radius - th)), z1 = (float) (Math.sin(a1) * (radius - th));
-                float x2 = (float) (Math.cos(a1) * (radius + th)), z2 = (float) (Math.sin(a1) * (radius + th));
-                float x3 = (float) (Math.cos(a0) * (radius + th)), z3 = (float) (Math.sin(a0) * (radius + th));
-                buffer.addVertex(matrix, x0, (float) y, z0).setColor(r, g, b, alpha * seg);
-                buffer.addVertex(matrix, x1, (float) y, z1).setColor(r, g, b, alpha * seg);
-                buffer.addVertex(matrix, x2, (float) y, z2).setColor(r, g, b, alpha * seg);
-                buffer.addVertex(matrix, x3, (float) y, z3).setColor(r, g, b, alpha * seg);
-            }
-        }
-        // dark vortex center (flat dark disc that the beam pierces)
-        int centerSeg = 16;
-        for (int i = 0; i < centerSeg; i++) {
-            double a0 = Math.PI * 2 * i / centerSeg + rot;
-            double a1 = Math.PI * 2 * (i + 1) / centerSeg + rot;
-            float r0 = 0.0F, r1 = 1.4F;
-            buffer.addVertex(matrix, (float) (Math.cos(a0) * r0), (float) y, (float) (Math.sin(a0) * r0)).setColor(holy ? 0.3F : 0.05F, holy ? 0.18F : 0.05F, holy ? 0.02F : 0.2F, alpha);
-            buffer.addVertex(matrix, (float) (Math.cos(a1) * r0), (float) y, (float) (Math.sin(a1) * r0)).setColor(holy ? 0.3F : 0.05F, holy ? 0.18F : 0.05F, holy ? 0.02F : 0.2F, alpha);
-            buffer.addVertex(matrix, (float) (Math.cos(a1) * r1), (float) y, (float) (Math.sin(a1) * r1)).setColor(holy ? 0.3F : 0.05F, holy ? 0.18F : 0.05F, holy ? 0.02F : 0.2F, alpha);
-            buffer.addVertex(matrix, (float) (Math.cos(a0) * r1), (float) y, (float) (Math.sin(a0) * r1)).setColor(holy ? 0.3F : 0.05F, holy ? 0.18F : 0.05F, holy ? 0.02F : 0.2F, alpha);
-        }
+        // портал-кольца и ударная волна убраны по просьбе — только луч
     }
 
     // 3D tube: N-sided polygonal ring per segment — real volume from every angle
@@ -123,35 +79,6 @@ public class RumblePillarRenderer extends EntityRenderer<RumblePillarEntity> {
                 buffer.addVertex(matrix, x11, (float) y1, z11).setColor(r, g, b, alpha);
                 buffer.addVertex(matrix, x10, (float) y1, z10).setColor(r, g, b, alpha);
             }
-        }
-    }
-
-    // flat expanding ring of quads at the base, like a shockwave
-    private static void drawGroundRing(VertexConsumer buffer, Matrix4f matrix, int age, float alpha,
-                                       boolean holy) {
-        float radius = 1.5F + age * 0.25F;
-        if (radius > 8.0F) {
-            return;
-        }
-        float a = alpha * (1.0F - radius / 8.0F);
-        float rr = holy ? 1.0F : 0.6F, gg = holy ? 0.85F : 0.8F, bb = holy ? 0.4F : 1.0F;
-        int quads = 12;
-        for (int i = 0; i < quads; i++) {
-            double a0 = Math.PI * 2 * i / quads;
-            double a1 = Math.PI * 2 * (i + 1) / quads;
-            float x0 = (float) (Math.cos(a0) * radius);
-            float z0 = (float) (Math.sin(a0) * radius);
-            float x1 = (float) (Math.cos(a1) * radius);
-            float z1 = (float) (Math.sin(a1) * radius);
-            float inner = radius * 0.7F;
-            float ix0 = (float) (Math.cos(a0) * inner);
-            float iz0 = (float) (Math.sin(a0) * inner);
-            float ix1 = (float) (Math.cos(a1) * inner);
-            float iz1 = (float) (Math.sin(a1) * inner);
-            buffer.addVertex(matrix, ix0, 0.05F, iz0).setColor(rr, gg, bb, a);
-            buffer.addVertex(matrix, x0, 0.05F, z0).setColor(rr, gg, bb, a);
-            buffer.addVertex(matrix, x1, 0.05F, z1).setColor(rr, gg, bb, a);
-            buffer.addVertex(matrix, ix1, 0.05F, iz1).setColor(rr, gg, bb, a);
         }
     }
 
