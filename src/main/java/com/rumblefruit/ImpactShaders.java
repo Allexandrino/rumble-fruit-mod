@@ -17,8 +17,6 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 // fall — карандашных зарисовок больше нет
 @EventBusSubscriber(modid = RumbleFruitMod.MOD_ID, value = Dist.CLIENT)
 public class ImpactShaders {
-    private static final ResourceLocation SPACETEAR =
-            ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "shaders/post/spacetear.json");
     private static final ResourceLocation IMPACT =
             ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, "shaders/post/impact.json");
     private static final ResourceLocation GLITCH =
@@ -26,12 +24,10 @@ public class ImpactShaders {
     private static final ResourceLocation BLUR =
             ResourceLocation.withDefaultNamespace("shaders/post/blur.json");
 
-    private static final long TEAR_MILLIS = 2200;
     private static final long IMPACT_MILLIS = 900;
     private static final long GLITCH_MILLIS = 600;
 
     private static final int NONE = 0;
-    private static final int TEAR = 1;
     private static final int IMPACT_FX = 2;
     private static final int GLITCH_FX = 3;
 
@@ -48,12 +44,6 @@ public class ImpactShaders {
     private static boolean wasHoly;
 
     private ImpactShaders() {
-    }
-
-    // the J blast rips space open
-    public static void spaceTear() {
-        mode = TEAR;
-        start = System.currentTimeMillis();
     }
 
     // heavy casts burn the screen edges in the fruit's color
@@ -74,7 +64,6 @@ public class ImpactShaders {
 
     private static long duration() {
         return switch (mode) {
-            case TEAR -> TEAR_MILLIS;
             case IMPACT_FX -> IMPACT_MILLIS;
             case GLITCH_FX -> GLITCH_MILLIS;
             default -> 0;
@@ -103,11 +92,8 @@ public class ImpactShaders {
         if (mc.player == null || mc.level == null) {
             return;
         }
-        // J detonation / landing: combat-anim transitions rip the screen
+        // slow-mo fall/landing blur (без «разрыва пространства» — убран)
         int combo = ClientCombatAnim.comboOf(mc.player.getUUID());
-        if (combo != prevCombo && (combo == 20 || combo == 21)) {
-            spaceTear();
-        }
         prevCombo = combo;
         // F transformation: reality glitches
         boolean holy = ClientWingsData.isActive(mc.player.getUUID());
@@ -142,7 +128,6 @@ public class ImpactShaders {
             return;
         }
         switch (mode) {
-            case TEAR -> mc.gameRenderer.loadEffect(SPACETEAR);
             case IMPACT_FX -> mc.gameRenderer.loadEffect(IMPACT);
             case GLITCH_FX -> mc.gameRenderer.loadEffect(GLITCH);
             default -> {
