@@ -13,8 +13,7 @@ public class ClientSetup {
     @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(ThunderballModel.LAYER_LOCATION, ThunderballModel::createBodyLayer);
-        event.registerLayerDefinition(WingsModel.LAYER_LOCATION, WingsModel::createBodyLayer);
-        event.registerLayerDefinition(AngelRobeLayer.LAYER_LOCATION, AngelRobeLayer::createRobeLayer);
+        event.registerLayerDefinition(TitanPropsLayer.LAYER_LOCATION, TitanPropsLayer::createLayer);
         event.registerLayerDefinition(WeaponModels.SWORD_LAYER, WeaponModels::createSwordLayer);
         event.registerLayerDefinition(EpicPlayerModel.LAYER, EpicPlayerModel::createLayer);
         // the Fallen Exorcist no longer needs a baked layer: GeckoLib loads
@@ -26,8 +25,7 @@ public class ClientSetup {
         for (net.minecraft.client.resources.PlayerSkin.Model skin : event.getSkins()) {
             net.minecraft.client.renderer.entity.player.PlayerRenderer renderer = event.getSkin(skin);
             if (renderer != null) {
-                renderer.addLayer(new WingsLayer(renderer, event.getEntityModels()));
-                renderer.addLayer(new AngelRobeLayer(renderer, event.getEntityModels()));
+                renderer.addLayer(new TitanPropsLayer(renderer, event.getEntityModels()));
                 renderer.addLayer(new CrackedSkinLayer(renderer));
                 renderer.addLayer(new VirtualWeaponLayer(renderer));
             }

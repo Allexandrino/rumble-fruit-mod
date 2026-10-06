@@ -49,11 +49,12 @@ public final class TitanForms {
     // how giant each form grows (1.0 = human size)
     public static double scaleOf(int elementId) {
         return switch (elementId) {
-            case 1 -> 1.9;   // Демон-Пожиратель
-            case 2 -> 1.8;   // Король Тьмы
-            case 3 -> 1.9;   // Ледяной Дракон
-            case 4 -> 1.8;   // Природа-Мать
-            default -> 1.15; // Электро-Ангел: чуть выше, но остаётся стремительным
+            case 0 -> 1.6;   // Грозовой Джинн
+            case 1 -> 2.2;   // Оплавленный Колосс — самый большой
+            case 2 -> 1.8;   // Живая Сингулярность
+            case 3 -> 1.7;   // Вьюжный Дух
+            case 4 -> 1.85;  // Мицелий-Владыка
+            default -> 1.15;
         };
     }
 
@@ -120,10 +121,11 @@ public final class TitanForms {
         long now = level.getGameTime();
 
         switch (elementId) {
-            case 1 -> demonTick(player, level, now);
-            case 2 -> voidTick(player, level, now);
-            case 3 -> dragonTick(player, level, now);
-            case 4 -> natureTick(player, level, now);
+            case 0 -> djinnTick(player, level, now);
+            case 1 -> colossusTick(player, level, now);
+            case 2 -> singularityTick(player, level, now);
+            case 3 -> spiritTick(player, level, now);
+            case 4 -> myceliumTick(player, level, now);
             default -> {
             }
         }
@@ -143,12 +145,26 @@ public final class TitanForms {
         }
     }
 
-    // ---------------- demon (inferno) ----------------
-    private static void demonTick(ServerPlayer player, ServerLevel level, long now) {
-        // heat aura: everything standing close to the demon catches fire
+    // ---------------- storm djinn (lightning) ----------------
+    private static void djinnTick(ServerPlayer player, ServerLevel level, long now) {
+        // the vortex that replaces his legs: a storm swirl every few ticks
+        if (now % 2 == 0) {
+            double t = now * 0.22;
+            level.sendParticles(ModParticles.ELECTRO_CLOUD.get(),
+                    player.getX() + Math.cos(t) * 0.6, player.getY() + 0.2,
+                    player.getZ() + Math.sin(t) * 0.6, 2, 0.15, 0.1, 0.15, 0.02);
+            level.sendParticles(Element.LIGHTNING.spark(),
+                    player.getX() - Math.cos(t) * 0.6, player.getY() + 0.35,
+                    player.getZ() - Math.sin(t) * 0.6, 2, 0.1, 0.15, 0.1, 0.03);
+        }
+    }
+
+    // ---------------- molten colossus (inferno) ----------------
+    private static void colossusTick(ServerPlayer player, ServerLevel level, long now) {
+        // heat aura: everything standing close to the colossus catches fire
         if (now % 20 == 0) {
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class,
-                    player.getBoundingBox().inflate(4.0), e -> e != player && e.isAlive())) {
+                    player.getBoundingBox().inflate(4.5), e -> e != player && e.isAlive())) {
                 e.setRemainingFireTicks(60);
             }
         }
@@ -161,9 +177,9 @@ public final class TitanForms {
         }
     }
 
-    // ---------------- void king ----------------
-    private static void voidTick(ServerPlayer player, ServerLevel level, long now) {
-        // aura of decay: the king's presence withers the living
+    // ---------------- living singularity (void) ----------------
+    private static void singularityTick(ServerPlayer player, ServerLevel level, long now) {
+        // aura of decay: the singularity withers the living
         if (now % 20 == 0) {
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class,
                     player.getBoundingBox().inflate(5.0), e -> e != player && e.isAlive())) {
@@ -172,11 +188,23 @@ public final class TitanForms {
             level.sendParticles(ParticleTypes.SOUL,
                     player.getX(), player.getY() + 1.2, player.getZ(), 6, 0.8, 1.0, 0.8, 0.02);
         }
+        // gravity: loose items and experience bend toward the event horizon
+        if (now % 2 == 0) {
+            for (var e : level.getEntitiesOfClass(net.minecraft.world.entity.Entity.class,
+                    player.getBoundingBox().inflate(7.0),
+                    e -> e instanceof net.minecraft.world.entity.item.ItemEntity
+                            || e instanceof net.minecraft.world.entity.ExperienceOrb)) {
+                net.minecraft.world.phys.Vec3 pull = player.position().add(0.0, 1.0, 0.0)
+                        .subtract(e.position()).normalize().scale(0.06);
+                e.setDeltaMovement(e.getDeltaMovement().add(pull));
+                e.hurtMarked = true;
+            }
+        }
     }
 
-    // ---------------- ice dragon (frost) ----------------
-    private static void dragonTick(ServerPlayer player, ServerLevel level, long now) {
-        // frost walker: water freezes solid under the dragon's tread
+    // ---------------- blizzard spirit (frost) ----------------
+    private static void spiritTick(ServerPlayer player, ServerLevel level, long now) {
+        // frost walker: water freezes solid under the spirit's tread
         if (now % 3 == 0 && player.onGround()) {
             BlockPos center = player.blockPosition();
             for (BlockPos pos : BlockPos.betweenClosed(center.offset(-3, -1, -3), center.offset(3, 0, 3))) {
@@ -184,8 +212,14 @@ public final class TitanForms {
                     level.setBlockAndUpdate(pos.immutable(), Blocks.FROSTED_ICE.defaultBlockState());
                 }
             }
+            // snow footprints where the spirit walks
+            BlockPos at = player.blockPosition();
+            if (level.getBlockState(at).isAir() && level.getBlockState(at.below()).isSolid()
+                    && level.random.nextInt(4) == 0) {
+                level.setBlockAndUpdate(at, Blocks.SNOW.defaultBlockState());
+            }
         }
-        // frost breath: while the wings drive the dragon forward it exhales a
+        // frost breath: while the wind drives the spirit forward it exhales a
         // freezing cone that chills everything caught inside
         if (now % 3 == 0 && !player.onGround()
                 && player.getDeltaMovement().horizontalDistanceSqr() > 0.3) {
@@ -212,27 +246,23 @@ public final class TitanForms {
         }
     }
 
-    // ---------------- mother nature ----------------
-    private static void natureTick(ServerPlayer player, ServerLevel level, long now) {
-        // life aura: slow mend + the ground blossoms where she walks
+    // ---------------- mycelium sovereign (nature) ----------------
+    private static void myceliumTick(ServerPlayer player, ServerLevel level, long now) {
+        // life aura: slow mend + the ground itself converts beneath the sovereign
         if (now % 20 == 0) {
             player.heal(1.0F);
             level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
                     player.getX(), player.getY() + 1.4, player.getZ(), 5, 1.0, 1.0, 1.0, 0.0);
         }
-        if (now % 7 == 0 && player.onGround()) {
+        if (now % 5 == 0 && player.onGround()) {
             BlockPos under = player.blockPosition().below();
-            BlockPos at = player.blockPosition();
             BlockState ground = level.getBlockState(under);
-            BlockState spot = level.getBlockState(at);
-            if (ground.is(Blocks.GRASS_BLOCK) && spot.isAir()
-                    && level.random.nextInt(3) == 0) {
-                BlockState flower = switch (level.random.nextInt(4)) {
-                    case 0 -> Blocks.POPPY.defaultBlockState();
-                    case 1 -> Blocks.DANDELION.defaultBlockState();
-                    default -> Blocks.SHORT_GRASS.defaultBlockState();
-                };
-                level.setBlockAndUpdate(at, flower);
+            // mycelium spread: grass and dirt bow to the sovereign
+            if (ground.is(Blocks.GRASS_BLOCK) || ground.is(Blocks.DIRT)) {
+                level.setBlockAndUpdate(under, Blocks.MYCELIUM.defaultBlockState());
+                level.sendParticles(Element.NATURE.spark(),
+                        under.getX() + 0.5, under.getY() + 1.05, under.getZ() + 0.5,
+                        3, 0.35, 0.1, 0.35, 0.01);
             }
         }
     }
