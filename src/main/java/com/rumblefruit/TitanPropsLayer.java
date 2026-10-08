@@ -88,56 +88,53 @@ public class TitanPropsLayer extends RenderLayer<AbstractClientPlayer, PlayerMod
 
     // ---------------- storm djinn (lightning) ----------------
     private void renderDjinn(PoseStack ps, MultiBufferSource buffer, int light, float age, float unfold) {
-        VertexConsumer vc = buffer.getBuffer(RenderType.entityCutoutNoCull(SEA_LANTERN));
         ps.pushPose();
         this.getParentModel().body.translateAndRotate(ps);
-        // three gyroscopic rings, each on its own axis and spin speed
-        ring(ps, vc, light, 15.0F, 16, 2.2F, age * 0.045F, 0.0F, 0.0F, 6.0F, unfold);
-        ring(ps, vc, light, 18.0F, 16, 1.9F, -age * 0.032F, 0.9F, 0.0F, 6.0F, unfold);
-        ring(ps, vc, light, 21.0F, 20, 1.6F, age * 0.021F, -0.6F, 0.6F, 6.0F, unfold);
+        // three gyroscopic rings, each on its own axis and spin speed —
+        // SOLID storm-cyan cubes: they read through the thin vortex
+        ring(ps, buffer, SEA_LANTERN, false, light, 15.0F, 16, 5.5F, age * 0.045F, 0.0F, 0.0F, 7.0F, unfold, 0xFF8FE3FF);
+        ring(ps, buffer, SEA_LANTERN, false, light, 18.5F, 16, 4.5F, -age * 0.032F, 0.9F, 0.0F, 7.0F, unfold, 0xFFB8EEFF);
+        ring(ps, buffer, SEA_LANTERN, false, light, 22.0F, 20, 3.5F, age * 0.021F, -0.6F, 0.6F, 7.0F, unfold, 0xFF6FCFFF);
         ps.popPose();
     }
 
     // ---------------- molten colossus (inferno) ----------------
     private void renderColossus(PoseStack ps, MultiBufferSource buffer, int light, float age, float unfold) {
-        VertexConsumer vc = buffer.getBuffer(RenderType.entityCutoutNoCull(MAGMA));
         ps.pushPose();
         this.getParentModel().body.translateAndRotate(ps);
         // chest plate
-        prop(ps, vc, light, 0.0F, 6.0F, 0.0F, 10.5F, 12.5F, 6.0F, unfold);
+        prop(ps, buffer, MAGMA, light, 0.0F, 6.0F, 0.0F, 10.5F, 12.5F, 6.0F, unfold);
         // pauldrons: huge slabs over the shoulders
-        prop(ps, vc, light, -7.6F, 0.5F, 0.0F, 6.5F, 4.5F, 7.5F, unfold);
-        prop(ps, vc, light, 7.6F, 0.5F, 0.0F, 6.5F, 4.5F, 7.5F, unfold);
+        prop(ps, buffer, MAGMA, light, -7.6F, 0.5F, 0.0F, 6.5F, 4.5F, 7.5F, unfold);
+        prop(ps, buffer, MAGMA, light, 7.6F, 0.5F, 0.0F, 6.5F, 4.5F, 7.5F, unfold);
         // belt plate
-        prop(ps, vc, light, 0.0F, 12.6F, 0.0F, 9.5F, 2.4F, 5.2F, unfold);
+        prop(ps, buffer, MAGMA, light, 0.0F, 12.6F, 0.0F, 9.5F, 2.4F, 5.2F, unfold);
         ps.popPose();
         ps.pushPose();
         this.getParentModel().rightArm.translateAndRotate(ps);
-        prop(ps, vc, light, -0.2F, 6.4F, 0.0F, 5.4F, 6.0F, 5.4F, unfold); // gauntlet
+        prop(ps, buffer, MAGMA, light, -0.2F, 6.4F, 0.0F, 5.4F, 6.0F, 5.4F, unfold); // gauntlet
         ps.popPose();
         ps.pushPose();
         this.getParentModel().leftArm.translateAndRotate(ps);
-        prop(ps, vc, light, 0.2F, 6.4F, 0.0F, 5.4F, 6.0F, 5.4F, unfold); // gauntlet
+        prop(ps, buffer, MAGMA, light, 0.2F, 6.4F, 0.0F, 5.4F, 6.0F, 5.4F, unfold); // gauntlet
         ps.popPose();
         ps.pushPose();
         this.getParentModel().head.translateAndRotate(ps);
-        prop(ps, vc, light, 0.0F, -2.6F, 0.0F, 9.4F, 3.0F, 9.4F, unfold); // visor brow
+        prop(ps, buffer, MAGMA, light, 0.0F, -2.6F, 0.0F, 9.4F, 3.0F, 9.4F, unfold); // visor brow
         ps.popPose();
     }
 
     // ---------------- living singularity (void) ----------------
     private void renderSingularity(PoseStack ps, MultiBufferSource buffer, int light, float age, float unfold) {
-        VertexConsumer obsidian = buffer.getBuffer(RenderType.entityCutoutNoCull(OBSIDIAN));
-        VertexConsumer heart = buffer.getBuffer(RenderType.entityCutoutNoCull(AMETHYST));
         ps.pushPose();
         this.getParentModel().body.translateAndRotate(ps);
         // debris ring, horizontal, slow
-        ring(ps, obsidian, light, 16.0F, 8, 2.8F, age * 0.018F, 0.0F, 0.0F, 5.0F, unfold);
+        ring(ps, buffer, OBSIDIAN, false, light, 16.0F, 8, 2.8F, age * 0.018F, 0.0F, 0.0F, 5.0F, unfold, -1);
         // counter-ring on a steep tilt
-        ring(ps, obsidian, light, 19.0F, 6, 2.2F, -age * 0.027F, 0.62F, 0.0F, 5.0F, unfold);
+        ring(ps, buffer, OBSIDIAN, false, light, 19.0F, 6, 2.2F, -age * 0.027F, 0.62F, 0.0F, 5.0F, unfold, -1);
         // the amethyst heart, pulsing inside the rings
         float pulse = 3.2F + (float) Math.sin(age * 0.13F) * 0.9F;
-        prop(ps, heart, light, 0.0F, 4.0F, 0.0F, pulse, pulse, pulse, unfold);
+        prop(ps, buffer, AMETHYST, light, 0.0F, 4.0F, 0.0F, pulse, pulse, pulse, unfold);
         ps.popPose();
     }
 
@@ -164,29 +161,32 @@ public class TitanPropsLayer extends RenderLayer<AbstractClientPlayer, PlayerMod
 
     // ---------------- mycelium sovereign (nature) ----------------
     private void renderMycelium(PoseStack ps, MultiBufferSource buffer, int light, float age, float unfold) {
-        VertexConsumer cap = buffer.getBuffer(RenderType.entityCutoutNoCull(MUSHROOM_RED));
-        VertexConsumer stem = buffer.getBuffer(RenderType.entityCutoutNoCull(MUSHROOM_STEM));
         ps.pushPose();
         this.getParentModel().head.translateAndRotate(ps);
         // the giant cap: red dome + stem ring under it, swaying like a real toadstool
         ps.mulPose(Axis.ZP.rotationDegrees((float) Math.sin(age * 0.05F) * 4.0F));
-        prop(ps, cap, light, 0.0F, -6.2F, 0.0F, 13.0F, 3.6F, 13.0F, unfold);
-        prop(ps, stem, light, 0.0F, -4.6F, 0.0F, 9.0F, 1.8F, 9.0F, unfold);
+        prop(ps, buffer, MUSHROOM_RED, light, 0.0F, -6.2F, 0.0F, 13.0F, 3.6F, 13.0F, unfold);
+        prop(ps, buffer, MUSHROOM_STEM, light, 0.0F, -4.6F, 0.0F, 9.0F, 1.8F, 9.0F, unfold);
         ps.popPose();
         ps.pushPose();
         this.getParentModel().body.translateAndRotate(ps);
         // two little toadstools on the shoulders
-        prop(ps, stem, light, -6.0F, -0.6F, 0.0F, 1.6F, 3.0F, 1.6F, unfold);
-        prop(ps, cap, light, -6.0F, -2.6F, 0.0F, 3.4F, 1.6F, 3.4F, unfold);
-        prop(ps, stem, light, 6.0F, -0.4F, 0.0F, 1.4F, 2.4F, 1.4F, unfold);
-        prop(ps, cap, light, 6.0F, -2.0F, 0.0F, 2.8F, 1.4F, 2.8F, unfold);
+        prop(ps, buffer, MUSHROOM_STEM, light, -6.0F, -0.6F, 0.0F, 1.6F, 3.0F, 1.6F, unfold);
+        prop(ps, buffer, MUSHROOM_RED, light, -6.0F, -2.6F, 0.0F, 3.4F, 1.6F, 3.4F, unfold);
+        prop(ps, buffer, MUSHROOM_STEM, light, 6.0F, -0.4F, 0.0F, 1.4F, 2.4F, 1.4F, unfold);
+        prop(ps, buffer, MUSHROOM_RED, light, 6.0F, -2.0F, 0.0F, 2.8F, 1.4F, 2.8F, unfold);
         ps.popPose();
     }
 
     // ---------------- shared prop helpers ----------------
-    // one textured cube: position and size in player-model pixels (16px = 1 block)
-    private void prop(PoseStack ps, VertexConsumer vc, int light,
+    // NOTE on buffer discipline: the entity BufferSource ENDS the previous
+    // builder whenever the render type changes — a VertexConsumer held across
+    // another getBuffer() call is a stale handle and crashes the frame with
+    // "Not building!" (this exact bug killed the singularity render). so every
+    // prop fetches its consumer immediately before use, never earlier.
+    private void prop(PoseStack ps, MultiBufferSource buffer, ResourceLocation texture, int light,
                       float x, float y, float z, float sx, float sy, float sz, float unfold) {
+        VertexConsumer vc = buffer.getBuffer(RenderType.entityCutoutNoCull(texture));
         ps.pushPose();
         ps.translate(x / 16.0F, y / 16.0F, z / 16.0F);
         ps.scale((sx / 16.0F) * unfold, (sy / 16.0F) * unfold, (sz / 16.0F) * unfold);
@@ -194,10 +194,14 @@ public class TitanPropsLayer extends RenderLayer<AbstractClientPlayer, PlayerMod
         ps.popPose();
     }
 
-    // a ring of small cubes on a tilted plane, spinning with age
-    private void ring(PoseStack ps, VertexConsumer vc, int light,
-                      float radiusPx, int count, float cubePx, float angle,
-                      float tiltX, float tiltZ, float yPx, float unfold) {
+    // a ring of small cubes on a tilted plane, spinning with age; the
+    // consumer is fetched ONCE per ring right before use (see prop's note)
+    private void ring(PoseStack ps, MultiBufferSource buffer, ResourceLocation texture, boolean emissive,
+                      int light, float radiusPx, int count, float cubePx, float angle,
+                      float tiltX, float tiltZ, float yPx, float unfold, int color) {
+        VertexConsumer vc = buffer.getBuffer(emissive
+                ? RenderType.eyes(texture)
+                : RenderType.entityCutoutNoCull(texture));
         ps.pushPose();
         ps.translate(0.0F, yPx / 16.0F, 0.0F);
         ps.mulPose(Axis.XP.rotation(tiltX));
@@ -209,7 +213,7 @@ public class TitanPropsLayer extends RenderLayer<AbstractClientPlayer, PlayerMod
             ps.translate(Math.cos(a) * radiusPx / 16.0F, 0.0F, Math.sin(a) * radiusPx / 16.0F);
             ps.mulPose(Axis.YP.rotation((float) -a));
             ps.scale(cubePx / 16.0F * unfold, cubePx / 16.0F * unfold, cubePx / 16.0F * unfold);
-            cube.render(ps, vc, light, OverlayTexture.NO_OVERLAY);
+            cube.render(ps, vc, light, OverlayTexture.NO_OVERLAY, color);
             ps.popPose();
         }
         ps.popPose();
@@ -227,13 +231,14 @@ public class TitanPropsLayer extends RenderLayer<AbstractClientPlayer, PlayerMod
         double pz = player.getZ();
         double t = player.tickCount * 0.22;
         switch (elementId) {
-            case 0 -> { // storm vortex swirling at the djinn's base
-                for (int i = 0; i < 2; i++) {
-                    double a = t + i * Math.PI;
-                    mc.level.addParticle(com.rumblefruit.ModParticles.ELECTRO_CLOUD.get(),
-                            px + Math.cos(a) * 0.55, py + 0.15 + Math.random() * 0.4,
-                            pz + Math.sin(a) * 0.55, 0.0, 0.05, 0.0);
+            case 0 -> { // storm djinn: rings do the talking — just spark drips
+                if (player.tickCount % 8 != 0) {
+                    return;
                 }
+                double a = t;
+                mc.level.addParticle(Element.LIGHTNING.spark(),
+                        px + Math.cos(a) * 0.7, py + 0.2 + Math.random() * 0.3,
+                        pz + Math.sin(a) * 0.7, 0.0, 0.04, 0.0);
             }
             case 1 -> { // embers drip off the colossus
                 mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.LAVA,

@@ -147,15 +147,19 @@ public final class TitanForms {
 
     // ---------------- storm djinn (lightning) ----------------
     private static void djinnTick(ServerPlayer player, ServerLevel level, long now) {
-        // the vortex that replaces his legs: a storm swirl every few ticks
-        if (now % 2 == 0) {
+        // the vortex that replaces his legs: a thin hint of storm at the base —
+        // kept VERY sparse so the glowing rings stay readable through it
+        if (now % 20 == 0) {
             double t = now * 0.22;
             level.sendParticles(ModParticles.ELECTRO_CLOUD.get(),
-                    player.getX() + Math.cos(t) * 0.6, player.getY() + 0.2,
-                    player.getZ() + Math.sin(t) * 0.6, 2, 0.15, 0.1, 0.15, 0.02);
+                    player.getX() + Math.cos(t) * 0.7, player.getY() + 0.1,
+                    player.getZ() + Math.sin(t) * 0.7, 1, 0.05, 0.03, 0.05, 0.005);
+        }
+        if (now % 8 == 0) {
+            double t = now * 0.22;
             level.sendParticles(Element.LIGHTNING.spark(),
-                    player.getX() - Math.cos(t) * 0.6, player.getY() + 0.35,
-                    player.getZ() - Math.sin(t) * 0.6, 2, 0.1, 0.15, 0.1, 0.03);
+                    player.getX() - Math.cos(t) * 0.7, player.getY() + 0.25,
+                    player.getZ() - Math.sin(t) * 0.7, 1, 0.06, 0.1, 0.06, 0.02);
         }
     }
 
