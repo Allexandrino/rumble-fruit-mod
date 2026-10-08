@@ -48,6 +48,39 @@ public final class PlayerSkillAnimations {
     private PlayerSkillAnimations() {
     }
 
+    // ---- зацикленная стойка (guard pose) на отдельном слое под боевыми ----
+
+    private static final Map<UUID, ModifierLayer<IAnimation>> IDLE_LAYERS = new HashMap<>();
+    private static final Map<UUID, String> IDLE_CURRENT = new HashMap<>();
+
+    // включает/держит зацикленную стойку; null — снять
+    public static void idle(UUID playerId, String name) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
+        Player player = mc.level.getPlayerByUUID(playerId);
+        if (!(player instanceof AbstractClientPlayer clientPlayer)) return;
+        String current = IDLE_CURRENT.get(playerId);
+        if (name == null ? current == null : name.equals(current)) return;
+        AnimationStack stack = PlayerAnimationAccess.getPlayerAnimLayer(clientPlayer);
+        ModifierLayer<IAnimation> layer = IDLE_LAYERS.computeIfAbsent(playerId, id -> {
+            ModifierLayer<IAnimation> created = new ModifierLayer<>();
+            stack.addAnimLayer(2000, created); // под боевыми (2500)
+            return created;
+        });
+        if (name == null) {
+            layer.setAnimation(null);
+            IDLE_CURRENT.remove(playerId);
+            return;
+        }
+        IPlayable playable = CACHE.computeIfAbsent(name,
+                n -> PlayerAnimationRegistry.getAnimation(
+                        ResourceLocation.fromNamespaceAndPath(RumbleFruitMod.MOD_ID, n)));
+        if (playable instanceof KeyframeAnimation animation) {
+            layer.setAnimation(new KeyframeAnimationPlayer(animation));
+            IDLE_CURRENT.put(playerId, name);
+        }
+    }
+
     public static void play(UUID playerId, int combo) {
         String name = BY_COMBO.get(combo);
         if (name == null) {

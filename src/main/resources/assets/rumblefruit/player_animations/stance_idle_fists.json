@@ -1,0 +1,156 @@
+{
+ "name": "stance_idle_fists",
+ "author": "rumblefruit",
+ "description": "",
+ "emote": {
+  "beginTick": 0,
+  "endTick": 40,
+  "stopTick": 42,
+  "isLoop": true,
+  "returnTick": 2,
+  "nsfw": false,
+  "degrees": true,
+  "moves": [
+   {
+    "tick": 0,
+    "easing": "INOUTQUAD",
+    "body": {
+     "yaw": -12,
+     "roll": 0.0
+    },
+    "rightArm": {
+     "pitch": -62.0,
+     "yaw": -18,
+     "roll": -12
+    },
+    "leftArm": {
+     "pitch": -78.0,
+     "yaw": 14,
+     "roll": 10
+    },
+    "head": {
+     "pitch": 4,
+     "yaw": 0.0
+    },
+    "rightLeg": {
+     "pitch": -6
+    },
+    "leftLeg": {
+     "pitch": 8
+    }
+   },
+   {
+    "tick": 10,
+    "easing": "INOUTQUAD",
+    "body": {
+     "yaw": -9.8,
+     "roll": 0.8800000000000001
+    },
+    "rightArm": {
+     "pitch": -58.92,
+     "yaw": -18,
+     "roll": -12
+    },
+    "leftArm": {
+     "pitch": -74.92,
+     "yaw": 14,
+     "roll": 10
+    },
+    "head": {
+     "pitch": 4,
+     "yaw": 1.1
+    },
+    "rightLeg": {
+     "pitch": -6
+    },
+    "leftLeg": {
+     "pitch": 8
+    }
+   },
+   {
+    "tick": 20,
+    "easing": "INOUTQUAD",
+    "body": {
+     "yaw": -12,
+     "roll": 0.0
+    },
+    "rightArm": {
+     "pitch": -62.0,
+     "yaw": -18,
+     "roll": -12
+    },
+    "leftArm": {
+     "pitch": -78.0,
+     "yaw": 14,
+     "roll": 10
+    },
+    "head": {
+     "pitch": 4,
+     "yaw": 0.0
+    },
+    "rightLeg": {
+     "pitch": -6
+    },
+    "leftLeg": {
+     "pitch": 8
+    }
+   },
+   {
+    "tick": 30,
+    "easing": "INOUTQUAD",
+    "body": {
+     "yaw": -14.2,
+     "roll": -0.8800000000000001
+    },
+    "rightArm": {
+     "pitch": -65.08,
+     "yaw": -18,
+     "roll": -12
+    },
+    "leftArm": {
+     "pitch": -81.08,
+     "yaw": 14,
+     "roll": 10
+    },
+    "head": {
+     "pitch": 4,
+     "yaw": -1.1
+    },
+    "rightLeg": {
+     "pitch": -6
+    },
+    "leftLeg": {
+     "pitch": 8
+    }
+   },
+   {
+    "tick": 40,
+    "easing": "INOUTQUAD",
+    "body": {
+     "yaw": -12,
+     "roll": 0.0
+    },
+    "rightArm": {
+     "pitch": -62.0,
+     "yaw": -18,
+     "roll": -12
+    },
+    "leftArm": {
+     "pitch": -78.0,
+     "yaw": 14,
+     "roll": 10
+    },
+    "head": {
+     "pitch": 4,
+     "yaw": 0.0
+    },
+    "rightLeg": {
+     "pitch": -6
+    },
+    "leftLeg": {
+     "pitch": 8
+    }
+   }
+  ]
+ }
+}

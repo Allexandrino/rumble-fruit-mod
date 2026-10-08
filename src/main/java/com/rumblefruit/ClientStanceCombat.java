@@ -49,6 +49,15 @@ public class ClientStanceCombat {
         }
         prevAttack = attack;
 
+        // реалистичная стойка в покое: гард с дыханием, когда игрок
+        // в стойке, не атакует, не бежит и стоит на земле
+        boolean attacking = attack || tick - lastSlashTick < 6;
+        boolean idle = ready && !attacking && !mc.player.isSprinting()
+                && mc.player.onGround();
+        String idleAnim = !idle ? null
+                : stance == StanceData.SWORD ? "stance_idle_spear" : "stance_idle_fists";
+        PlayerSkillAnimations.idle(mc.player.getUUID(), idleAnim);
+
         // fists stance: hands (and the kicking foot) crackle with electricity
         if (mc.level != null && tick % 3 == 0) {
             for (net.minecraft.client.player.AbstractClientPlayer p : mc.level.players()) {
