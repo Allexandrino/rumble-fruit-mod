@@ -26,6 +26,17 @@ public class ModCommands {
                             PowerChargeData.sync(player);
                             return 1;
                         }))
+                // /rumblefruit chargedbg — сколько силы в шкале (диагностика)
+                .then(Commands.literal("chargedbg")
+                        .executes(ctx -> {
+                            ServerPlayer player = ctx.getSource().getPlayerOrException();
+                            ctx.getSource().sendSystemMessage(Component.literal(
+                                    "charge=" + PowerChargeData.get(player.getUUID())
+                                            + " wings=" + WingsData.isActive(player.getUUID())));
+                            System.out.println("[chargedbg] charge=" + PowerChargeData.get(player.getUUID())
+                                    + " wings=" + WingsData.isActive(player.getUUID()));
+                            return 1;
+                        }))
                 // /rumblefruit fruit <element> — сила фрукта без поедания (демо/съёмка)
                 .then(Commands.literal("fruit")
                         .then(Commands.argument("element",

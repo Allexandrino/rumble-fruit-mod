@@ -206,13 +206,16 @@ public class ClientRpgCamera {
                 && living.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE) != null) {
             scale = living.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE).getValue();
         }
-        if (scale <= 1.05) {
+        // the monumental avatar needs a MUCH wider shot than the body
+        boolean formed = ClientWingsData.isActive(entity.getUUID());
+        double pull = 4.0 * (scale - 1.0) + (formed ? 30.0 : 0.0);
+        if (pull <= 0.2) {
             return;
         }
         net.minecraft.world.phys.Vec3 pos = camera.getPosition();
         org.joml.Vector3f lv = camera.getLookVector();
         net.minecraft.world.phys.Vec3 look = new net.minecraft.world.phys.Vec3(lv.x, lv.y, lv.z);
-        net.minecraft.world.phys.Vec3 target = pos.add(look.scale(-4.0 * (scale - 1.0)));
+        net.minecraft.world.phys.Vec3 target = pos.add(look.scale(-pull));
         var hit = mc.level.clip(new net.minecraft.world.level.ClipContext(
                 pos, target, net.minecraft.world.level.ClipContext.Block.VISUAL,
                 net.minecraft.world.level.ClipContext.Fluid.NONE, entity));
